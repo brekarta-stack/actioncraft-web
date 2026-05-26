@@ -1,0 +1,48 @@
+@import "tailwindcss";
+@plugin "@tailwindcss/typography";
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans), 'Apple SD Gothic Neo', 'Malgun Gothic', 'Noto Sans KR', sans-serif;
+  --font-mono: var(--font-geist-mono);
+}
+
+:root {
+  --background: #ffffff;
+  --foreground: #0f172a;
+  --ces-blue: #1E22B2;
+  --ces-blue-dark: #171AB0;
+  --ces-blue-light: #F0F2FF;
+}
+
+html { scroll-behavior: smooth; }
+body { background: var(--background); color: var(--foreground); }
+
+.ces-gradient-text {
+  background: linear-gradient(90deg, #06C6C8, #F5C518, #E91E8C);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.ces-gradient-bg {
+  background: linear-gradient(135deg, #06C6C8 0%, #F5C518 50%, #E91E8C 100%);
+}
+
+.ces-gradient-border {
+  position: relative;
+}
+.ces-gradient-border::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1.5px;
+  background: linear-gradient(135deg, #06C6C8, #F5C518, #E91E8C);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
