@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { PAGE_META } from "@/lib/site";
+import { ArrowRightIcon } from "@/components/icons";
 
 export const metadata: Metadata = {
   title: PAGE_META.faq.title,
@@ -150,19 +151,19 @@ export default function FaqPage() {
       <FAQJsonLd />
 
       {/* Hero */}
-      <section className="py-20 md:py-28" style={{ background: "#1E22B2" }}>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <span className="inline-block px-4 py-1.5 bg-orange-500/20 text-orange-400 text-sm font-semibold rounded-full mb-6">
+      <section className="relative py-20 md:py-28 overflow-hidden" style={{ background: "#1E22B2" }}>
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <span className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-full mb-6 bg-white/10 text-white border border-white/15">
+            <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
             FAQ
           </span>
-          <h1 className="text-4xl md:text-5xl font-bold text-white mb-6">
-            자주 묻는 질문
+          <h1 className="text-4xl md:text-5xl font-extrabold text-white mb-6 tracking-tight leading-[1.1]">
+            <span className="pe-gradient-text">자주 묻는 질문</span>
           </h1>
-          <p className="text-blue-200 text-lg max-w-2xl mx-auto">
+          <p className="text-blue-200 text-lg max-w-2xl mx-auto" style={{ wordBreak: "keep-all" }}>
             견적 문의 전 자주 묻는 질문을 확인해 보세요.
             <br />
-            답변에 없는 내용은 자동 견적 페이지에서 문의해 주시면 빠르게 회신
-            드립니다.
+            답변에 없는 내용은 자동 견적 페이지에서 문의해 주시면 빠르게 회신드립니다.
           </p>
         </div>
       </section>
@@ -222,10 +223,11 @@ export default function FaqPage() {
           </p>
           <Link
             href="/quote"
-            className="inline-block px-8 py-3.5 font-bold rounded-xl text-white transition-opacity hover:opacity-90"
+            className="group inline-flex items-center justify-center gap-2 px-8 py-4 font-bold rounded-xl text-white text-lg shadow-lg shadow-pink-500/25 hover:-translate-y-0.5 transition-all"
             style={{ background: "linear-gradient(135deg, #06C6C8, #E91E8C)" }}
           >
-            무료 견적 받기 →
+            무료 견적 받기
+            <ArrowRightIcon size={20} className="transition-transform group-hover:translate-x-1" />
           </Link>
         </div>
       </section>

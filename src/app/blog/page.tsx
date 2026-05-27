@@ -1,7 +1,9 @@
 ﻿import type { Metadata } from "next";
 import Link from "next/link";
 import { getPosts } from "@/lib/blog";
-import { PAGE_META } from "@/lib/site";
+import { PAGE_META, SITE_SHORT, BRAND_TAGLINE_KR } from "@/lib/site";
+import { PencilIcon, ArrowRightIcon } from "@/components/icons";
+import { PaperNetBg } from "@/components/paper-art";
 
 export const dynamic = "force-dynamic";
 
@@ -46,16 +48,22 @@ export default async function BlogPage() {
   return (
     <>
       {/* Hero */}
-      <section className="py-20 md:py-28" style={{ background: "#1E22B2" }}>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <span className="inline-block px-4 py-1.5 bg-orange-500/20 text-orange-400 text-sm font-semibold rounded-full mb-6">
-            Blog
+      <section className="relative py-20 md:py-28 overflow-hidden" style={{ background: "#1E22B2" }}>
+        <div className="absolute inset-0 pointer-events-none opacity-25">
+          <div className="absolute -right-32 top-1/4 w-[70%] max-w-3xl rotate-6">
+            <PaperNetBg className="w-full h-auto" />
+          </div>
+        </div>
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <span className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-full mb-6 bg-white/10 text-white border border-white/15">
+            <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
+            Blog · {BRAND_TAGLINE_KR}
           </span>
-          <h1 className="text-4xl md:text-5xl font-bold text-white mb-6">
-            CES 블로그
+          <h1 className="text-4xl md:text-5xl font-extrabold text-white mb-6 tracking-tight leading-[1.1]">
+            {SITE_SHORT} <span className="pe-gradient-text">블로그</span>
           </h1>
-          <p className="text-slate-300 text-lg max-w-2xl mx-auto">
-            제작 과정, 교육 활용 사례, 종이공예 이야기를 담았습니다.
+          <p className="text-blue-200 text-lg max-w-2xl mx-auto" style={{ wordBreak: "keep-all" }}>
+            페이퍼 엔지니어링 제작 과정, STEAM 교육 활용 사례, 종이공예 이야기를 담았습니다.
           </p>
         </div>
       </section>
@@ -65,9 +73,11 @@ export default async function BlogPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {allPosts.length === 0 ? (
             <div className="text-center py-20">
-              <div className="text-6xl mb-4">📝</div>
-              <p className="text-slate-500 text-lg">아직 작성된 글이 없습니다.</p>
-              <p className="text-slate-400 text-sm mt-2">곧 흥미로운 글로 찾아오겠습니다!</p>
+              <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl mb-5 text-white" style={{ background: "#1E22B2" }} aria-hidden>
+                <PencilIcon size={32} />
+              </div>
+              <p className="text-slate-700 text-lg font-semibold">아직 작성된 글이 없습니다.</p>
+              <p className="text-slate-400 text-sm mt-2">곧 페이퍼 엔지니어링 관련 콘텐츠로 찾아오겠습니다.</p>
             </div>
           ) : (
             <>
@@ -99,7 +109,7 @@ export default async function BlogPage() {
                         추천 글
                       </span>
                     </div>
-                    <h2 className="text-2xl font-bold text-slate-900 mb-3 group-hover:text-orange-600 transition-colors">
+                    <h2 className="text-2xl font-bold text-slate-900 mb-3 group-hover:text-[#1E22B2] transition-colors">
                       {allPosts[0].title}
                     </h2>
                     <p className="text-slate-600 leading-relaxed mb-6">{allPosts[0].excerpt}</p>
@@ -134,7 +144,7 @@ export default async function BlogPage() {
                         >
                           {post.tag}
                         </span>
-                        <h3 className="font-bold text-slate-900 mb-2 group-hover:text-orange-600 transition-colors line-clamp-2 flex-1">
+                        <h3 className="font-bold text-slate-900 mb-2 group-hover:text-[#1E22B2] transition-colors line-clamp-2 flex-1">
                           {post.title}
                         </h3>
                         <p className="text-sm text-slate-500 line-clamp-2 mb-4">{post.excerpt}</p>
@@ -151,23 +161,23 @@ export default async function BlogPage() {
         </div>
       </section>
 
-      {/* Newsletter CTA */}
-      <section className="py-16 bg-orange-50">
-        <div className="max-w-xl mx-auto px-4 sm:px-6 text-center">
-          <h2 className="text-2xl font-bold text-slate-900 mb-3">새 글 알림 받기</h2>
-          <p className="text-slate-500 mb-6">
-            새로운 블로그 포스트가 올라오면 이메일로 알려드립니다.
+      {/* CTA */}
+      <section className="py-16 md:py-20" style={{ background: "#F0F2FF" }}>
+        <div className="max-w-3xl mx-auto px-4 sm:px-6 text-center">
+          <h2 className="text-2xl md:text-3xl font-bold text-slate-900 mb-3 tracking-tight">
+            페이퍼 엔지니어링 프로젝트를 시작해볼까요?
+          </h2>
+          <p className="text-slate-500 mb-8" style={{ wordBreak: "keep-all" }}>
+            블로그에서 본 사례 같은 작업을 의뢰하고 싶으시다면, 자동 견적으로 빠르게 문의해 주세요.
           </p>
-          <div className="flex gap-2">
-            <input
-              type="email"
-              placeholder="이메일 주소를 입력해주세요"
-              className="flex-1 px-4 py-3 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-300 text-slate-900 bg-white"
-            />
-            <button className="px-6 py-3 bg-orange-500 hover:bg-orange-600 text-white font-semibold rounded-xl transition-colors whitespace-nowrap">
-              구독
-            </button>
-          </div>
+          <Link
+            href="/quote"
+            className="group inline-flex items-center gap-2 px-8 py-4 font-bold rounded-xl text-white text-lg shadow-lg shadow-pink-500/25 hover:-translate-y-0.5 transition-all"
+            style={{ background: "linear-gradient(135deg, #06C6C8, #E91E8C)" }}
+          >
+            무료 견적 받기
+            <ArrowRightIcon size={20} className="transition-transform group-hover:translate-x-1" />
+          </Link>
         </div>
       </section>
     </>

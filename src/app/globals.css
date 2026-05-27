@@ -1,35 +1,102 @@
 @import "tailwindcss";
 @plugin "@tailwindcss/typography";
 
+/* Pretendard — 한글 가독성 최상위 폰트, 자체 CDN */
+@import url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css");
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans), 'Apple SD Gothic Neo', 'Malgun Gothic', 'Noto Sans KR', sans-serif;
+  --font-sans:
+    "Pretendard Variable", Pretendard,
+    var(--font-geist-sans),
+    -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo",
+    "Malgun Gothic", "Noto Sans KR", sans-serif;
   --font-mono: var(--font-geist-mono);
+  --font-tabular: "Pretendard Variable", Pretendard, -apple-system, system-ui, sans-serif;
 }
 
 :root {
   --background: #ffffff;
   --foreground: #0f172a;
-  --ces-blue: #1E22B2;
-  --ces-blue-dark: #171AB0;
-  --ces-blue-light: #F0F2FF;
+  --pe-blue: #1E22B2;
+  --pe-blue-dark: #171AB0;
+  --pe-blue-light: #F0F2FF;
+  --pe-cyan: #06C6C8;
+  --pe-pink: #E91E8C;
+  --pe-amber: #F5C518;
 }
 
 html { scroll-behavior: smooth; }
-body { background: var(--background); color: var(--foreground); }
 
-.ces-gradient-text {
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+  /* 한글 단어 중간 끊김 방지 — 자연스러운 줄바꿈 */
+  word-break: keep-all;
+  /* 모바일 텍스트 확대 방지 */
+  -webkit-text-size-adjust: 100%;
+}
+
+/* 헤딩: 자간 살짝 좁힘 */
+h1, h2, h3, h4 {
+  letter-spacing: -0.02em;
+  word-break: keep-all;
+}
+
+/* 숫자 강조 — tabular 정렬, 디스플레이용 */
+.pe-num {
+  font-family: var(--font-tabular);
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum";
+  letter-spacing: -0.04em;
+  font-weight: 800;
+}
+
+/* ──────────────────────────────────────
+ * 시그니처 그라데이션 (PE Studio 브랜드)
+ * ────────────────────────────────────── */
+.pe-gradient-text {
   background: linear-gradient(90deg, #06C6C8, #F5C518, #E91E8C);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 
-.ces-gradient-bg {
+.pe-gradient-bg {
   background: linear-gradient(135deg, #06C6C8 0%, #F5C518 50%, #E91E8C 100%);
 }
 
+.pe-gradient-border {
+  position: relative;
+}
+.pe-gradient-border::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1.5px;
+  background: linear-gradient(135deg, #06C6C8, #F5C518, #E91E8C);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
+/* ──────────────────────────────────────
+ * Legacy ces-* 클래스 호환 (점진적 마이그레이션용) — 동일 스타일 복제
+ * ────────────────────────────────────── */
+.ces-gradient-text {
+  background: linear-gradient(90deg, #06C6C8, #F5C518, #E91E8C);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.ces-gradient-bg {
+  background: linear-gradient(135deg, #06C6C8 0%, #F5C518 50%, #E91E8C 100%);
+}
 .ces-gradient-border {
   position: relative;
 }
@@ -45,4 +112,57 @@ body { background: var(--background); color: var(--foreground); }
   -webkit-mask-composite: xor;
   mask-composite: exclude;
   pointer-events: none;
+}
+
+/* ──────────────────────────────────────
+ * 종이 그림자 (Paper shadow) — 종이 두께 메타포
+ * ────────────────────────────────────── */
+.pe-paper-shadow {
+  box-shadow:
+    0 1px 0 rgba(15, 23, 42, 0.04),
+    0 4px 12px -2px rgba(15, 23, 42, 0.08),
+    0 16px 32px -12px rgba(15, 23, 42, 0.12);
+}
+.pe-paper-shadow-lg {
+  box-shadow:
+    0 1px 0 rgba(15, 23, 42, 0.05),
+    0 8px 24px -4px rgba(15, 23, 42, 0.10),
+    0 24px 48px -16px rgba(15, 23, 42, 0.18);
+}
+
+/* ──────────────────────────────────────
+ * 카드 hover: 종이가 떠오르는 모션
+ * ────────────────────────────────────── */
+.pe-paper-lift {
+  transition: transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1),
+              box-shadow 0.35s cubic-bezier(0.2, 0.8, 0.2, 1);
+  will-change: transform;
+}
+.pe-paper-lift:hover {
+  transform: translateY(-4px) rotate(-0.4deg);
+}
+
+/* ──────────────────────────────────────
+ * 포커스 인디케이터 (a11y)
+ * ────────────────────────────────────── */
+*:focus-visible {
+  outline: 2.5px solid var(--pe-blue);
+  outline-offset: 3px;
+  border-radius: 6px;
+}
+button:focus-visible,
+a:focus-visible {
+  outline-offset: 4px;
+}
+
+/* ──────────────────────────────────────
+ * Reduced motion respect
+ * ────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

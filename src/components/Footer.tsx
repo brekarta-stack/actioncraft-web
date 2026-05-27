@@ -9,18 +9,21 @@ export default function Footer() {
           {/* Brand */}
           <div>
             <div className="flex items-center gap-2.5 mb-4">
-              <div className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center flex-shrink-0">
-                <span className="text-white font-bold text-xs tracking-tight">CES</span>
+              <div className="w-9 h-9 bg-white/15 rounded-lg flex items-center justify-center flex-shrink-0" aria-hidden>
+                <svg viewBox="0 0 28 28" className="w-5 h-5" fill="none">
+                  <path d="M6 4 H14 A6 6 0 0 1 14 16 H10 V24 H6 Z" fill="white" />
+                  <path d="M14 4 L20 10 V24 H22 V8 L16 2 H14 Z" fill="white" opacity="0.55" />
+                </svg>
               </div>
-              <span className="font-bold text-white text-lg">Craft Engineering Studio</span>
+              <div className="leading-tight">
+                <span className="font-bold text-white text-lg block">PE Studio</span>
+                <span className="text-blue-300 text-xs">Paper Engineering Studio</span>
+              </div>
             </div>
-            <p className="text-sm leading-relaxed text-blue-200">
-              창의적 발상으로 종이가 줄 수 있는
+            <p className="text-sm leading-relaxed text-blue-200" style={{ wordBreak: "keep-all" }}>
+              국내 유일의 페이퍼 엔지니어링 스튜디오.
               <br />
-              최고의 가치를 만들어냅니다.
-            </p>
-            <p className="text-xs mt-4 text-blue-300">
-              크리에이티브 페이퍼토이 전문 스튜디오
+              움직이는 종이로 브랜드를 살아 숨쉬게 합니다.
             </p>
             {COMPANY.businessNumber && (
               <p className="text-xs mt-3 text-blue-300/70">

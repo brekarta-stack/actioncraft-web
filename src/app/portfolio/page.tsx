@@ -2,6 +2,8 @@
 import { getItems, CATEGORIES } from "@/lib/portfolio";
 import PortfolioGallery from "@/components/PortfolioGallery";
 import { PAGE_META, SITE_NAME, SITE_URL } from "@/lib/site";
+import { PaperNetBg } from "@/components/paper-art";
+import { ArrowRightIcon } from "@/components/icons";
 
 export const dynamic = "force-dynamic";
 
@@ -61,14 +63,22 @@ export default async function PortfolioPage() {
     <>
       <PortfolioJsonLd items={items} />
       {/* Hero */}
-      <section className="py-20 md:py-28" style={{ background: "#1E22B2" }}>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <span className="inline-block px-4 py-1.5 bg-orange-500/20 text-orange-400 text-sm font-semibold rounded-full mb-6">
+      <section className="relative py-20 md:py-28 overflow-hidden" style={{ background: "#1E22B2" }}>
+        <div className="absolute inset-0 pointer-events-none opacity-25">
+          <div className="absolute -right-32 top-1/4 w-[70%] max-w-3xl rotate-6">
+            <PaperNetBg className="w-full h-auto" />
+          </div>
+        </div>
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <span className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-full mb-6 bg-white/10 text-white border border-white/15">
+            <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
             Portfolio
           </span>
-          <h1 className="text-4xl md:text-5xl font-bold text-white mb-6">제작 사례</h1>
-          <p className="text-slate-300 text-lg max-w-2xl mx-auto">
-            팝업북부터 액션 크래프트까지, CES가 만들어온 작품들을 소개합니다.
+          <h1 className="text-4xl md:text-5xl font-extrabold text-white mb-6 tracking-tight leading-[1.1]">
+            페이퍼 엔지니어링 <span className="pe-gradient-text">제작 사례</span>
+          </h1>
+          <p className="text-blue-200 text-lg max-w-2xl mx-auto" style={{ wordBreak: "keep-all" }}>
+            팝업북부터 액션 크래프트까지, PE Studio가 만들어온 작품들을 소개합니다.
           </p>
         </div>
       </section>
@@ -81,19 +91,24 @@ export default async function PortfolioPage() {
       </section>
 
       {/* CTA */}
-      <section className="py-16 bg-orange-500">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-2xl font-bold text-white mb-4">
-            비슷한 제품을 제작하고 싶으신가요?
+      <section className="py-16 md:py-20 relative overflow-hidden" style={{ background: "#1E22B2" }}>
+        <div className="absolute inset-0 pointer-events-none opacity-20 flex items-center justify-center">
+          <div className="w-full max-w-2xl"><PaperNetBg className="w-full h-auto" /></div>
+        </div>
+        <div className="relative max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <h2 className="text-2xl md:text-3xl font-bold text-white mb-4 tracking-tight">
+            비슷한 작업을 의뢰하고 싶으신가요?
           </h2>
-          <p className="text-orange-100 mb-6">
-            무료 견적을 통해 원하시는 제품의 제작 가능 여부와 비용을 확인해보세요.
+          <p className="text-blue-200 mb-8" style={{ wordBreak: "keep-all" }}>
+            국내 유일의 페이퍼 엔지니어링 스튜디오에게 직접 문의해 보세요. 영업일 1~2일 내 회신 드립니다.
           </p>
           <a
             href="/quote"
-            className="inline-block px-8 py-3.5 bg-white text-orange-600 font-bold rounded-xl hover:bg-orange-50 transition-colors"
+            className="group inline-flex items-center gap-2 px-8 py-4 font-bold rounded-xl text-white text-lg shadow-xl shadow-pink-500/30 hover:-translate-y-0.5 transition-all"
+            style={{ background: "linear-gradient(135deg, #06C6C8, #E91E8C)" }}
           >
             무료 견적 받기
+            <ArrowRightIcon size={20} className="transition-transform group-hover:translate-x-1" />
           </a>
         </div>
       </section>
