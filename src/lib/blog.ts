@@ -1,4 +1,5 @@
 import { supabase } from "./supabase";
+import { SEED_POSTS } from "./blog-seed";
 
 export interface Post {
   id: string;
@@ -31,28 +32,59 @@ function toPost(row: any): Post {
   };
 }
 
+/**
+ * Supabase 의 DB 글과 코드 내장 SEED_POSTS 를 머지.
+ * - 동일 slug 가 DB 에 있으면 DB 가 우선 (운영자가 admin 에서 시드 글을 덮어쓸 수 있도록)
+ * - DB 가 비어있거나 연결 실패 시에도 SEED 글은 항상 보임 (SEO 색인 보호)
+ * - 최신순 정렬
+ */
+function mergePosts(dbPosts: Post[]): Post[] {
+  const dbSlugs = new Set(dbPosts.map((p) => p.slug));
+  const seedFiltered = SEED_POSTS.filter((p) => !dbSlugs.has(p.slug));
+  const merged = [...dbPosts, ...seedFiltered];
+  return merged.sort(
+    (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+  );
+}
+
 export async function getPosts(): Promise<Post[]> {
-  const { data, error } = await supabase
-    .from("posts")
-    .select("*")
-    .order("created_at", { ascending: false });
-  if (error) throw error;
-  return (data ?? []).map(toPost);
+  try {
+    const { data, error } = await supabase
+      .from("posts")
+      .select("*")
+      .order("created_at", { ascending: false });
+    if (error) throw error;
+    return mergePosts((data ?? []).map(toPost));
+  } catch {
+    // DB 연결/권한 실패 시에도 seed 만이라도 노출
+    return mergePosts([]);
+  }
 }
 
 export async function getPostById(id: string): Promise<Post | undefined> {
-  const { data } = await supabase.from("posts").select("*").eq("id", id).maybeSingle();
-  return data ? toPost(data) : undefined;
+  try {
+    const { data } = await supabase.from("posts").select("*").eq("id", id).maybeSingle();
+    if (data) return toPost(data);
+  } catch {
+    /* fall through to seed */
+  }
+  return SEED_POSTS.find((p) => p.id === id);
 }
 
 export async function getPostBySlug(slug: string): Promise<Post | undefined> {
-  const { data } = await supabase
-    .from("posts")
-    .select("*")
-    .eq("slug", slug)
-    .eq("published", true)
-    .maybeSingle();
-  return data ? toPost(data) : undefined;
+  try {
+    const { data } = await supabase
+      .from("posts")
+      .select("*")
+      .eq("slug", slug)
+      .eq("published", true)
+      .maybeSingle();
+    if (data) return toPost(data);
+  } catch {
+    /* fall through to seed */
+  }
+  const seed = SEED_POSTS.find((p) => p.slug === slug && p.published);
+  return seed;
 }
 
 export async function savePost(post: Post): Promise<void> {

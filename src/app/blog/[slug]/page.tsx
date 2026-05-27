@@ -8,6 +8,7 @@ import rehypeRaw from "rehype-raw";
 import Link from "next/link";
 import type { Metadata } from "next";
 import { SITE_NAME, SITE_URL } from "@/lib/site";
+import { BlogThumbnail, blogVariantFromTag } from "@/components/paper-art";
 
 export async function generateStaticParams() {
   try {
@@ -105,7 +106,13 @@ export default async function BlogPostPage({
       </Link>
 
       <div className="mb-10">
-        <span className="text-6xl block mb-6">{post.emoji}</span>
+        {post.emoji ? (
+          <span className="text-6xl block mb-6" aria-hidden>{post.emoji}</span>
+        ) : (
+          <div className="w-full aspect-[16/7] rounded-2xl overflow-hidden mb-6 pe-paper-shadow">
+            <BlogThumbnail variant={blogVariantFromTag(post.tag)} className="w-full h-full" />
+          </div>
+        )}
         <div className="flex items-center gap-3 mb-4">
           {post.tag && (
             <span

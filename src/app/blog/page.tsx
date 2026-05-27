@@ -3,7 +3,7 @@ import Link from "next/link";
 import { getPosts } from "@/lib/blog";
 import { PAGE_META, SITE_SHORT, BRAND_TAGLINE_KR } from "@/lib/site";
 import { PencilIcon, ArrowRightIcon } from "@/components/icons";
-import { PaperNetBg } from "@/components/paper-art";
+import { PaperNetBg, BlogThumbnail, blogVariantFromTag } from "@/components/paper-art";
 
 export const dynamic = "force-dynamic";
 
@@ -87,12 +87,19 @@ export default async function BlogPage() {
                   href={`/blog/${allPosts[0].slug}`}
                   className="group grid grid-cols-1 md:grid-cols-2 bg-white rounded-3xl overflow-hidden border border-slate-200 hover:shadow-xl transition-shadow"
                 >
-                  <div
-                    className={`bg-gradient-to-br ${tagGradients[allPosts[0].tag] ?? "from-slate-100 to-slate-50"} flex items-center justify-center h-64 md:h-auto`}
-                  >
-                    <span className="text-8xl group-hover:scale-110 transition-transform">
-                      {allPosts[0].emoji}
-                    </span>
+                  <div className="relative h-64 md:h-auto md:min-h-[280px] group-hover:scale-[1.02] transition-transform overflow-hidden">
+                    {allPosts[0].emoji ? (
+                      <div
+                        className={`bg-gradient-to-br ${tagGradients[allPosts[0].tag] ?? "from-slate-100 to-slate-50"} flex items-center justify-center h-full`}
+                      >
+                        <span className="text-8xl">{allPosts[0].emoji}</span>
+                      </div>
+                    ) : (
+                      <BlogThumbnail
+                        variant={blogVariantFromTag(allPosts[0].tag)}
+                        className="w-full h-full"
+                      />
+                    )}
                   </div>
                   <div className="p-8 md:p-10 flex flex-col justify-center">
                     <div className="flex items-center gap-3 mb-4">
@@ -129,12 +136,14 @@ export default async function BlogPage() {
                       href={`/blog/${post.slug}`}
                       className="group bg-white rounded-2xl overflow-hidden border border-slate-200 hover:shadow-lg transition-shadow flex flex-col"
                     >
-                      <div
-                        className={`bg-gradient-to-br ${tagGradients[post.tag] ?? "from-slate-100 to-slate-50"} h-44 flex items-center justify-center`}
-                      >
-                        <span className="text-6xl group-hover:scale-110 transition-transform">
-                          {post.emoji}
-                        </span>
+                      <div className="h-44 overflow-hidden group-hover:scale-[1.02] transition-transform">
+                        {post.emoji ? (
+                          <div className={`bg-gradient-to-br ${tagGradients[post.tag] ?? "from-slate-100 to-slate-50"} h-full flex items-center justify-center`}>
+                            <span className="text-6xl">{post.emoji}</span>
+                          </div>
+                        ) : (
+                          <BlogThumbnail variant={blogVariantFromTag(post.tag)} className="w-full h-full" />
+                        )}
                       </div>
                       <div className="p-6 flex-1 flex flex-col">
                         <span

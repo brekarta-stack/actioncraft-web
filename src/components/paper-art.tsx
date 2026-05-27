@@ -432,6 +432,178 @@ export function PatentBadge({
 }
 
 /* ──────────────────────────────────────────────────
+ * BlogThumbnail
+ * 블로그 글의 emoji 가 비어있을 때 사용하는 태그별 일러스트.
+ * 글 카드의 시각적 일관성을 유지하면서 이모지 의존을 제거.
+ * ────────────────────────────────────────────────── */
+
+export type BlogThumbVariant = "case" | "education" | "process" | "story" | "design" | "material";
+
+export function BlogThumbnail({
+  variant,
+  className = "",
+}: {
+  variant: BlogThumbVariant;
+  className?: string;
+}) {
+  const accents: Record<BlogThumbVariant, { bg: string; fg: string }> = {
+    case:       { bg: "linear-gradient(135deg,#fce7f3,#fbcfe8)", fg: "#E91E8C" }, // 사례 연구 - 핑크
+    education:  { bg: "linear-gradient(135deg,#fef3c7,#fde68a)", fg: "#D97706" }, // 교육 - 앰버
+    process:    { bg: "linear-gradient(135deg,#cffafe,#a5f3fc)", fg: "#0891B2" }, // 제작 과정 - 시안
+    story:      { bg: "linear-gradient(135deg,#ede9fe,#ddd6fe)", fg: "#7C3AED" }, // 이야기 - 바이올렛
+    design:     { bg: "linear-gradient(135deg,#fae8ff,#f5d0fe)", fg: "#A21CAF" }, // 디자인 - 푸시아
+    material:   { bg: "linear-gradient(135deg,#dcfce7,#bbf7d0)", fg: "#16A34A" }, // 소재 - 그린
+  };
+  const c = accents[variant];
+
+  return (
+    <div
+      className={`relative overflow-hidden flex items-center justify-center ${className}`}
+      style={{ background: c.bg }}
+      aria-hidden
+    >
+      {/* 배경 전개도 패턴 */}
+      <svg viewBox="0 0 200 200" className="absolute inset-0 w-full h-full opacity-30" aria-hidden>
+        <rect x="60" y="20" width="50" height="40" fill="none" stroke={c.fg} strokeWidth="1" strokeDasharray="3 3" />
+        <rect x="30" y="60" width="30" height="60" fill="none" stroke={c.fg} strokeWidth="1" strokeDasharray="3 3" />
+        <rect x="60" y="60" width="50" height="60" fill="none" stroke={c.fg} strokeWidth="1" strokeDasharray="3 3" />
+        <rect x="110" y="60" width="30" height="60" fill="none" stroke={c.fg} strokeWidth="1" strokeDasharray="3 3" />
+        <rect x="60" y="120" width="50" height="40" fill="none" stroke={c.fg} strokeWidth="1" strokeDasharray="3 3" />
+      </svg>
+
+      {/* variant 별 메인 일러스트 */}
+      <div className="relative z-10">
+        {variant === "case" && <BlogCaseIllust color={c.fg} />}
+        {variant === "education" && <BlogEduIllust color={c.fg} />}
+        {variant === "process" && <BlogProcessIllust color={c.fg} />}
+        {variant === "story" && <BlogStoryIllust color={c.fg} />}
+        {variant === "design" && <BlogDesignIllust color={c.fg} />}
+        {variant === "material" && <BlogMaterialIllust color={c.fg} />}
+      </div>
+    </div>
+  );
+}
+
+function BlogCaseIllust({ color }: { color: string }) {
+  // 데이터 차트 + 페이퍼토이
+  return (
+    <svg viewBox="0 0 160 120" className="w-32 h-24" fill="none">
+      <rect x="20" y="60" width="14" height="40" fill="white" stroke={color} strokeWidth="2"/>
+      <rect x="40" y="40" width="14" height="60" fill="white" stroke={color} strokeWidth="2"/>
+      <rect x="60" y="50" width="14" height="50" fill="white" stroke={color} strokeWidth="2"/>
+      <rect x="80" y="25" width="14" height="75" fill={color} stroke={color} strokeWidth="2"/>
+      <line x1="14" y1="100" x2="100" y2="100" stroke={color} strokeWidth="2"/>
+      {/* 페이퍼토이 캐릭터 */}
+      <g transform="translate(125,55)">
+        <path d="M-15 -5 L15 -5 L17 35 L-17 35 Z" fill="white" stroke={color} strokeWidth="1.5"/>
+        <path d="M-15 -5 L-8 -18 L8 -18 L15 -5 Z" fill={color} stroke={color} strokeWidth="1.5"/>
+        <circle cx="-5" cy="8" r="1.5" fill="white"/><circle cx="5" cy="8" r="1.5" fill="white"/>
+      </g>
+    </svg>
+  );
+}
+
+function BlogEduIllust({ color }: { color: string }) {
+  // 학사모 + 책
+  return (
+    <svg viewBox="0 0 160 120" className="w-32 h-24" fill="none">
+      <path d="M80 20 L120 35 L80 50 L40 35 Z" fill={color}/>
+      <path d="M105 38 L105 58 Q105 65 100 65" stroke={color} strokeWidth="2.5" fill="none" strokeLinecap="round"/>
+      <circle cx="100" cy="68" r="3" fill={color}/>
+      <path d="M40 70 L80 65 L120 70 L120 100 L40 100 Z" fill="white" stroke={color} strokeWidth="2"/>
+      <line x1="80" y1="65" x2="80" y2="100" stroke={color} strokeWidth="1" strokeDasharray="3 3" opacity="0.7"/>
+      <line x1="50" y1="78" x2="72" y2="76" stroke={color} strokeWidth="1.5" opacity="0.5"/>
+      <line x1="50" y1="86" x2="72" y2="84" stroke={color} strokeWidth="1.5" opacity="0.5"/>
+      <line x1="88" y1="76" x2="110" y2="78" stroke={color} strokeWidth="1.5" opacity="0.5"/>
+      <line x1="88" y1="84" x2="110" y2="86" stroke={color} strokeWidth="1.5" opacity="0.5"/>
+    </svg>
+  );
+}
+
+function BlogProcessIllust({ color }: { color: string }) {
+  // 톱니바퀴 + 페이퍼 접기
+  return (
+    <svg viewBox="0 0 160 120" className="w-32 h-24" fill="none">
+      <g transform="translate(50,60)">
+        <circle cx="0" cy="0" r="22" fill="white" stroke={color} strokeWidth="2"/>
+        <circle cx="0" cy="0" r="8" fill={color}/>
+        {[0,45,90,135,180,225,270,315].map((deg) => (
+          <rect key={deg} x="-3" y="-30" width="6" height="10" fill={color} transform={`rotate(${deg})`} />
+        ))}
+      </g>
+      <g transform="translate(110,60)">
+        <path d="M-20 -25 L20 -25 L25 25 L-25 25 Z" fill="white" stroke={color} strokeWidth="2"/>
+        <path d="M-20 -25 L-10 -38 L10 -38 L20 -25 Z" fill={color} stroke={color} strokeWidth="2"/>
+        <line x1="-20" y1="-25" x2="20" y2="-25" stroke={color} strokeWidth="1" strokeDasharray="3 3"/>
+      </g>
+      <path d="M75 60 L90 60" stroke={color} strokeWidth="2" markerEnd="url(#arr-p)"/>
+      <defs><marker id="arr-p" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 Z" fill={color}/></marker></defs>
+    </svg>
+  );
+}
+
+function BlogStoryIllust({ color }: { color: string }) {
+  // 말풍선 + 종이
+  return (
+    <svg viewBox="0 0 160 120" className="w-32 h-24" fill="none">
+      <path d="M30 35 L100 35 Q110 35 110 45 L110 75 Q110 85 100 85 L55 85 L40 100 L45 85 L30 85 Q20 85 20 75 L20 45 Q20 35 30 35 Z"
+        fill="white" stroke={color} strokeWidth="2"/>
+      <circle cx="45" cy="60" r="3" fill={color}/>
+      <circle cx="65" cy="60" r="3" fill={color}/>
+      <circle cx="85" cy="60" r="3" fill={color}/>
+      <g transform="translate(130,75)">
+        <rect x="-15" y="-15" width="30" height="35" fill={color} stroke={color} strokeWidth="1.5"/>
+        <rect x="-12" y="-12" width="24" height="29" fill="white"/>
+        <line x1="-8" y1="-5" x2="8" y2="-5" stroke={color} strokeWidth="1"/>
+        <line x1="-8" y1="0" x2="8" y2="0" stroke={color} strokeWidth="1"/>
+        <line x1="-8" y1="5" x2="6" y2="5" stroke={color} strokeWidth="1"/>
+      </g>
+    </svg>
+  );
+}
+
+function BlogDesignIllust({ color }: { color: string }) {
+  // 컴퍼스 + 곡선
+  return (
+    <svg viewBox="0 0 160 120" className="w-32 h-24" fill="none">
+      <circle cx="80" cy="60" r="40" fill="white" stroke={color} strokeWidth="2" strokeDasharray="4 4" opacity="0.5"/>
+      <path d="M80 25 L60 95 L100 95 Z" fill={color} opacity="0.15" stroke={color} strokeWidth="2"/>
+      <line x1="80" y1="25" x2="80" y2="95" stroke={color} strokeWidth="1.5"/>
+      <circle cx="80" cy="25" r="4" fill={color}/>
+      <circle cx="60" cy="95" r="2.5" fill={color}/>
+      <circle cx="100" cy="95" r="2.5" fill={color}/>
+    </svg>
+  );
+}
+
+function BlogMaterialIllust({ color }: { color: string }) {
+  // 잎사귀 (친환경 소재)
+  return (
+    <svg viewBox="0 0 160 120" className="w-32 h-24" fill="none">
+      <path d="M40 80 Q80 30 130 40 Q120 90 60 100 Q50 95 40 80 Z" fill={color} opacity="0.25" stroke={color} strokeWidth="2"/>
+      <path d="M50 90 Q90 50 130 40" stroke={color} strokeWidth="1.5" fill="none"/>
+      <path d="M70 75 Q90 55 110 60" stroke={color} strokeWidth="1" fill="none"/>
+      <path d="M60 85 Q80 65 105 70" stroke={color} strokeWidth="1" fill="none"/>
+    </svg>
+  );
+}
+
+/**
+ * 태그 → BlogThumbnail variant 매핑 헬퍼.
+ */
+export function blogVariantFromTag(tag: string): BlogThumbVariant {
+  switch (tag) {
+    case "사례 연구":   return "case";
+    case "교육":          return "education";
+    case "제작 과정":   return "process";
+    case "이야기":       return "story";
+    case "디자인":       return "design";
+    case "소재":          return "material";
+    default:                return "story";
+  }
+}
+
+/* ──────────────────────────────────────────────────
  * PaperNetBg
  * 섹션 배경용 전개도 패턴 (반복 가능)
  * ────────────────────────────────────────────────── */
