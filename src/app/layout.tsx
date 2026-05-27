@@ -3,41 +3,139 @@ import { Geist } from "next/font/google";
 import "./globals.css";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import { SITE_URL, SITE_NAME, SITE_DESCRIPTION, COMPANY, PAGE_META } from "@/lib/site";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
 });
 
-const siteUrl = process.env.NEXTAUTH_URL ?? "https://actioncraft.co.kr";
-
 export const metadata: Metadata = {
-  metadataBase: new URL(siteUrl),
+  metadataBase: new URL(SITE_URL),
   title: {
-    default: "Craft Engineering Studio | 페이퍼 모델 엔지니어링 전문 스튜디오",
-    template: "%s | Craft Engineering Studio",
+    // default 는 root 페이지에서 metadata 미지정 시 fallback
+    default: `${SITE_NAME} | ${PAGE_META.home.title}`,
+    // 하위 페이지 metadata.title (string) 에 자동으로 ` | CES` suffix 부여
+    template: `%s | ${SITE_NAME}`,
   },
-  description:
-    "창의적인 페이퍼토이, 팝업카드, 교구를 주문 제작합니다. 기업 굿즈, 이벤트 소품, 오토마타 전문 크리에이티브 스튜디오.",
+  description: SITE_DESCRIPTION,
+  keywords: [
+    "페이퍼토이 제작",
+    "페이퍼토이 외주",
+    "페이퍼토이 업체",
+    "페이퍼토이 주문제작",
+    "기업 굿즈 종이",
+    "지자체 캐릭터 굿즈",
+    "STEAM 교구",
+    "팝업카드 제작",
+    "오토마타",
+    "페이퍼 모델 엔지니어링",
+    "현대백화점 페이퍼토이",
+    "KAIST 페이퍼토이",
+    "Craft Engineering Studio",
+    "CES",
+  ],
+  authors: [{ name: SITE_NAME, url: SITE_URL }],
+  creator: SITE_NAME,
+  publisher: SITE_NAME,
+  alternates: {
+    canonical: "/",
+  },
   openGraph: {
     type: "website",
     locale: "ko_KR",
-    siteName: "Craft Engineering Studio",
-    title: "Craft Engineering Studio | 페이퍼 모델 엔지니어링 전문 스튜디오",
-    description:
-      "창의적인 페이퍼토이, 팝업카드, 교구를 주문 제작합니다. 기업 굿즈, 이벤트 소품, 오토마타 전문 크리에이티브 스튜디오.",
+    url: SITE_URL,
+    siteName: SITE_NAME,
+    title: `${SITE_NAME} | ${PAGE_META.home.title}`,
+    description: SITE_DESCRIPTION,
   },
   twitter: {
     card: "summary_large_image",
-    title: "Craft Engineering Studio",
-    description: "창의적인 페이퍼토이, 팝업카드, 교구를 주문 제작합니다.",
+    title: `${SITE_NAME} | ${PAGE_META.home.title}`,
+    description: SITE_DESCRIPTION,
   },
   robots: {
     index: true,
     follow: true,
     googleBot: { index: true, follow: true },
   },
+  verification: {
+    // TODO: Google Search Console / Naver Webmaster Tools 인증 코드 (사용자 입력 필요)
+    // google: "google-site-verification=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+    // other: { "naver-site-verification": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" },
+  },
 };
+
+/**
+ * 사이트 전체 공통 Organization JSON-LD.
+ * Schema.org Organization 으로 회사의 정체성을 검색엔진에 직접 알림.
+ */
+function OrganizationJsonLd() {
+  const data = {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    name: COMPANY.name,
+    legalName: COMPANY.legalName,
+    alternateName: COMPANY.shortName,
+    url: SITE_URL,
+    logo: `${SITE_URL}/og-default.png`,
+    description: SITE_DESCRIPTION,
+    foundingDate: COMPANY.foundingYear,
+    email: COMPANY.email,
+    ...(COMPANY.phone ? { telephone: COMPANY.phone } : {}),
+    address: {
+      "@type": "PostalAddress",
+      addressLocality: COMPANY.address.locality,
+      addressRegion: COMPANY.address.region,
+      addressCountry: COMPANY.address.country,
+      ...(COMPANY.address.streetAddress
+        ? { streetAddress: COMPANY.address.streetAddress }
+        : {}),
+    },
+    sameAs: [
+      COMPANY.social.instagram,
+      COMPANY.social.youtube,
+      COMPANY.social.community,
+    ].filter(Boolean),
+    knowsAbout: [
+      "페이퍼토이",
+      "페이퍼 모델 엔지니어링",
+      "오토마타",
+      "팝업카드",
+      "STEAM 교육",
+      "캐릭터 굿즈",
+      "BI/CI 디자인",
+    ],
+  };
+
+  return (
+    <script
+      type="application/ld+json"
+      // eslint-disable-next-line react/no-danger
+      dangerouslySetInnerHTML={{ __html: JSON.stringify(data) }}
+    />
+  );
+}
+
+/**
+ * WebSite JSON-LD (사이트 검색 sitelink 노출용).
+ */
+function WebSiteJsonLd() {
+  const data = {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    name: SITE_NAME,
+    url: SITE_URL,
+    inLanguage: "ko-KR",
+  };
+  return (
+    <script
+      type="application/ld+json"
+      // eslint-disable-next-line react/no-danger
+      dangerouslySetInnerHTML={{ __html: JSON.stringify(data) }}
+    />
+  );
+}
 
 export default function RootLayout({
   children,
@@ -47,6 +145,8 @@ export default function RootLayout({
   return (
     <html lang="ko" className={`${geistSans.variable}`}>
       <body className="min-h-screen flex flex-col antialiased">
+        <OrganizationJsonLd />
+        <WebSiteJsonLd />
         <Header />
         <main className="flex-1">{children}</main>
         <Footer />

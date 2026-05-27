@@ -7,6 +7,7 @@ import remarkGfm from "remark-gfm";
 import rehypeRaw from "rehype-raw";
 import Link from "next/link";
 import type { Metadata } from "next";
+import { SITE_NAME, SITE_URL } from "@/lib/site";
 
 export async function generateStaticParams() {
   try {
@@ -25,9 +26,26 @@ export async function generateMetadata({
   const { slug } = await params;
   const post = await getPostBySlug(slug);
   if (!post) return {};
+  const canonical = `/blog/${post.slug}`;
   return {
-    title: `${post.title} | CES 블로그`,
+    // template 가 자동으로 ` | CES` 를 붙이므로 여기서 다시 붙이지 않음
+    title: post.title,
     description: post.excerpt,
+    alternates: { canonical },
+    openGraph: {
+      type: "article",
+      title: post.title,
+      description: post.excerpt,
+      url: canonical,
+      publishedTime: post.createdAt,
+      modifiedTime: post.updatedAt,
+      ...(post.tag ? { tags: [post.tag] } : {}),
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: post.title,
+      description: post.excerpt,
+    },
   };
 }
 
@@ -49,8 +67,36 @@ export default async function BlogPostPage({
     "디자인": "bg-pink-100 text-pink-700",
   };
 
+  // BlogPosting JSON-LD
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    headline: post.title,
+    description: post.excerpt,
+    datePublished: post.createdAt,
+    dateModified: post.updatedAt,
+    inLanguage: "ko-KR",
+    author: { "@type": "Organization", name: SITE_NAME, url: SITE_URL },
+    publisher: {
+      "@type": "Organization",
+      name: SITE_NAME,
+      logo: { "@type": "ImageObject", url: `${SITE_URL}/og-default.png` },
+    },
+    mainEntityOfPage: {
+      "@type": "WebPage",
+      "@id": `${SITE_URL}/blog/${post.slug}`,
+    },
+    ...(post.tag ? { articleSection: post.tag } : {}),
+  };
+
   return (
     <article className="max-w-3xl mx-auto px-4 py-16">
+      <script
+        type="application/ld+json"
+        // eslint-disable-next-line react/no-danger
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+
       <Link
         href="/blog"
         className="inline-flex items-center gap-1 text-slate-500 hover:text-orange-600 text-sm mb-8 transition-colors"

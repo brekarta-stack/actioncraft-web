@@ -1,11 +1,73 @@
 ﻿import type { Metadata } from "next";
 import Link from "next/link";
+import { PAGE_META, SITE_URL, SITE_NAME } from "@/lib/site";
 
 export const metadata: Metadata = {
-  title: "서비스 | Craft Engineering Studio",
-  description:
-    "Paper Model Engineering, Education Program, Editorial Design. 특허 기술로 만드는 페이퍼 모델 엔지니어링부터 STEAM 교육 키트, BI/CI 디자인까지.",
+  title: PAGE_META.products.title,
+  description: PAGE_META.products.description,
+  alternates: { canonical: "/products" },
+  openGraph: {
+    title: PAGE_META.products.title,
+    description: PAGE_META.products.description,
+    url: "/products",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: PAGE_META.products.title,
+    description: PAGE_META.products.description,
+  },
 };
+
+/**
+ * /products 페이지용 Service JSON-LD.
+ * 검색엔진에 "어떤 서비스를 제공하는가" 를 명시.
+ */
+function ProductsServiceJsonLd() {
+  const services = [
+    {
+      name: "Action Paper Toy 주문 제작",
+      description:
+        "자기 구조 설계 특허를 기반으로 한 움직이는 페이퍼토이 외주 제작",
+    },
+    {
+      name: "STEAM 교육 키트 제작",
+      description:
+        "수학·도형·과학 원리를 학습하는 페이퍼 기반 STEAM 교구 개발",
+    },
+    {
+      name: "캐릭터 굿즈 주문 제작",
+      description: "지자체·기관·기업 캐릭터 및 기념품 페이퍼토이 제작",
+    },
+    {
+      name: "BI/CI 편집 디자인",
+      description:
+        "브랜드 아이덴티티 개발 및 브로셔·PPT 편집 디자인",
+    },
+  ];
+
+  const data = services.map((s) => ({
+    "@context": "https://schema.org",
+    "@type": "Service",
+    name: s.name,
+    description: s.description,
+    provider: {
+      "@type": "Organization",
+      name: SITE_NAME,
+      url: SITE_URL,
+    },
+    areaServed: "KR",
+    serviceType: "주문 제작",
+  }));
+
+  return (
+    <script
+      type="application/ld+json"
+      // eslint-disable-next-line react/no-danger
+      dangerouslySetInnerHTML={{ __html: JSON.stringify(data) }}
+    />
+  );
+}
 
 const products = [
   {
@@ -152,6 +214,7 @@ const projectWorks = [
 export default function ProductsPage() {
   return (
     <>
+      <ProductsServiceJsonLd />
       {/* Hero */}
       <section className="py-20 md:py-28" style={{ background: "#1E22B2" }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">

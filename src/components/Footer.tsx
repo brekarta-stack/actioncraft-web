@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { COMPANY } from "@/lib/site";
 
 export default function Footer() {
   return (
@@ -21,6 +22,11 @@ export default function Footer() {
             <p className="text-xs mt-4 text-blue-300">
               크리에이티브 페이퍼토이 전문 스튜디오
             </p>
+            {COMPANY.businessNumber && (
+              <p className="text-xs mt-3 text-blue-300/70">
+                사업자등록번호 {COMPANY.businessNumber}
+              </p>
+            )}
           </div>
 
           {/* Quick Links */}
@@ -33,6 +39,7 @@ export default function Footer() {
                 { href: "/portfolio", label: "제작 사례" },
                 { href: "/quote", label: "자동 견적" },
                 { href: "/blog", label: "블로그" },
+                { href: "/faq", label: "자주 묻는 질문" },
               ].map((link) => (
                 <li key={link.href}>
                   <Link href={link.href} className="hover:text-white transition-colors">
@@ -49,25 +56,58 @@ export default function Footer() {
             <ul className="space-y-2.5 text-sm">
               <li className="flex items-center gap-2">
                 <span>📧</span>
-                <span>hello@actioncraft.co.kr</span>
+                <a
+                  href={`mailto:${COMPANY.email}`}
+                  className="hover:text-white transition-colors"
+                >
+                  {COMPANY.email}
+                </a>
               </li>
-              <li className="flex items-center gap-2">
-                <span>📞</span>
-                <span>02-000-0000</span>
-              </li>
-              <li className="flex items-center gap-2">
+              {COMPANY.phone && (
+                <li className="flex items-center gap-2">
+                  <span>📞</span>
+                  <a
+                    href={`tel:${COMPANY.phone.replace(/-/g, "")}`}
+                    className="hover:text-white transition-colors"
+                  >
+                    {COMPANY.phone}
+                  </a>
+                </li>
+              )}
+              {COMPANY.kakaoChannel && (
+                <li className="flex items-center gap-2">
+                  <span>💬</span>
+                  <a
+                    href={COMPANY.kakaoChannel}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="hover:text-white transition-colors"
+                  >
+                    카카오톡 채널 문의
+                  </a>
+                </li>
+              )}
+              <li className="flex items-start gap-2">
                 <span>📍</span>
-                <span>서울특별시</span>
+                <span>
+                  {COMPANY.address.streetAddress
+                    ? `${COMPANY.address.region} ${COMPANY.address.streetAddress}`
+                    : COMPANY.address.region}
+                </span>
               </li>
             </ul>
           </div>
         </div>
 
         <div className="mt-10 pt-8 border-t border-white/10 flex flex-col sm:flex-row justify-between items-center gap-4 text-xs text-blue-300">
-          <p>© 2024 Craft Engineering Studio. All rights reserved.</p>
+          <p>© {new Date().getFullYear()} Craft Engineering Studio. All rights reserved.</p>
           <div className="flex gap-6">
-            <Link href="#" className="hover:text-white transition-colors">개인정보처리방침</Link>
-            <Link href="#" className="hover:text-white transition-colors">이용약관</Link>
+            <Link href="/legal/privacy" className="hover:text-white transition-colors">
+              개인정보처리방침
+            </Link>
+            <Link href="/legal/terms" className="hover:text-white transition-colors">
+              이용약관
+            </Link>
           </div>
         </div>
       </div>

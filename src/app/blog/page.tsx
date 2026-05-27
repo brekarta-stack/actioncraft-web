@@ -1,12 +1,25 @@
 ﻿import type { Metadata } from "next";
 import Link from "next/link";
 import { getPosts } from "@/lib/blog";
+import { PAGE_META } from "@/lib/site";
 
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "블로그 | Craft Engineering Studio",
-  description: "페이퍼토이 제작 과정, 교육 활용 사례, 종이공예 이야기를 담은 블로그.",
+  title: PAGE_META.blog.title,
+  description: PAGE_META.blog.description,
+  alternates: { canonical: "/blog" },
+  openGraph: {
+    title: PAGE_META.blog.title,
+    description: PAGE_META.blog.description,
+    url: "/blog",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: PAGE_META.blog.title,
+    description: PAGE_META.blog.description,
+  },
 };
 
 const tagColors: Record<string, string> = {

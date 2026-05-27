@@ -132,7 +132,7 @@ function BoxNetSVG() {
   const faceFill  = "rgba(255,255,255,0.04)";
   const cutStroke = "rgba(255,255,255,0.55)";
   const foldStroke = "rgba(255,255,255,0.28)";
-  const labelFill = "rgba(255,255,255,0.35)";
+  // labelFill 미사용 — 텍스트 레이블 제거로 검색엔진 노이즈 방지
 
   // 십자 외곽선 path (절단선)
   const crossPath = `
@@ -172,13 +172,7 @@ function BoxNetSVG() {
       {/* 우측면-뒷면 */}
       <line x1={D+W+D} y1={D} x2={D+W+D} y2={D+H} stroke={foldStroke} strokeWidth="1.2" strokeDasharray="10 7" />
 
-      {/* 면 레이블 */}
-      <text x={D+W/2}       y={D/2+7}     textAnchor="middle" fill={labelFill} fontSize="15" fontFamily="monospace" letterSpacing="1">윗면</text>
-      <text x={D/2}         y={D+H/2+7}   textAnchor="middle" fill={labelFill} fontSize="13" fontFamily="monospace" letterSpacing="1">좌측면</text>
-      <text x={D+W/2}       y={D+H/2+7}   textAnchor="middle" fill={labelFill} fontSize="15" fontFamily="monospace" letterSpacing="1">앞면</text>
-      <text x={D+W+D/2}     y={D+H/2+7}   textAnchor="middle" fill={labelFill} fontSize="13" fontFamily="monospace" letterSpacing="1">우측면</text>
-      <text x={D+W+D+W/2}   y={D+H/2+7}   textAnchor="middle" fill={labelFill} fontSize="15" fontFamily="monospace" letterSpacing="1">뒷면</text>
-      <text x={D+W/2}       y={D+H+D/2+7} textAnchor="middle" fill={labelFill} fontSize="15" fontFamily="monospace" letterSpacing="1">밑면</text>
+      {/* 텍스트 레이블 제거 — 데코레이션 용도로만 사용되므로 검색엔진에 노이즈가 되지 않도록 */}
     </svg>
   );
 }

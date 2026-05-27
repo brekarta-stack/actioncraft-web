@@ -1,10 +1,22 @@
 ﻿import type { Metadata } from "next";
 import Link from "next/link";
+import { PAGE_META } from "@/lib/site";
 
 export const metadata: Metadata = {
-  title: "회사소개 | Craft Engineering Studio",
-  description:
-    "자기 구조 설계 특허 11종 보유, KAIST 협력, 국내 최대 페이퍼 토이 커뮤니티 운영. Craft Engineering Studio(CES)는 사용자 경험을 기획하고 디자인하는 크리에이티브 디자인 스튜디오입니다.",
+  title: PAGE_META.about.title,
+  description: PAGE_META.about.description,
+  alternates: { canonical: "/about" },
+  openGraph: {
+    title: PAGE_META.about.title,
+    description: PAGE_META.about.description,
+    url: "/about",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: PAGE_META.about.title,
+    description: PAGE_META.about.description,
+  },
 };
 
 const stats = [

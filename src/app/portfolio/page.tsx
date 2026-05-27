@@ -1,19 +1,65 @@
 ﻿import type { Metadata } from "next";
 import { getItems, CATEGORIES } from "@/lib/portfolio";
 import PortfolioGallery from "@/components/PortfolioGallery";
+import { PAGE_META, SITE_NAME, SITE_URL } from "@/lib/site";
 
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "제작 사례 | Craft Engineering Studio",
-  description: "팝업북, 페이퍼 크래프트, 액션 크래프트, 우드락 등 CES의 다양한 제작 사례를 확인하세요.",
+  title: PAGE_META.portfolio.title,
+  description: PAGE_META.portfolio.description,
+  alternates: { canonical: "/portfolio" },
+  openGraph: {
+    title: PAGE_META.portfolio.title,
+    description: PAGE_META.portfolio.description,
+    url: "/portfolio",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: PAGE_META.portfolio.title,
+    description: PAGE_META.portfolio.description,
+  },
 };
+
+/**
+ * 포트폴리오 페이지 ItemList / CreativeWork JSON-LD.
+ * 검색엔진이 어떤 사례들을 다루는지 파악하도록 ItemList 로 묶음.
+ */
+function PortfolioJsonLd({ items }: { items: { title: string; slug?: string; description?: string }[] }) {
+  const data = {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    name: "CES 제작 사례",
+    url: `${SITE_URL}/portfolio`,
+    numberOfItems: items.length,
+    itemListElement: items.slice(0, 30).map((item, idx) => ({
+      "@type": "ListItem",
+      position: idx + 1,
+      item: {
+        "@type": "CreativeWork",
+        name: item.title,
+        creator: { "@type": "Organization", name: SITE_NAME },
+        ...(item.description ? { description: item.description } : {}),
+        ...(item.slug ? { url: `${SITE_URL}/portfolio#${item.slug}` } : {}),
+      },
+    })),
+  };
+  return (
+    <script
+      type="application/ld+json"
+      // eslint-disable-next-line react/no-danger
+      dangerouslySetInnerHTML={{ __html: JSON.stringify(data) }}
+    />
+  );
+}
 
 export default async function PortfolioPage() {
   const items = (await getItems()).filter((i) => i.published);
 
   return (
     <>
+      <PortfolioJsonLd items={items} />
       {/* Hero */}
       <section className="py-20 md:py-28" style={{ background: "#1E22B2" }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">

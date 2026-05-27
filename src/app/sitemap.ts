@@ -1,17 +1,18 @@
 import type { MetadataRoute } from "next";
 import { getPosts } from "@/lib/blog";
-import { getItems } from "@/lib/portfolio";
+import { SITE_URL } from "@/lib/site";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const base = process.env.NEXTAUTH_URL ?? "https://actioncraft.co.kr";
+  const base = SITE_URL;
 
   const staticPages: MetadataRoute.Sitemap = [
     { url: base, priority: 1.0, changeFrequency: "weekly" },
     { url: `${base}/about`, priority: 0.8, changeFrequency: "monthly" },
-    { url: `${base}/products`, priority: 0.8, changeFrequency: "monthly" },
+    { url: `${base}/products`, priority: 0.9, changeFrequency: "monthly" },
     { url: `${base}/portfolio`, priority: 0.9, changeFrequency: "weekly" },
     { url: `${base}/blog`, priority: 0.9, changeFrequency: "weekly" },
-    { url: `${base}/quote`, priority: 0.7, changeFrequency: "monthly" },
+    { url: `${base}/quote`, priority: 0.8, changeFrequency: "monthly" },
+    { url: `${base}/faq`, priority: 0.7, changeFrequency: "monthly" },
   ];
 
   const allPosts = await getPosts().catch(() => []);
