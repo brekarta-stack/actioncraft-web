@@ -1,8 +1,8 @@
 @import "tailwindcss";
 @plugin "@tailwindcss/typography";
 
-/* Pretendard — 한글 가독성 최상위 폰트, 자체 CDN */
-@import url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css");
+/* Pretendard 폰트는 layout.tsx 의 <head> 에서 <link> 로 로드.
+ * (Tailwind 4 의 @plugin 이후로는 @import url(...) 가 CSS 스펙상 허용되지 않음) */
 
 @theme inline {
   --color-background: var(--background);
