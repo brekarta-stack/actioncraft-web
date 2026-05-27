@@ -20,10 +20,10 @@ import { BRAND_TAGLINE_KR, SITE_SHORT } from "@/lib/site";
 
 /* ────────────── 데이터 ────────────── */
 
-const trustStats: { num: string; label: string; sub?: string }[] = [
-  { num: "11", label: "자기구조 설계 특허", sub: "종" },
-  { num: "1,000+", label: "누적 제작 프로젝트" },
-  { num: "3~4주", label: "평균 납기" },
+const trustStats: { num: string; label: string; sub?: string; since?: string }[] = [
+  { num: "11",     label: "자기구조 설계 특허",        sub: "종" },
+  { num: "650+",   label: "누적 납품 프로젝트",         sub: "건", since: "Since 2013" },
+  { num: "약 4주 내", label: "평균 납기" },
   { num: "국내 유일", label: "페이퍼 엔지니어링 스튜디오" },
 ];
 
@@ -131,7 +131,7 @@ export default function HomePage() {
                 {" "}<strong className="text-white">국내 유일의 페이퍼 엔지니어링 스튜디오</strong>.
               </p>
               <p className="text-blue-300 mb-10">
-                현대백화점, KAIST, 경주박물관 등 <span className="pe-num">1,000+</span>건 납품.
+                현대백화점, KAIST, 경주박물관 등 <span className="pe-num">650+</span>건 납품. 2013년 창업.
               </p>
 
               {/* CTA — Primary dominant + Secondary ghost */}
@@ -186,6 +186,9 @@ export default function HomePage() {
                   <div className={`text-xs md:text-sm ${isHero ? "text-slate-700 font-semibold" : "text-slate-500"}`} style={{ wordBreak: "keep-all" }}>
                     {stat.label}
                   </div>
+                  {stat.since && (
+                    <div className="text-[11px] text-slate-400 mt-0.5">{stat.since}</div>
+                  )}
                 </div>
               );
             })}
@@ -199,7 +202,7 @@ export default function HomePage() {
           <div className="text-center mb-10">
             <p className="text-slate-500 text-xs font-semibold uppercase tracking-widest mb-2">Trusted By</p>
             <h2 className="text-2xl md:text-3xl font-bold text-slate-900">
-              이미 검증된 페이퍼 엔지니어링 파트너십
+              PE Studio와 함께한 파트너들
             </h2>
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3">
@@ -362,7 +365,7 @@ export default function HomePage() {
               페이퍼 엔지니어링 주문 제작 프로세스
             </h2>
             <p className="text-slate-500">
-              대부분의 제품은 <strong style={{ color: "#1E22B2" }}>3~4주 내 납품</strong> 가능합니다.
+              대부분의 제품은 <strong style={{ color: "#1E22B2" }}>약 4주 내 납품</strong> 가능합니다.
             </p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
@@ -419,7 +422,7 @@ export default function HomePage() {
             국내 유일의 페이퍼 엔지니어링 스튜디오가 함께합니다.
           </p>
           <p className="text-blue-300 text-sm mb-10">
-            제품 정보 입력 → 영업일 1~2일 내 담당자 회신 · 최소 수량 1,000부 · 평균 납기 3~4주
+            제품 정보 입력 → 영업일 1~2일 내 담당자 회신 · 최소 수량 1,000부 · 평균 납기 약 4주
           </p>
           <div className="flex flex-col sm:flex-row justify-center gap-3">
             <Link

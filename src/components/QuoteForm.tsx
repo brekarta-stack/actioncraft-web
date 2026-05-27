@@ -3,9 +3,6 @@
 import { useEffect, useState, type FormEvent } from "react";
 import {
   PaperToyIcon,
-  GiftIcon,
-  EducationIcon,
-  CharacterIcon,
   GearIcon,
   BoxIcon,
   PencilIcon,
@@ -16,12 +13,10 @@ import {
 } from "@/components/icons";
 
 type ProductType =
-  | "papertoy"
+  | "papercraft"
+  | "action"
   | "popup"
-  | "edu"
-  | "goods"
-  | "automata"
-  | "event"
+  | "foamboard"
   | "unsure"
   | "";
 
@@ -40,12 +35,10 @@ interface FormState {
 }
 
 const PRODUCTS: { id: ProductType; icon: IconKey; name: string; desc: string }[] = [
-  { id: "papertoy", icon: "paperToy",  name: "페이퍼토이",     desc: "움직이는 종이 완구" },
-  { id: "popup",    icon: "sparkle",   name: "팝업카드",       desc: "3D 팝업 카드·북" },
-  { id: "edu",      icon: "education", name: "교구 / 교재",    desc: "STEAM 교육용 교구" },
-  { id: "goods",    icon: "gift",      name: "기업 굿즈",      desc: "브랜딩 종이 굿즈" },
-  { id: "automata", icon: "gear",      name: "오토마타",       desc: "정교한 종이 메커니즘" },
-  { id: "event",    icon: "character", name: "이벤트 소품",    desc: "대형 종이 소품" },
+  { id: "papercraft", icon: "paperToy", name: "페이퍼 크래프트", desc: "특허 기반 종이 입체 구조" },
+  { id: "action",     icon: "gear",     name: "액션 페이퍼",    desc: "움직이는 종이 메커니즘" },
+  { id: "popup",      icon: "sparkle",  name: "팝업북",         desc: "3D 팝업 카드·북" },
+  { id: "foamboard",  icon: "box",      name: "폼보드 크래프트", desc: "대형 입체 구조물" },
 ];
 
 const PURPOSES = ["마케팅/홍보", "교육", "선물", "전시", "행사", "기타"];
@@ -71,13 +64,11 @@ const STORAGE_KEY = "pe-quote-form-draft";
 /** 아이콘 색상 — 카드 활성/비활성 통일 */
 function ProductIconRender({ name }: { name: IconKey }) {
   switch (name) {
-    case "paperToy":  return <PaperToyIcon size={28} />;
-    case "sparkle":   return <SparkleIcon size={28} />;
-    case "education": return <EducationIcon size={28} />;
-    case "gift":      return <GiftIcon size={28} />;
-    case "gear":      return <GearIcon size={28} />;
-    case "character": return <CharacterIcon size={28} />;
-    default:          return <PaperToyIcon size={28} />;
+    case "paperToy": return <PaperToyIcon size={28} />;
+    case "gear":     return <GearIcon size={28} />;
+    case "sparkle":  return <SparkleIcon size={28} />;
+    case "box":      return <BoxIcon size={28} />;
+    default:         return <PaperToyIcon size={28} />;
   }
 }
 
@@ -167,7 +158,7 @@ export default function QuoteForm() {
           <p className="text-slate-500 mb-8" style={{ wordBreak: "keep-all" }}>
             담당자가 영업일 기준 <strong className="text-slate-900">1~2일 내</strong>로 회신 드립니다.
             <br />
-            추가 문의는 <strong className="text-slate-900">hello@papercraft.kr</strong> 로 보내주세요.
+            추가 문의는 <strong className="text-slate-900">ask@papercraft.kr</strong> 로 보내주세요.
           </p>
           <div className="bg-slate-50 rounded-xl p-4 text-left mb-6 space-y-2.5 text-sm border border-slate-100">
             <div className="flex justify-between">

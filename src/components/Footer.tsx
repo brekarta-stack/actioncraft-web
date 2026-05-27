@@ -25,8 +25,13 @@ export default function Footer() {
               <br />
               움직이는 종이로 브랜드를 살아 숨쉬게 합니다.
             </p>
-            {COMPANY.businessNumber && (
+            {COMPANY.representative && (
               <p className="text-xs mt-3 text-blue-300/70">
+                대표 {COMPANY.representative}
+              </p>
+            )}
+            {COMPANY.businessNumber && (
+              <p className="text-xs mt-1 text-blue-300/70">
                 사업자등록번호 {COMPANY.businessNumber}
               </p>
             )}
@@ -90,6 +95,19 @@ export default function Footer() {
                   </a>
                 </li>
               )}
+              {COMPANY.social.community && (
+                <li className="flex items-center gap-2">
+                  <span>🌐</span>
+                  <a
+                    href={COMPANY.social.community}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="hover:text-white transition-colors"
+                  >
+                    커뮤니티 (finalpaper.net)
+                  </a>
+                </li>
+              )}
               <li className="flex items-start gap-2">
                 <span>📍</span>
                 <span>
@@ -103,7 +121,7 @@ export default function Footer() {
         </div>
 
         <div className="mt-10 pt-8 border-t border-white/10 flex flex-col sm:flex-row justify-between items-center gap-4 text-xs text-blue-300">
-          <p>© {new Date().getFullYear()} Craft Engineering Studio. All rights reserved.</p>
+          <p>© {new Date().getFullYear()} {COMPANY.legalName}. All rights reserved.</p>
           <div className="flex gap-6">
             <Link href="/legal/privacy" className="hover:text-white transition-colors">
               개인정보처리방침

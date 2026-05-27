@@ -3,14 +3,13 @@ import Link from "next/link";
 import { PAGE_META, SITE_URL, SITE_NAME, BRAND_TAGLINE_KR } from "@/lib/site";
 import {
   PaperToyIcon,
-  GeometryIcon,
-  CharacterIcon,
-  PencilIcon,
+  SparkleIcon,
   CheckIcon,
   ArrowRightIcon,
   BoxIcon,
   GearIcon,
   EducationIcon,
+  PencilIcon,
   type IconKey,
 } from "@/components/icons";
 import { PortfolioPlaceholder, PaperNetBg } from "@/components/paper-art";
@@ -38,20 +37,20 @@ export const metadata: Metadata = {
 function ProductsServiceJsonLd() {
   const services = [
     {
-      name: "Action Paper Toy 주문 제작",
-      description: "자기 구조 설계 특허를 기반으로 한 움직이는 페이퍼토이 외주 제작",
+      name: "페이퍼 크래프트 주문 제작",
+      description: "특허 기반 도형·내각 원리 자기 구조 설계 페이퍼 크래프트 외주 제작",
     },
     {
-      name: "STEAM 교육 키트 제작",
-      description: "수학·도형·과학 원리를 학습하는 페이퍼 기반 STEAM 교구 개발",
+      name: "액션 페이퍼 주문 제작",
+      description: "정교한 종이 메커니즘으로 실제로 움직이는 캐릭터 액션 페이퍼 제작",
     },
     {
-      name: "캐릭터 굿즈 주문 제작",
-      description: "지자체·기관·기업 캐릭터 및 기념품 페이퍼토이 제작",
+      name: "팝업북 주문 제작",
+      description: "다층 팝업 구조 카드·북·포스터 형태의 팝업북 제작",
     },
     {
-      name: "BI/CI 편집 디자인",
-      description: "브랜드 아이덴티티 개발 및 브로셔·PPT 편집 디자인",
+      name: "폼보드(우드락) 크래프트 제작",
+      description: "전시·행사·인테리어용 대형 폼보드 입체 구조물 제작",
     },
   ];
 
@@ -91,87 +90,87 @@ const products: {
 }[] = [
   {
     icon: "paperToy",
-    name: "Action Paper Toy",
-    subtitle: "페이퍼 엔지니어링",
+    name: "Paper Craft",
+    subtitle: "페이퍼 크래프트",
     accent: "#06C6C8",
     bgGradient: "from-cyan-50 to-sky-50",
     highlight: "핵심 서비스",
     description:
-      "체계적이고 전문적인 설계에 의해 다양하게 움직이도록 고안된 종이 모형. 자기 구조 설계 특허 11종을 바탕으로 세계 페이퍼 엔지니어들과 교류하며 메커니즘을 고도화합니다.",
+      "도형·내각 원리를 이용해 종이만으로 입체 구조를 완성하는 특허 기반 페이퍼 크래프트. 치환·연결 원리를 응용해 무한한 형태 변주가 가능하며, 기관·기업 맞춤 대량 제작이 가능합니다.",
     features: [
       "도형·내각 원리 기반 입체 구조",
-      "무게중심·중력 원리 자동 기립",
-      "교육용·홍보용 캐릭터 외주 제작",
-      "구동 가능 플랫폼 제공",
+      "치환·연결 원리 응용 설계",
+      "무게중심·중력 자동 기립",
       "기관·관공서·기업 맞춤 제작",
-      "친환경·업사이클링 소재",
+      "친환경 종이 소재",
+      "OPP/벌크 포장 선택",
     ],
     minOrder: "1,000부",
-    leadTime: "3~4주",
-    useCase: "기관, 기업, 교육",
+    leadTime: "약 4주",
+    useCase: "기관, 기업, 관공서",
   },
   {
-    icon: "geometry",
-    name: "Education Program",
-    subtitle: "STEAM 교육 키트",
-    accent: "#F5C518",
-    bgGradient: "from-amber-50 to-yellow-50",
-    highlight: "교육 기관 추천",
+    icon: "gear",
+    name: "Action Paper",
+    subtitle: "액션 페이퍼",
+    accent: "#1E22B2",
+    bgGradient: "from-blue-50 to-indigo-50",
+    highlight: "특허 핵심 기술",
     description:
-      "수학·도형·과학 등 기초 원리를 친근한 캐릭터로 자연스럽게 배우는 STEAM 페이퍼 엔지니어링 키트. KAIST 출신 개발자와 함께 만든 교육 콘텐츠입니다.",
+      "정교한 종이 메커니즘으로 실제로 움직이는 캐릭터 페이퍼. 고개를 끄덕이거나 팔을 흔드는 등 5가지 기본 움직임 타입으로 브랜드 캐릭터에 생동감을 부여합니다.",
     features: [
-      "STEAM 기초 원리 학습",
-      "방과 후 교육 프로그램",
-      "업사이클링 교육 키트",
-      "코딩 전자 교육 키트",
-      "재료 별도 판매",
-      "교육 프로그램 연계 가능",
+      "5가지 기본 움직임 타입",
+      "캐릭터 IP 활용 가능",
+      "움직임형·고정형 선택",
+      "홍보·전시 활용 최적",
+      "대량 생산 가능",
+      "브랜드 굿즈 제작",
     ],
-    minOrder: "30세트",
-    leadTime: "2~3주",
-    useCase: "학교, 학원, 교육기관",
+    minOrder: "1,000부",
+    leadTime: "약 4주",
+    useCase: "기업, 브랜드, 이벤트",
   },
   {
-    icon: "character",
-    name: "Custom Character",
-    subtitle: "캐릭터 & 굿즈",
+    icon: "sparkle",
+    name: "Popup Book",
+    subtitle: "팝업북",
     accent: "#E91E8C",
     bgGradient: "from-pink-50 to-fuchsia-50",
-    highlight: "관공서 납품 다수",
+    highlight: "선물·기념품 인기",
     description:
-      "기관 기존 캐릭터 활용이 가능하며, 캐릭터가 없는 경우 개발해 드립니다. 기념품·축제·체험 상품 등 다양하게 활용 가능한 정교한 움직임의 굿즈.",
+      "펼치면 살아 숨쉬는 다층 팝업 구조. 카드·북·포스터 등 다양한 형태로 제작 가능하며 고급 선물·기념품·기업 프로모션으로 최적입니다.",
     features: [
-      "기관·기업 기존 캐릭터 활용",
-      "신규 캐릭터 개발 가능",
-      "기념품·축제·체험상품",
-      "기존 물량 대비 저렴한 대량 생산",
-      "남녀노소 즐길 수 있는 디자인",
-      "포장(OPP/벌크) 선택 가능",
+      "다층 팝업 구조 설계",
+      "카드·북·포스터 형태",
+      "고급 선물·기념품 제작",
+      "기업 프로모션 활용",
+      "커스텀 문구 삽입",
+      "소량 맞춤 제작 가능",
     ],
-    minOrder: "1,000부",
-    leadTime: "3~4주",
-    useCase: "지자체, 박물관, 문화재단",
+    minOrder: "300부",
+    leadTime: "약 3주",
+    useCase: "선물, 기념품, 이벤트",
   },
   {
-    icon: "pencil",
-    name: "Editorial Design",
-    subtitle: "편집 디자인",
-    accent: "#8B5CF6",
-    bgGradient: "from-violet-50 to-purple-50",
-    highlight: "BI/CI 전문",
+    icon: "box",
+    name: "Foamboard Craft",
+    subtitle: "폼보드 크래프트",
+    accent: "#F5C518",
+    bgGradient: "from-amber-50 to-yellow-50",
+    highlight: "전시·행사 특화",
     description:
-      "캐릭터 제작부터 기관·관공서·기업 BI/CI 개발, 브로셔·PPT 등 편집 디자인까지. 브랜드 아이덴티티를 일관성 있게 구축해 드립니다.",
+      "폼보드·우드락 소재로 제작하는 대형 입체 구조물. 전시·행사·인테리어 소품으로 적합하며 임팩트 있는 공간 연출이 가능합니다.",
     features: [
-      "캐릭터 디자인",
-      "기관·기업 BI/CI 개발",
-      "브로셔·리플렛 디자인",
-      "PPT 템플릿 제작",
-      "브랜드 가이드라인",
-      "편집 디자인 일체",
+      "대형 입체 구조 제작",
+      "전시·행사 소품 최적",
+      "공간 인테리어 활용",
+      "라이트박스 연동 가능",
+      "조립식으로 이동 용이",
+      "경량 소재 사용",
     ],
     minOrder: "협의",
-    leadTime: "2~3주",
-    useCase: "기업, 기관, 스타트업",
+    leadTime: "협의",
+    useCase: "전시, 행사, 인테리어",
   },
 ];
 
@@ -200,12 +199,11 @@ const projectWorks: { client: string; character: string; type: string; variant: 
 function ProductIcon({ name, size = 48 }: { name: IconKey; size?: number }) {
   switch (name) {
     case "paperToy":  return <PaperToyIcon size={size} />;
-    case "geometry":  return <GeometryIcon size={size} />;
-    case "character": return <CharacterIcon size={size} />;
-    case "pencil":    return <PencilIcon size={size} />;
-    case "education": return <EducationIcon size={size} />;
+    case "sparkle":   return <SparkleIcon size={size} />;
     case "gear":      return <GearIcon size={size} />;
     case "box":       return <BoxIcon size={size} />;
+    case "education": return <EducationIcon size={size} />;
+    case "pencil":    return <PencilIcon size={size} />;
     default:          return <PaperToyIcon size={size} />;
   }
 }
@@ -346,7 +344,7 @@ export default function ProductsPage() {
               페이퍼 엔지니어링 주문 제작 프로세스
             </h2>
             <p className="text-slate-500">
-              대부분의 제품은 <strong style={{ color: "#1E22B2" }}>3~4주 내 납품</strong> 가능합니다.
+              대부분의 제품은 <strong style={{ color: "#1E22B2" }}>약 4주 내 납품</strong> 가능합니다.
             </p>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-5 mb-12">
