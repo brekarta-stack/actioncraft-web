@@ -26,6 +26,12 @@ export default async function AdminPage() {
           <h1 className="text-2xl font-bold text-slate-900">관리자 대시보드</h1>
           <p className="text-slate-500 text-sm mt-1">{session.user?.email}</p>
         </div>
+        <Link
+          href="/admin/setup"
+          className="text-xs px-3 py-1.5 rounded-lg border border-slate-200 text-slate-500 hover:text-slate-700 hover:border-slate-300 transition-colors"
+        >
+          🛠 DB 셋업
+        </Link>
       </div>
 
       <div className="grid grid-cols-3 gap-4 mb-10">
