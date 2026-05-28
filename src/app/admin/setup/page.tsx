@@ -56,15 +56,10 @@ export default async function SetupPage() {
   };
 
   return (
-    <div className="max-w-3xl mx-auto px-4 py-10">
-      <div className="flex items-center justify-between mb-8">
-        <div>
-          <h1 className="text-2xl font-bold text-slate-900">DB 셋업</h1>
-          <p className="text-slate-500 text-sm mt-1">Supabase 테이블 상태 확인</p>
-        </div>
-        <Link href="/admin" className="text-sm text-slate-500 hover:text-slate-700">
-          ← 어드민 홈
-        </Link>
+    <div className="p-6 md:p-8 max-w-3xl mx-auto">
+      <div className="mb-6">
+        <h1 className="text-2xl font-bold text-slate-900">DB 셋업</h1>
+        <p className="text-slate-500 text-sm mt-0.5">Supabase 테이블 상태 확인</p>
       </div>
 
       {/* 테이블 상태 */}

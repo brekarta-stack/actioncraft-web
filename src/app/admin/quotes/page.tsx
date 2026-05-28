@@ -3,8 +3,6 @@ import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { supabaseAdmin } from "@/lib/supabase-admin";
 import type { QuoteSubmission } from "@/lib/quote-types";
-import Link from "next/link";
-
 const PRODUCT_LABELS: Record<string, string> = {
   papercraft: "페이퍼 크래프트",
   action:     "액션 페이퍼",
@@ -41,21 +39,13 @@ export default async function AdminQuotesPage() {
       }));
 
   return (
-    <div className="max-w-5xl mx-auto px-4 py-10">
+    <div className="p-6 md:p-8 max-w-5xl mx-auto">
       {/* Header */}
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">견적 문의 관리</h1>
-          <p className="text-slate-500 text-sm mt-1">
-            {session.user?.email} · 총 {quotes.length}건
-          </p>
+          <h1 className="text-2xl font-bold text-slate-900">견적 문의</h1>
+          <p className="text-slate-500 text-sm mt-0.5">총 {quotes.length}건</p>
         </div>
-        <Link
-          href="/admin"
-          className="text-sm text-slate-500 hover:text-slate-700 transition-colors"
-        >
-          ← 어드민 홈
-        </Link>
       </div>
 
       {error && (
