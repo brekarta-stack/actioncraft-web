@@ -24,7 +24,7 @@
 
 \- 코드를 짜면 항상 같은 턴 안에서 테스트를 작성하고 실행한다.
 
-\- 테스트가 통과하면 묻지 않고 git commit까지 한다 (push는 하지 않는다).
+\- 테스트가 통과하면 묻지 않고 git commit + git push 까지 한다 (다기기 동기화를 위해).
 
 \- commit 메시지는 Conventional Commits 형식을 따른다.
 
