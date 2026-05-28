@@ -49,7 +49,27 @@ CREATE TABLE IF NOT EXISTS quotes (
   created_at    TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
--- RLS 비활성화 (서버에서 service_role 키로만 접근)
-ALTER TABLE portfolio_items DISABLE ROW LEVEL SECURITY;
-ALTER TABLE posts            DISABLE ROW LEVEL SECURITY;
-ALTER TABLE quotes           DISABLE ROW LEVEL SECURITY;
+-- ============================================================
+-- RLS (Row Level Security) 활성화
+-- 서버는 service_role 키 사용 → RLS 자동 우회
+-- 외부에서 anon 키로 직접 접근 시 아래 정책만 허용
+-- ============================================================
+
+ALTER TABLE portfolio_items ENABLE ROW LEVEL SECURITY;
+ALTER TABLE posts            ENABLE ROW LEVEL SECURITY;
+ALTER TABLE quotes           ENABLE ROW LEVEL SECURITY;
+
+-- portfolio_items: 공개된 항목만 anon 읽기 허용 (쓰기는 service_role만)
+DROP POLICY IF EXISTS "Public read published portfolio" ON portfolio_items;
+CREATE POLICY "Public read published portfolio"
+  ON portfolio_items FOR SELECT TO anon
+  USING (published = true);
+
+-- posts: 공개된 포스트만 anon 읽기 허용 (쓰기는 service_role만)
+DROP POLICY IF EXISTS "Public read published posts" ON posts;
+CREATE POLICY "Public read published posts"
+  ON posts FOR SELECT TO anon
+  USING (published = true);
+
+-- quotes: anon 접근 전면 차단 (삽입 포함) — 모든 접근은 service_role을 통해서만
+-- (견적 폼 → /api/quote → supabaseAdmin 경유)

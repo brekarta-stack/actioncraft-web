@@ -1,7 +1,8 @@
 import type { NextAuthOptions } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 
-const ADMIN_EMAIL = process.env.ADMIN_EMAIL ?? "brekarta@gmail.com";
+const ADMIN_EMAIL = process.env.ADMIN_EMAIL;
+if (!ADMIN_EMAIL) throw new Error("ADMIN_EMAIL environment variable is required");
 
 export const authOptions: NextAuthOptions = {
   providers: [

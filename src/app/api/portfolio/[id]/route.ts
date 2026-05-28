@@ -7,9 +7,14 @@ export async function GET(
   _req: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const session = await getServerSession(authOptions);
   const { id } = await params;
   const item = await getItemById(id);
   if (!item) return NextResponse.json({ error: "Not found" }, { status: 404 });
+  // 비공개 아이템은 어드민만 접근 가능
+  if (!item.published && !session) {
+    return NextResponse.json({ error: "Not found" }, { status: 404 });
+  }
   return NextResponse.json(item);
 }
 

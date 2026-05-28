@@ -1,4 +1,3 @@
-import { supabase } from "./supabase";
 import { supabaseAdmin } from "./supabase-admin";
 export type { Category, PortfolioItem } from "./portfolio-types";
 export { CATEGORIES } from "./portfolio-types";

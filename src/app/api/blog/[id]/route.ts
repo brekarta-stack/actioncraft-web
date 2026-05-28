@@ -4,12 +4,17 @@ import { authOptions } from "@/lib/auth";
 import { getPostById, savePost, deletePost } from "@/lib/blog";
 
 export async function GET(
-  _request: Request,
+  request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const session = await getServerSession(authOptions);
   const { id } = await params;
   const post = await getPostById(id);
   if (!post) return NextResponse.json({ error: "Not found" }, { status: 404 });
+  // 비공개 글은 어드민만 접근 가능
+  if (!post.published && !session) {
+    return NextResponse.json({ error: "Not found" }, { status: 404 });
+  }
   return NextResponse.json(post);
 }
 

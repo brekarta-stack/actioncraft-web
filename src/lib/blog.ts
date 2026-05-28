@@ -1,4 +1,3 @@
-import { supabase } from "./supabase";
 import { supabaseAdmin } from "./supabase-admin";
 import { SEED_POSTS } from "./blog-seed";
 
