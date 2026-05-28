@@ -21,7 +21,7 @@ function toItem(row: any): PortfolioItem {
 }
 
 export async function getItems(): Promise<PortfolioItem[]> {
-  const { data, error } = await supabase
+  const { data, error } = await supabaseAdmin
     .from("portfolio_items")
     .select("*")
     .order("created_at", { ascending: false });
@@ -30,7 +30,7 @@ export async function getItems(): Promise<PortfolioItem[]> {
 }
 
 export async function getItemById(id: string): Promise<PortfolioItem | undefined> {
-  const { data } = await supabase
+  const { data } = await supabaseAdmin
     .from("portfolio_items")
     .select("*")
     .eq("id", id)
@@ -39,7 +39,7 @@ export async function getItemById(id: string): Promise<PortfolioItem | undefined
 }
 
 export async function getItemByAirtableId(airtableId: string): Promise<PortfolioItem | undefined> {
-  const { data } = await supabase
+  const { data } = await supabaseAdmin
     .from("portfolio_items")
     .select("*")
     .eq("airtable_id", airtableId)

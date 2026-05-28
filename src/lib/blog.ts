@@ -50,7 +50,7 @@ function mergePosts(dbPosts: Post[]): Post[] {
 
 export async function getPosts(): Promise<Post[]> {
   try {
-    const { data, error } = await supabase
+    const { data, error } = await supabaseAdmin
       .from("posts")
       .select("*")
       .order("created_at", { ascending: false });
@@ -64,7 +64,7 @@ export async function getPosts(): Promise<Post[]> {
 
 export async function getPostById(id: string): Promise<Post | undefined> {
   try {
-    const { data } = await supabase.from("posts").select("*").eq("id", id).maybeSingle();
+    const { data } = await supabaseAdmin.from("posts").select("*").eq("id", id).maybeSingle();
     if (data) return toPost(data);
   } catch {
     /* fall through to seed */
@@ -74,7 +74,7 @@ export async function getPostById(id: string): Promise<Post | undefined> {
 
 export async function getPostBySlug(slug: string): Promise<Post | undefined> {
   try {
-    const { data } = await supabase
+    const { data } = await supabaseAdmin
       .from("posts")
       .select("*")
       .eq("slug", slug)
