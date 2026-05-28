@@ -10,7 +10,8 @@ import {
   ArrowRightIcon,
   type IconKey,
 } from "@/components/icons";
-import { PatentBadge, PortfolioPlaceholder, PaperNetBg } from "@/components/paper-art";
+import { PatentBadge, PaperNetBg } from "@/components/paper-art";
+import PartnersMarquee from "@/components/PartnersMarquee";
 
 export const metadata: Metadata = {
   title: PAGE_META.about.title,
@@ -61,15 +62,6 @@ const strengths: { icon: IconKey; title: string; description: string }[] = [
     description:
       "친환경 재질로 만드는 캐릭터. 단순하게 표현하거나, 의미를 더해 훨씬 가치 있게 표현하는 것도 가능합니다.",
   },
-];
-
-const clients: { name: string; work: string; variant: "department" | "university" | "museum" | "city" | "character" | "generic" }[] = [
-  { name: "현대백화점", work: "스마일리 페이퍼 토이",         variant: "department" },
-  { name: "KAIST",       work: "납육이 캐릭터",                  variant: "university" },
-  { name: "경주박물관",  work: "도토리 캐릭터",                  variant: "museum" },
-  { name: "수원시",      work: "수원이 캐릭터",                  variant: "city" },
-  { name: "공주시",      work: "고마곰·공주 캐릭터",             variant: "character" },
-  { name: "뚱이천하",    work: "국내 최대 커뮤니티 운영",         variant: "generic" },
 ];
 
 const services = [
@@ -288,26 +280,23 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* Clients */}
-      <section className="py-16 md:py-20 bg-white">
+      {/* Partners — logo marquee */}
+      <section className="py-16 md:py-20 bg-white overflow-hidden">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-10">
             <p className="text-xs font-semibold uppercase tracking-widest text-slate-400 mb-3">
               Partners
             </p>
-            <h2 className="text-2xl md:text-3xl font-bold text-slate-900 mb-2 tracking-tight">함께한 파트너</h2>
+            <h2 className="text-2xl md:text-3xl font-bold text-slate-900 mb-2 tracking-tight">
+              PE Studio와 함께한 파트너들
+            </h2>
             <p className="text-slate-500 text-sm" style={{ wordBreak: "keep-all" }}>
-              국내 주요 기관·기업과 함께 제작했습니다.
+              국내 주요 기업·기관·관공서와 650건 이상의 프로젝트를 함께했습니다.
             </p>
           </div>
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3">
-            {clients.map((c) => (
-              <div key={c.name} className="aspect-square">
-                <PortfolioPlaceholder variant={c.variant} label={c.name} className="w-full h-full" />
-              </div>
-            ))}
-          </div>
         </div>
+        {/* 전체 너비 — padding 제거해서 로고가 엣지까지 흘러가도록 */}
+        <PartnersMarquee />
       </section>
 
       {/* Timeline */}
