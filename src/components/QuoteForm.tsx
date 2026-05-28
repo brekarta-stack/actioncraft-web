@@ -75,6 +75,7 @@ function ProductIconRender({ name }: { name: IconKey }) {
 export default function QuoteForm() {
   const [step, setStep] = useState(1);
   const [submitted, setSubmitted] = useState(false);
+  const [saving, setSaving] = useState(false);
   const [form, setForm] = useState<FormState>(INITIAL_FORM);
   const [hydrated, setHydrated] = useState(false);
 
@@ -116,14 +117,23 @@ export default function QuoteForm() {
     return false;
   };
 
-  const handleSubmit = (e: FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     if (!canProceed()) return;
-    setSubmitted(true);
+    setSaving(true);
     try {
+      const res = await fetch("/api/quote", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form),
+      });
+      if (!res.ok) throw new Error("제출 실패");
+      setSubmitted(true);
       localStorage.removeItem(STORAGE_KEY);
     } catch {
-      /* ignore */
+      alert("제출 중 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.");
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -583,16 +593,16 @@ export default function QuoteForm() {
               ) : (
                 <button
                   type="submit"
-                  disabled={!canProceed()}
+                  disabled={!canProceed() || saving}
                   className={`inline-flex items-center gap-1.5 px-7 py-3 font-semibold rounded-xl transition-all ${
-                    canProceed()
+                    canProceed() && !saving
                       ? "text-white shadow-lg shadow-pink-500/25 hover:-translate-y-0.5"
                       : "bg-slate-200 text-slate-400 cursor-not-allowed"
                   }`}
-                  style={canProceed() ? { background: "linear-gradient(135deg, #06C6C8, #E91E8C)" } : {}}
+                  style={canProceed() && !saving ? { background: "linear-gradient(135deg, #06C6C8, #E91E8C)" } : {}}
                 >
-                  견적 문의 제출
-                  <ArrowRightIcon size={18} />
+                  {saving ? "제출 중…" : "견적 문의 제출"}
+                  {!saving && <ArrowRightIcon size={18} />}
                 </button>
               )}
             </div>

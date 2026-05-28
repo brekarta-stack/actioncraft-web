@@ -3,8 +3,10 @@ import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { getPosts } from "@/lib/blog";
 import { getItems } from "@/lib/portfolio";
+import { supabaseAdmin } from "@/lib/supabase-admin";
 import AdminPostList from "@/components/admin/AdminPostList";
 import AdminPortfolioList from "@/components/admin/AdminPortfolioList";
+import Link from "next/link";
 
 export default async function AdminPage() {
   const session = await getServerSession(authOptions);
@@ -12,6 +14,10 @@ export default async function AdminPage() {
 
   const posts = await getPosts();
   const portfolioItems = await getItems();
+  const { count: quoteCount } = await supabaseAdmin
+    .from("quotes")
+    .select("*", { count: "exact", head: true })
+    .then((r) => ({ count: r.count ?? 0 }));
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-10">
@@ -22,7 +28,7 @@ export default async function AdminPage() {
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-4 mb-10">
+      <div className="grid grid-cols-3 gap-4 mb-10">
         <div className="bg-white rounded-2xl border border-slate-200 p-5">
           <div className="text-3xl font-bold text-orange-500 mb-1">{posts.length}</div>
           <div className="text-sm text-slate-500">블로그 포스트</div>
@@ -31,6 +37,15 @@ export default async function AdminPage() {
           <div className="text-3xl font-bold text-orange-500 mb-1">{portfolioItems.length}</div>
           <div className="text-sm text-slate-500">제작 사례</div>
         </div>
+        <Link
+          href="/admin/quotes"
+          className="bg-white rounded-2xl border border-slate-200 p-5 hover:border-blue-300 hover:shadow-sm transition-all group"
+        >
+          <div className="text-3xl font-bold mb-1 group-hover:text-blue-600" style={{ color: "#1E22B2" }}>
+            {quoteCount}
+          </div>
+          <div className="text-sm text-slate-500 group-hover:text-blue-500">견적 문의 →</div>
+        </Link>
       </div>
 
       <div className="mb-12">
