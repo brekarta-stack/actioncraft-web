@@ -1,4 +1,5 @@
 import { supabase } from "./supabase";
+import { supabaseAdmin } from "./supabase-admin";
 export type { Category, PortfolioItem } from "./portfolio-types";
 export { CATEGORIES } from "./portfolio-types";
 import type { PortfolioItem } from "./portfolio-types";
@@ -47,7 +48,7 @@ export async function getItemByAirtableId(airtableId: string): Promise<Portfolio
 }
 
 export async function saveItem(item: PortfolioItem): Promise<void> {
-  const { error } = await supabase.from("portfolio_items").upsert({
+  const { error } = await supabaseAdmin.from("portfolio_items").upsert({
     id: item.id,
     airtable_id: item.airtableId ?? null,
     title: item.title,
@@ -63,12 +64,12 @@ export async function saveItem(item: PortfolioItem): Promise<void> {
 }
 
 export async function deleteItem(id: string): Promise<void> {
-  const { error } = await supabase.from("portfolio_items").delete().eq("id", id);
+  const { error } = await supabaseAdmin.from("portfolio_items").delete().eq("id", id);
   if (error) throw error;
 }
 
 export async function deleteItemByAirtableId(airtableId: string): Promise<void> {
-  const { error } = await supabase
+  const { error } = await supabaseAdmin
     .from("portfolio_items")
     .delete()
     .eq("airtable_id", airtableId);

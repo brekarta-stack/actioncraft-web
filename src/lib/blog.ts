@@ -1,4 +1,5 @@
 import { supabase } from "./supabase";
+import { supabaseAdmin } from "./supabase-admin";
 import { SEED_POSTS } from "./blog-seed";
 
 export interface Post {
@@ -88,7 +89,7 @@ export async function getPostBySlug(slug: string): Promise<Post | undefined> {
 }
 
 export async function savePost(post: Post): Promise<void> {
-  const { error } = await supabase.from("posts").upsert({
+  const { error } = await supabaseAdmin.from("posts").upsert({
     id: post.id,
     slug: post.slug,
     title: post.title,
@@ -105,7 +106,7 @@ export async function savePost(post: Post): Promise<void> {
 }
 
 export async function deletePost(id: string): Promise<void> {
-  const { error } = await supabase.from("posts").delete().eq("id", id);
+  const { error } = await supabaseAdmin.from("posts").delete().eq("id", id);
   if (error) throw error;
 }
 
