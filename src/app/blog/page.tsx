@@ -4,6 +4,7 @@ import { getPosts } from "@/lib/blog";
 import { PAGE_META, SITE_SHORT, BRAND_TAGLINE_KR } from "@/lib/site";
 import { PencilIcon, ArrowRightIcon } from "@/components/icons";
 import { PaperNetBg, BlogThumbnail, blogVariantFromTag } from "@/components/paper-art";
+import { BlogCoverImage } from "@/components/BlogCoverImage";
 
 export const dynamic = "force-dynamic";
 
@@ -89,8 +90,16 @@ export default async function BlogPage() {
                 >
                   <div className="relative h-64 md:h-auto md:min-h-[280px] group-hover:scale-[1.02] transition-transform overflow-hidden">
                     {allPosts[0].coverImage ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img src={allPosts[0].coverImage} alt={allPosts[0].title} className="w-full h-full object-cover" />
+                      <BlogCoverImage
+                        src={allPosts[0].coverImage}
+                        alt={allPosts[0].title}
+                        className="w-full h-full object-cover"
+                        fallback={
+                          allPosts[0].emoji
+                            ? <div className={`bg-gradient-to-br ${tagGradients[allPosts[0].tag] ?? "from-slate-100 to-slate-50"} flex items-center justify-center h-full`}><span className="text-8xl">{allPosts[0].emoji}</span></div>
+                            : <BlogThumbnail variant={blogVariantFromTag(allPosts[0].tag)} className="w-full h-full" />
+                        }
+                      />
                     ) : allPosts[0].emoji ? (
                       <div className={`bg-gradient-to-br ${tagGradients[allPosts[0].tag] ?? "from-slate-100 to-slate-50"} flex items-center justify-center h-full`}>
                         <span className="text-8xl">{allPosts[0].emoji}</span>
@@ -136,8 +145,16 @@ export default async function BlogPage() {
                     >
                       <div className="h-44 overflow-hidden group-hover:scale-[1.02] transition-transform">
                         {post.coverImage ? (
-                          // eslint-disable-next-line @next/next/no-img-element
-                          <img src={post.coverImage} alt={post.title} className="w-full h-full object-cover" />
+                          <BlogCoverImage
+                            src={post.coverImage}
+                            alt={post.title}
+                            className="w-full h-full object-cover"
+                            fallback={
+                              post.emoji
+                                ? <div className={`bg-gradient-to-br ${tagGradients[post.tag] ?? "from-slate-100 to-slate-50"} h-full flex items-center justify-center`}><span className="text-6xl">{post.emoji}</span></div>
+                                : <BlogThumbnail variant={blogVariantFromTag(post.tag)} className="w-full h-full" />
+                            }
+                          />
                         ) : post.emoji ? (
                           <div className={`bg-gradient-to-br ${tagGradients[post.tag] ?? "from-slate-100 to-slate-50"} h-full flex items-center justify-center`}>
                             <span className="text-6xl">{post.emoji}</span>

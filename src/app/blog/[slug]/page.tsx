@@ -9,6 +9,7 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import { SITE_NAME, SITE_URL } from "@/lib/site";
 import { BlogThumbnail, blogVariantFromTag } from "@/components/paper-art";
+import { BlogCoverImage } from "@/components/BlogCoverImage";
 
 export async function generateStaticParams() {
   try {
@@ -108,11 +109,15 @@ export default async function BlogPostPage({
       <div className="mb-10">
         {/* 커버 이미지 우선, 없으면 이모지, 없으면 SVG 썸네일 */}
         {post.coverImage ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
+          <BlogCoverImage
             src={post.coverImage}
             alt={post.title}
             className="w-full aspect-[16/7] object-cover rounded-2xl mb-6 pe-paper-shadow"
+            fallback={
+              post.emoji
+                ? <span className="text-6xl block mb-6" aria-hidden>{post.emoji}</span>
+                : <div className="w-full aspect-[16/7] rounded-2xl overflow-hidden mb-6 pe-paper-shadow"><BlogThumbnail variant={blogVariantFromTag(post.tag)} className="w-full h-full" /></div>
+            }
           />
         ) : post.emoji ? (
           <span className="text-6xl block mb-6" aria-hidden>{post.emoji}</span>
