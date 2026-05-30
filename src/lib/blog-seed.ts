@@ -13,12 +13,21 @@ import type { Post } from "./blog";
 
 const NOW = "2026-05-27T00:00:00.000Z";
 
+/**
+ * 인라인 SVG figure를 한 줄로 정규화한다.
+ * 마크다운(remark + rehype-raw) 렌더 시 raw HTML 블록은 "빈 줄"에서 종료되고,
+ * 4칸 이상 들여쓴 줄은 "들여쓰기 코드 블록"으로 인식되어 SVG 소스가 그대로 노출된다.
+ * 줄바꿈 + 뒤따르는 공백을 단일 공백으로 합쳐 두 문제를 모두 제거한다.
+ * (SVG/HTML은 태그 사이 공백을 무시하므로 시각적 영향 없음)
+ */
+const oneLine = (s: string): string => s.replace(/\n\s*/g, " ").trim();
+
 /* ──────────────────────────────────────────────
  * 재사용 가능한 인라인 일러스트 (markdown 본문 안에 들어감)
  * ────────────────────────────────────────────── */
 
 // 페스티벌/축제 일러스트 (천막 + 캐릭터 페이퍼토이)
-const FigFestival = `<figure class="not-prose my-8 rounded-2xl overflow-hidden bg-gradient-to-br from-cyan-50 to-blue-50 border border-cyan-100">
+const FigFestival = oneLine(`<figure class="not-prose my-8 rounded-2xl overflow-hidden bg-gradient-to-br from-cyan-50 to-blue-50 border border-cyan-100">
 <svg viewBox="0 0 720 320" class="w-full h-auto" xmlns="http://www.w3.org/2000/svg">
   <defs><linearGradient id="tent1" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="#06C6C8"/><stop offset="100%" stop-color="#1E22B2"/></linearGradient></defs>
   <!-- 지면 -->
@@ -54,10 +63,10 @@ const FigFestival = `<figure class="not-prose my-8 rounded-2xl overflow-hidden b
   <g opacity="0.6"><rect x="490" y="50" width="14" height="14" fill="#E91E8C" transform="rotate(30 497 57)"/></g>
 </svg>
 <figcaption class="text-xs text-slate-500 text-center py-2 bg-white/50">▲ 지역 캐릭터를 페이퍼토이로 만들면 축제 현장의 시각적 임팩트가 즉시 올라갑니다.</figcaption>
-</figure>`;
+</figure>`);
 
 // 비용 비교 차트
-const FigCostCompare = `<figure class="not-prose my-8 rounded-2xl overflow-hidden bg-white border border-slate-200">
+const FigCostCompare = oneLine(`<figure class="not-prose my-8 rounded-2xl overflow-hidden bg-white border border-slate-200">
 <svg viewBox="0 0 720 280" class="w-full h-auto" xmlns="http://www.w3.org/2000/svg">
   <text x="360" y="35" text-anchor="middle" font-family="Pretendard, sans-serif" font-size="16" font-weight="700" fill="#1E22B2">1,000개 제작 시 단가 비교 (예시)</text>
   <!-- Y축 라벨 -->
@@ -77,10 +86,10 @@ const FigCostCompare = `<figure class="not-prose my-8 rounded-2xl overflow-hidde
   <text x="300" y="231" font-family="Pretendard" font-size="13" font-weight="700" fill="#1E22B2">약 2,000~3,000원/개</text>
 </svg>
 <figcaption class="text-xs text-slate-500 text-center py-2 bg-slate-50">▲ 수량·옵션에 따라 다르나, 동일 예산으로 더 많은 수량 제작이 가능합니다.</figcaption>
-</figure>`;
+</figure>`);
 
 // 교실 + 학생 + 페이퍼토이 일러스트
-const FigClassroom = `<figure class="not-prose my-8 rounded-2xl overflow-hidden bg-gradient-to-br from-amber-50 to-yellow-50 border border-amber-100">
+const FigClassroom = oneLine(`<figure class="not-prose my-8 rounded-2xl overflow-hidden bg-gradient-to-br from-amber-50 to-yellow-50 border border-amber-100">
 <svg viewBox="0 0 720 320" class="w-full h-auto" xmlns="http://www.w3.org/2000/svg">
   <!-- 바닥 -->
   <rect x="0" y="260" width="720" height="60" fill="#FFF3D0"/>
@@ -120,10 +129,10 @@ const FigClassroom = `<figure class="not-prose my-8 rounded-2xl overflow-hidden 
   <g opacity="0.5"><rect x="660" y="100" width="14" height="14" fill="#06C6C8" transform="rotate(-15 667 107)"/></g>
 </svg>
 <figcaption class="text-xs text-slate-600 text-center py-2 bg-white/60">▲ 학교만의 오리지널 페이퍼 엔지니어링 교구는 정체성과 입소문 효과를 동시에 만듭니다.</figcaption>
-</figure>`;
+</figure>`);
 
 // SNS 확산 다이어그램
-const FigSnsShare = `<figure class="not-prose my-8 rounded-2xl overflow-hidden bg-gradient-to-br from-pink-50 to-rose-50 border border-pink-100">
+const FigSnsShare = oneLine(`<figure class="not-prose my-8 rounded-2xl overflow-hidden bg-gradient-to-br from-pink-50 to-rose-50 border border-pink-100">
 <svg viewBox="0 0 720 280" class="w-full h-auto" xmlns="http://www.w3.org/2000/svg">
   <!-- 가운데 페이퍼토이 -->
   <g transform="translate(360,140)">
@@ -151,10 +160,10 @@ const FigSnsShare = `<figure class="not-prose my-8 rounded-2xl overflow-hidden b
     .join("")}
 </svg>
 <figcaption class="text-xs text-slate-600 text-center py-2 bg-white/60">▲ 움직이는 종이는 정적 이미지보다 SNS 공유율이 압도적으로 높습니다.</figcaption>
-</figure>`;
+</figure>`);
 
 // 손과 종이 접기 (AI 시대 인지 효과)
-const FigHandsPaper = `<figure class="not-prose my-8 rounded-2xl overflow-hidden bg-gradient-to-br from-violet-50 to-blue-50 border border-violet-100">
+const FigHandsPaper = oneLine(`<figure class="not-prose my-8 rounded-2xl overflow-hidden bg-gradient-to-br from-violet-50 to-blue-50 border border-violet-100">
 <svg viewBox="0 0 720 320" class="w-full h-auto" xmlns="http://www.w3.org/2000/svg">
   <!-- 좌: AI/컴퓨터 (납작한 회로) -->
   <g transform="translate(170,160)">
@@ -185,10 +194,10 @@ const FigHandsPaper = `<figure class="not-prose my-8 rounded-2xl overflow-hidden
   </g>
 </svg>
 <figcaption class="text-xs text-slate-600 text-center py-2 bg-white/60">▲ AI가 결과물을 만들수록, 인간의 인지·운동 발달은 직접 손을 쓸 때 일어납니다.</figcaption>
-</figure>`;
+</figure>`);
 
 // 기하학 변환 (평면 → 입체)
-const FigGeometry = `<figure class="not-prose my-8 rounded-2xl overflow-hidden bg-gradient-to-br from-cyan-50 to-sky-50 border border-cyan-100">
+const FigGeometry = oneLine(`<figure class="not-prose my-8 rounded-2xl overflow-hidden bg-gradient-to-br from-cyan-50 to-sky-50 border border-cyan-100">
 <svg viewBox="0 0 720 280" class="w-full h-auto" xmlns="http://www.w3.org/2000/svg">
   <!-- 좌: 평면 전개도 -->
   <g transform="translate(160,140)">
@@ -218,10 +227,10 @@ const FigGeometry = `<figure class="not-prose my-8 rounded-2xl overflow-hidden b
   </g>
 </svg>
 <figcaption class="text-xs text-slate-600 text-center py-2 bg-white/60">▲ 평면이 입체가 되는 과정 자체가 강력한 기하학·공간 인지 학습입니다.</figcaption>
-</figure>`;
+</figure>`);
 
 // 체크리스트 일러스트
-const FigChecklist = `<figure class="not-prose my-8 rounded-2xl overflow-hidden bg-gradient-to-br from-slate-50 to-blue-50 border border-slate-200">
+const FigChecklist = oneLine(`<figure class="not-prose my-8 rounded-2xl overflow-hidden bg-gradient-to-br from-slate-50 to-blue-50 border border-slate-200">
 <svg viewBox="0 0 720 320" class="w-full h-auto" xmlns="http://www.w3.org/2000/svg">
   <!-- 종이 (체크리스트) -->
   <g transform="translate(360,160)">
@@ -249,10 +258,10 @@ const FigChecklist = `<figure class="not-prose my-8 rounded-2xl overflow-hidden 
   </g>
 </svg>
 <figcaption class="text-xs text-slate-600 text-center py-2 bg-white/60">▲ 견적 문의 전 5가지만 확인해도 외주 실패를 크게 줄일 수 있습니다.</figcaption>
-</figure>`;
+</figure>`);
 
 // 인지 효과 3원
-const FigCognitive = `<figure class="not-prose my-8 rounded-2xl overflow-hidden bg-gradient-to-br from-fuchsia-50 to-pink-50 border border-fuchsia-100">
+const FigCognitive = oneLine(`<figure class="not-prose my-8 rounded-2xl overflow-hidden bg-gradient-to-br from-fuchsia-50 to-pink-50 border border-fuchsia-100">
 <svg viewBox="0 0 720 280" class="w-full h-auto" xmlns="http://www.w3.org/2000/svg">
   ${[
     { x: 160, label: "기하학적 사고", desc: "평면 → 입체", color: "#06C6C8" },
@@ -270,10 +279,10 @@ const FigCognitive = `<figure class="not-prose my-8 rounded-2xl overflow-hidden 
     .join("")}
 </svg>
 <figcaption class="text-xs text-slate-600 text-center py-2 bg-white/60">▲ 페이퍼 엔지니어링은 단일 학습이 아닌 다층적 인지 발달을 동시에 자극합니다.</figcaption>
-</figure>`;
+</figure>`);
 
 // 굿즈 트렌드 비교
-const FigGoodsCompare = `<figure class="not-prose my-8 rounded-2xl overflow-hidden bg-white border border-slate-200">
+const FigGoodsCompare = oneLine(`<figure class="not-prose my-8 rounded-2xl overflow-hidden bg-white border border-slate-200">
 <svg viewBox="0 0 720 280" class="w-full h-auto" xmlns="http://www.w3.org/2000/svg">
   <text x="360" y="35" text-anchor="middle" font-family="Pretendard" font-size="15" font-weight="700" fill="#1E22B2">SNS 공유율 & 폐기율 비교 (인하우스 추정)</text>
   ${[
@@ -295,7 +304,7 @@ const FigGoodsCompare = `<figure class="not-prose my-8 rounded-2xl overflow-hidd
   <defs><linearGradient id="g1" x1="0%" x2="100%"><stop offset="0%" stop-color="#06C6C8"/><stop offset="100%" stop-color="#E91E8C"/></linearGradient></defs>
 </svg>
 <figcaption class="text-xs text-slate-500 text-center py-2 bg-slate-50">▲ 페이퍼토이는 받는 사람이 직접 만드는 콘텐츠가 되어 SNS 공유율이 높고, 휴대성·소장성도 높습니다.</figcaption>
-</figure>`;
+</figure>`);
 
 /* ──────────────────────────────────────────────
  * 글 본문
