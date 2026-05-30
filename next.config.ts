@@ -26,8 +26,8 @@ const securityHeaders = [
       "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
       // Tailwind 인라인 스타일
       "style-src 'self' 'unsafe-inline'",
-      // Supabase Storage 이미지 + Wikimedia Commons (파트너 로고) + 로컬 data URI / blob
-      `img-src 'self' data: blob: https://${SUPABASE_HOST} https://upload.wikimedia.org`,
+      // Supabase Storage + Wikimedia Commons (파트너 로고) + Pollinations AI (블로그 이미지) + data/blob
+      `img-src 'self' data: blob: https://${SUPABASE_HOST} https://upload.wikimedia.org https://image.pollinations.ai`,
       // Supabase API + Google OAuth
       `connect-src 'self' https://${SUPABASE_HOST} https://accounts.google.com https://oauth2.googleapis.com`,
       // 폰트

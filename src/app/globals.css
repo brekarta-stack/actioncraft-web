@@ -185,6 +185,67 @@ a:focus-visible {
   animation-play-state: paused;
 }
 
+/* ──────────────────────────────────────
+ * Tiptap WYSIWYG 에디터 (노션 스타일)
+ * ────────────────────────────────────── */
+.tiptap-editor .ProseMirror {
+  outline: none;
+  min-height: 480px;
+  padding: 1.5rem 1.75rem;
+  font-size: 1rem;
+  line-height: 1.8;
+  color: #1e293b;
+  font-family: var(--font-sans);
+  word-break: keep-all;
+}
+.tiptap-editor .ProseMirror > * + * { margin-top: 0.75rem; }
+.tiptap-editor .ProseMirror h1 { font-size: 1.75rem; font-weight: 800; color: #0f172a; margin-top: 1.5rem; margin-bottom: 0.5rem; }
+.tiptap-editor .ProseMirror h2 { font-size: 1.375rem; font-weight: 700; color: #0f172a; margin-top: 1.25rem; margin-bottom: 0.4rem; }
+.tiptap-editor .ProseMirror h3 { font-size: 1.125rem; font-weight: 700; color: #1e293b; margin-top: 1rem; margin-bottom: 0.3rem; }
+.tiptap-editor .ProseMirror p { margin-bottom: 0; }
+.tiptap-editor .ProseMirror ul { list-style-type: disc; padding-left: 1.5rem; }
+.tiptap-editor .ProseMirror ol { list-style-type: decimal; padding-left: 1.5rem; }
+.tiptap-editor .ProseMirror li { margin-bottom: 0.25rem; }
+.tiptap-editor .ProseMirror blockquote {
+  border-left: 3px solid #1E22B2;
+  padding-left: 1rem;
+  margin-left: 0;
+  color: #475569;
+  font-style: italic;
+}
+.tiptap-editor .ProseMirror code {
+  background: #f1f5f9;
+  border-radius: 0.25rem;
+  padding: 0.1em 0.35em;
+  font-size: 0.875em;
+  font-family: var(--font-mono);
+  color: #1E22B2;
+}
+.tiptap-editor .ProseMirror pre {
+  background: #0f172a;
+  color: #e2e8f0;
+  border-radius: 0.75rem;
+  padding: 1rem 1.25rem;
+  overflow-x: auto;
+  font-family: var(--font-mono);
+  font-size: 0.875em;
+}
+.tiptap-editor .ProseMirror pre code { background: none; color: inherit; padding: 0; }
+.tiptap-editor .ProseMirror img { border-radius: 0.75rem; max-width: 100%; display: block; margin: 0.75rem auto; }
+.tiptap-editor .ProseMirror hr { border: none; border-top: 1px solid #e2e8f0; margin: 1.5rem 0; }
+.tiptap-editor .ProseMirror a { color: #1E22B2; text-decoration: underline; }
+.tiptap-editor .ProseMirror mark { background: #fef9c3; border-radius: 0.2em; padding: 0.05em 0.2em; }
+/* 플레이스홀더 */
+.tiptap-editor .ProseMirror p.is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  float: left;
+  color: #94a3b8;
+  pointer-events: none;
+  height: 0;
+}
+/* 선택 영역 */
+.tiptap-editor .ProseMirror *::selection { background: #dbeafe; }
+
 /* 파트너 로고: 기본 그레이스케일 → hover 시 컬러 복원 */
 .partner-logo {
   filter: grayscale(1) opacity(0.5);

@@ -106,7 +106,15 @@ export default async function BlogPostPage({
       </Link>
 
       <div className="mb-10">
-        {post.emoji ? (
+        {/* 커버 이미지 우선, 없으면 이모지, 없으면 SVG 썸네일 */}
+        {post.coverImage ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={post.coverImage}
+            alt={post.title}
+            className="w-full aspect-[16/7] object-cover rounded-2xl mb-6 pe-paper-shadow"
+          />
+        ) : post.emoji ? (
           <span className="text-6xl block mb-6" aria-hidden>{post.emoji}</span>
         ) : (
           <div className="w-full aspect-[16/7] rounded-2xl overflow-hidden mb-6 pe-paper-shadow">
