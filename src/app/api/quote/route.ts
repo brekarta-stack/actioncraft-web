@@ -4,7 +4,85 @@ import { authOptions } from "@/lib/auth";
 import { supabaseAdmin } from "@/lib/supabase-admin";
 import { randomUUID } from "crypto";
 import { z } from "zod";
+import { Resend } from "resend";
 import type { QuoteSubmission } from "@/lib/quote-types";
+
+/* ── 견적 알림 메일 발송 (실패해도 사용자 응답에는 영향 없음) ── */
+const PRODUCT_LABEL: Record<string, string> = {
+  papercraft: "페이퍼 크래프트",
+  action:     "액션 페이퍼",
+  popup:      "팝업북",
+  foamboard:  "폼보드 크래프트",
+  unsure:     "잘 모름 — 담당자 상의 희망",
+};
+
+async function sendInquiryEmail(s: QuoteSubmission): Promise<void> {
+  const apiKey = process.env.RESEND_API_KEY;
+  const to     = process.env.INQUIRY_TO_EMAIL ?? "ceo@actioncraft.co.kr";
+  const bcc    = process.env.INQUIRY_BCC_EMAIL;
+  const from   = process.env.INQUIRY_FROM_EMAIL ?? "Papercraft Quote <onboarding@resend.dev>";
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://papercraft.kr";
+
+  if (!apiKey) {
+    console.warn("[api/quote] RESEND_API_KEY not set — skipping email notification");
+    return;
+  }
+
+  const productLabel = PRODUCT_LABEL[s.product] ?? s.product;
+  const rows: Array<[string, string]> = [
+    ["제품 유형",     productLabel],
+    ["수량",          s.quantity || "—"],
+    ["희망 납기",     s.deliveryDate || "—"],
+    ["용도",          s.purpose || "—"],
+    ["맞춤 디자인",   s.customDesign === "yes" ? "예 (시안 의뢰)" : s.customDesign === "no" ? "아니오 (기존 디자인 활용)" : "—"],
+    ["별색·옵션",     s.colorRequest || "—"],
+    ["기타 메모",     s.notes || "—"],
+    ["담당자 이름",   s.name],
+    ["이메일",        s.email],
+    ["연락처",        s.phone || "—"],
+    ["첨부 파일",     s.fileName || "—"],
+    ["접수 일시",     s.createdAt],
+    ["문의 ID",       s.id],
+  ];
+
+  const esc = (v: string) =>
+    v.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+
+  const tableHtml = rows
+    .map(
+      ([k, v]) =>
+        `<tr><th align="left" style="padding:8px 14px;border-bottom:1px solid #eee;background:#fafafa;white-space:nowrap;width:120px;color:#555;font-weight:600;">${esc(k)}</th><td style="padding:8px 14px;border-bottom:1px solid #eee;color:#111;">${esc(v).replace(/\n/g, "<br/>")}</td></tr>`,
+    )
+    .join("");
+
+  const html = `<!doctype html><html><body style="margin:0;padding:24px;background:#f4f4f5;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
+<div style="max-width:640px;margin:0 auto;background:#fff;border-radius:12px;overflow:hidden;border:1px solid #e5e7eb;">
+  <div style="padding:24px 28px 12px;border-bottom:1px solid #e5e7eb;">
+    <div style="font-size:13px;letter-spacing:1px;color:#6366f1;font-weight:700;">PAPERCRAFT.KR · 새 견적 문의</div>
+    <h1 style="margin:8px 0 0;font-size:22px;color:#111;">${esc(s.name)} · ${esc(productLabel)}</h1>
+  </div>
+  <table style="width:100%;border-collapse:collapse;font-size:14px;">${tableHtml}</table>
+  <div style="padding:18px 28px;background:#fafafa;border-top:1px solid #e5e7eb;font-size:13px;color:#555;line-height:1.55;">
+    이 메일은 <a href="${siteUrl}/quote" style="color:#6366f1;">papercraft.kr/quote</a> 폼 제출에 의해 자동 발송되었습니다.<br/>
+    어드민 페이지에서 전체 목록 확인: <a href="${siteUrl}/admin/quotes" style="color:#6366f1;">${siteUrl}/admin/quotes</a>
+  </div>
+</div></body></html>`;
+
+  const textLines = rows.map(([k, v]) => `${k}: ${v}`).join("\n");
+  const text = `[papercraft.kr] 새 견적 문의\n\n${textLines}\n\n전체 목록: ${siteUrl}/admin/quotes\n`;
+
+  const resend = new Resend(apiKey);
+  const subject = `[papercraft.kr] 새 견적 문의 — ${s.name} · ${productLabel}`;
+  await resend.emails.send({
+    from,
+    to:      [to],
+    bcc:     bcc ? [bcc] : undefined,
+    replyTo: s.email,
+    subject,
+    html,
+    text,
+  });
+}
 
 /* ── 입력 스키마 (Zod) ── */
 const QuoteSchema = z.object({
@@ -96,6 +174,13 @@ export async function POST(request: Request) {
   if (error) {
     console.error("[api/quote] DB insert error:", error);
     return NextResponse.json({ error: "견적 접수 중 오류가 발생했습니다. 잠시 후 다시 시도해 주세요." }, { status: 500 });
+  }
+
+  /* 알림 메일 발송 — 실패해도 사용자에게는 201 응답 유지 */
+  try {
+    await sendInquiryEmail(submission);
+  } catch (mailErr) {
+    console.error("[api/quote] email notification failed:", mailErr);
   }
 
   return NextResponse.json(submission, { status: 201 });
