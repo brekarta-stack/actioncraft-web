@@ -14,14 +14,27 @@ import type { Post } from "@/lib/blog";
 
 const TAGS = ["제작 과정", "교육", "이야기", "사례 연구", "소재", "디자인"];
 
-/* ── 폴리네이션 AI 이미지 URL 생성 ── */
+/* ──────────────────────────────────────
+ * 이미지 생성 규칙 (자동 적용)
+ * 1. 한국인·한국 배경
+ * 2. 실사 사진 스타일 (AI 일러스트 아님)
+ * 3. 핵심 피사체 중앙 배치 (크롭 손실 최소화)
+ * ────────────────────────────────────── */
+const KOREA_PHOTO_RULES =
+  "photorealistic DSLR photograph, South Korea Korean setting, Korean people, " +
+  "candid natural lighting, sharp focus, professional photography, " +
+  "subject centered in frame, not AI art not illustration not cartoon not digital painting";
+
+function buildKoreanPhotoPrompt(userInput: string): string {
+  return `${userInput.trim()}, ${KOREA_PHOTO_RULES}`;
+}
+
 function pollinationsUrl(prompt: string, w = 1200, h = 630, seed?: number): string {
   const params = new URLSearchParams({
     width: String(w),
     height: String(h),
     nologo: "true",
     model: "flux",
-    enhance: "true",
     ...(seed != null ? { seed: String(seed) } : {}),
   });
   return `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?${params}`;
@@ -76,7 +89,9 @@ function ImagePanel({
 
   function generatePreview() {
     if (!aiPrompt.trim()) return;
-    const url = pollinationsUrl(aiPrompt.trim(), 1200, 630, aiSeed);
+    // 한국인·실사 규칙 자동 적용
+    const fullPrompt = buildKoreanPhotoPrompt(aiPrompt.trim());
+    const url = pollinationsUrl(fullPrompt, 1200, 630, aiSeed);
     setGenerating(true);
     setPreviewUrl(url);
   }
@@ -130,11 +145,18 @@ function ImagePanel({
             <textarea
               value={aiPrompt}
               onChange={(e) => setAiPrompt(e.target.value)}
-              placeholder={"예: 어린이들이 종이 팝업북 만드는 체험\n교실에서 학생들이 페이퍼토이 조립"}
+              placeholder={"예: 어린이들이 종이 팝업북 만드는 체험\n교실에서 학생들이 페이퍼토이 조립\n박물관 가족 체험 프로그램"}
               rows={3}
               className="w-full text-sm px-3 py-2 border border-slate-200 rounded-xl resize-none focus:outline-none focus:ring-2 focus:ring-blue-300"
               onKeyDown={(e) => { if (e.key === "Enter" && e.metaKey) generatePreview(); }}
             />
+            <div className="mt-1.5 px-2 py-1.5 bg-blue-50 rounded-lg">
+              <p className="text-[11px] text-blue-700 font-medium leading-relaxed">
+                ✓ 한국인·한국 배경 자동 적용<br />
+                ✓ 실사 사진 스타일 (AI 일러스트 아님)<br />
+                ✓ 피사체 중앙 배치 (크롭 안전)
+              </p>
+            </div>
             <p className="text-[11px] text-slate-400 mt-1">⌘Enter로 생성</p>
           </div>
 
