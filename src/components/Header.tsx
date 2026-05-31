@@ -71,7 +71,9 @@ export default function Header() {
             <button
               onClick={() => setIsOpen(!isOpen)}
               className="md:hidden p-2 rounded-lg text-slate-600 hover:bg-slate-100 transition-colors"
-              aria-label="메뉴 열기"
+              aria-label={isOpen ? "메뉴 닫기" : "메뉴 열기"}
+              aria-expanded={isOpen}
+              aria-controls="mobile-menu"
             >
               {isOpen ? (
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -89,7 +91,7 @@ export default function Header() {
 
       {/* Mobile Menu */}
       {isOpen && (
-        <div className="md:hidden border-t border-slate-200 bg-white">
+        <div id="mobile-menu" className="md:hidden border-t border-slate-200 bg-white">
           <div className="px-4 py-3 space-y-1">
             {navLinks.map((link) => (
               <Link

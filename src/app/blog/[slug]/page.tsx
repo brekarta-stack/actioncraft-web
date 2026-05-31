@@ -82,7 +82,7 @@ export default async function BlogPostPage({
     publisher: {
       "@type": "Organization",
       name: SITE_NAME,
-      logo: { "@type": "ImageObject", url: `${SITE_URL}/og-default.png` },
+      logo: { "@type": "ImageObject", url: `${SITE_URL}/opengraph-image` },
     },
     mainEntityOfPage: {
       "@type": "WebPage",

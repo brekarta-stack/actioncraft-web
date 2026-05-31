@@ -96,7 +96,7 @@ const processSteps: { num: string; label: string; detail: string; period: string
   { num: "01", label: "상담 및 기획",       detail: "생산 제품 종류 및 수량 결정",       period: "1주",  icon: "education" },
   { num: "02", label: "구조 설계 & 샘플링", detail: "컨셉 맞는 최적 움직임 설계",         period: "1주",  icon: "gear" },
   { num: "03", label: "디자인 작업",         detail: "고객사 피드백 반영 및 완성",         period: "1.5주", icon: "pencil" },
-  { num: "04", label: "생산 및 납품",         detail: "공정 기반 생산, 패키징 후 납품",     period: "~",    icon: "box" },
+  { num: "04", label: "생산 및 납품",         detail: "공정 기반 생산, 패키징 후 납품",     period: "일정 협의", icon: "box" },
 ];
 
 /* ────────────── 페이지 ────────────── */
@@ -288,15 +288,15 @@ export default function HomePage() {
           {/* Patent badges row */}
           <div className="mt-12 pt-10 border-t border-slate-100">
             <p className="text-center text-xs font-semibold uppercase tracking-widest text-slate-400 mb-5">
-              보유 특허 (일부)
+              자기 구조 설계 특허 11종 보유 (KIPO 등록)
             </p>
             <div className="flex flex-wrap justify-center gap-3">
-              <PatentBadge number="제10-XXXXXXX호" title="자기구조 페이퍼토이 설계 방법" />
-              <PatentBadge number="제10-XXXXXXX호" title="탄성 메커니즘 종이 모형 구조" />
-              <PatentBadge number="외 9종 보유" title="자기 구조 설계 특허군" />
+              <PatentBadge number="설계 특허" title="자기구조 페이퍼토이 설계 방법" />
+              <PatentBadge number="구조 특허" title="탄성 메커니즘 종이 모형 구조" />
+              <PatentBadge number="외 9종" title="자기 구조 설계 특허군" />
             </div>
             <p className="text-center text-[11px] text-slate-400 mt-3">
-              * 정확한 특허번호는 운영자 확인 후 표기됩니다.
+              특허 등록증은 견적 상담 시 제공해 드립니다.
             </p>
           </div>
         </div>

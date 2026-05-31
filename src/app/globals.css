@@ -8,12 +8,12 @@
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --font-sans:
-    "Pretendard Variable", Pretendard,
+    var(--font-pretendard),
     var(--font-geist-sans),
     -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo",
     "Malgun Gothic", "Noto Sans KR", sans-serif;
   --font-mono: var(--font-geist-mono);
-  --font-tabular: "Pretendard Variable", Pretendard, -apple-system, system-ui, sans-serif;
+  --font-tabular: var(--font-pretendard), -apple-system, system-ui, sans-serif;
 }
 
 :root {

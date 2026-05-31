@@ -32,7 +32,7 @@ export default function Footer() {
             )}
             {COMPANY.businessNumber && (
               <p className="text-xs mt-1 text-blue-300/70">
-                사업자등록번호 {COMPANY.businessNumber}
+                통신판매업신고 {COMPANY.businessNumber}
               </p>
             )}
           </div>
@@ -45,7 +45,7 @@ export default function Footer() {
                 { href: "/about", label: "회사소개" },
                 { href: "/products", label: "제품 종류" },
                 { href: "/portfolio", label: "제작 사례" },
-                { href: "/quote", label: "자동 견적" },
+                { href: "/quote", label: "견적 문의" },
                 { href: "/blog", label: "블로그" },
                 { href: "/faq", label: "자주 묻는 질문" },
               ].map((link) => (

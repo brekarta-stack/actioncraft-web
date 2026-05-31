@@ -32,7 +32,7 @@ export const metadata: Metadata = {
 
 const stats: { num: string; sub?: string; label: string }[] = [
   { num: "11", sub: "종", label: "자기구조 설계 특허" },
-  { num: "1,000+", label: "누적 제작 건수" },
+  { num: "650+", label: "누적 납품 프로젝트" },
   { num: "국내 유일", label: "페이퍼 엔지니어링 스튜디오" },
   { num: "KAIST", label: "출신 개발 인력" },
 ];
@@ -99,13 +99,13 @@ const services = [
 ];
 
 const timeline = [
-  { year: "2018", event: "Paper Engineering Studio 창업 — 국내 유일의 페이퍼 엔지니어링 전문 스튜디오 출범" },
-  { year: "2019", event: "자기 구조 설계 특허 최초 등록, STEAM 교육 키트 출시" },
-  { year: "2020", event: "국내 최대 페이퍼 토이 커뮤니티 '뚱이천하' 운영 시작" },
-  { year: "2021", event: "누적 특허 11종 달성, KAIST 협력 교육 프로그램 개발" },
-  { year: "2022", event: "현대백화점·경주박물관 등 주요 기관 납품" },
-  { year: "2023", event: "누적 제작 1,000건 달성, 기업 굿즈 서비스 확장" },
-  { year: "2024", event: "온라인 자동 견적 서비스 론칭" },
+  { year: "2013", event: "Paper Engineering Studio 창업 — 국내 유일의 페이퍼 엔지니어링 전문 스튜디오 출범" },
+  { year: "2015", event: "자기 구조 설계 특허 최초 등록, STEAM 교육 키트 출시" },
+  { year: "2017", event: "국내 최대 페이퍼 토이 커뮤니티 '뚱이천하' 운영 시작" },
+  { year: "2019", event: "누적 특허 11종 달성, KAIST 협력 교육 프로그램 개발" },
+  { year: "2021", event: "현대백화점·경주박물관 등 주요 기관 납품 본격화" },
+  { year: "2023", event: "누적 납품 650건 돌파, 기업 굿즈 서비스 확장" },
+  { year: "2024", event: "온라인 견적 문의 서비스 론칭" },
 ];
 
 export default function AboutPage() {
@@ -241,11 +241,11 @@ export default function AboutPage() {
           {/* Patent badges */}
           <div className="mt-12 pt-8 border-t border-slate-100">
             <p className="text-center text-xs font-semibold uppercase tracking-widest text-slate-400 mb-5">
-              보유 특허 (일부)
+자기 구조 설계 특허 11종 보유 (KIPO 등록)
             </p>
             <div className="flex flex-wrap justify-center gap-3">
-              <PatentBadge number="제10-XXXXXXX호" title="자기구조 페이퍼토이 설계 방법" />
-              <PatentBadge number="제10-XXXXXXX호" title="탄성 메커니즘 종이 모형 구조" />
+              <PatentBadge number="설계 특허" title="자기구조 페이퍼토이 설계 방법" />
+              <PatentBadge number="구조 특허" title="탄성 메커니즘 종이 모형 구조" />
               <PatentBadge number="외 9종" title="자기 구조 설계 특허군" />
             </div>
           </div>

@@ -185,6 +185,7 @@ export default function PortfolioGallery({ items, categories }: Props) {
           <button
             className="absolute top-4 right-4 text-white/70 hover:text-white text-3xl leading-none z-10"
             onClick={closeLightbox}
+            aria-label="닫기"
           >
             ×
           </button>
@@ -194,12 +195,14 @@ export default function PortfolioGallery({ items, categories }: Props) {
               <button
                 className="absolute left-4 top-1/2 -translate-y-1/2 text-white/70 hover:text-white p-3 text-4xl z-10"
                 onClick={(e) => { e.stopPropagation(); prevImage(); }}
+                aria-label="이전 이미지"
               >
                 ‹
               </button>
               <button
                 className="absolute right-4 top-1/2 -translate-y-1/2 text-white/70 hover:text-white p-3 text-4xl z-10"
                 onClick={(e) => { e.stopPropagation(); nextImage(); }}
+                aria-label="다음 이미지"
               >
                 ›
               </button>

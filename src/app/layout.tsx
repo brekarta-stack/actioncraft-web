@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist } from "next/font/google";
+import localFont from "next/font/local";
 import "./globals.css";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -8,6 +9,19 @@ import { SITE_URL, SITE_NAME, SITE_DESCRIPTION, COMPANY, PAGE_META } from "@/lib
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
+});
+
+/**
+ * Pretendard — 한글 본문 폰트 (self-host)
+ * 기존 jsdelivr CDN 로드는 (1) 가용성 장애(503), (2) CSP font-src 차단으로
+ * production에서 실패해 system 폰트로 대체되고 있었음. next/font/local 로
+ * 빌드 시 자체 호스팅 → CDN 의존 제거 + font-display:swap + CSP 'self' 충족.
+ */
+const pretendard = localFont({
+  src: "./fonts/PretendardVariable.woff2",
+  variable: "--font-pretendard",
+  display: "swap",
+  weight: "45 920",
 });
 
 export const metadata: Metadata = {
@@ -80,7 +94,7 @@ function OrganizationJsonLd() {
     legalName: COMPANY.legalName,
     alternateName: COMPANY.shortName,
     url: SITE_URL,
-    logo: `${SITE_URL}/og-default.png`,
+    logo: `${SITE_URL}/opengraph-image`,
     description: SITE_DESCRIPTION,
     foundingDate: COMPANY.foundingYear,
     email: COMPANY.email,
@@ -145,16 +159,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="ko" className={`${geistSans.variable}`}>
-      <head>
-        {/* Pretendard — 한글 가독성 최상위 폰트
-            preconnect 로 CDN 핸드셰이크 미리 시작 + 비동기 로드 */}
-        <link rel="preconnect" href="https://cdn.jsdelivr.net" crossOrigin="anonymous" />
-        <link
-          rel="stylesheet"
-          href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css"
-        />
-      </head>
+    <html lang="ko" className={`${geistSans.variable} ${pretendard.variable}`}>
       <body className="min-h-screen flex flex-col antialiased">
         <OrganizationJsonLd />
         <WebSiteJsonLd />
