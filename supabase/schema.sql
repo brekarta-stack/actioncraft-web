@@ -7,15 +7,28 @@
 CREATE TABLE IF NOT EXISTS portfolio_items (
   id           UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   airtable_id  TEXT,
+  slug         TEXT,                                   -- URL 슬러그 (UNIQUE 인덱스는 아래)
   title        TEXT NOT NULL DEFAULT '',
+  summary      TEXT,                                   -- SEO 요약 (og:description)
   category     TEXT NOT NULL DEFAULT '기타',
   description  TEXT NOT NULL DEFAULT '',
   client       TEXT NOT NULL DEFAULT '',
+  client_type  TEXT,                                   -- 박물관/지자체/기업 등 분야
+  tags         JSONB NOT NULL DEFAULT '[]',            -- 자유 태그
+  keywords     JSONB NOT NULL DEFAULT '[]',            -- 추가 SEO 키워드
   images       JSONB NOT NULL DEFAULT '[]',
+  image_alts   JSONB NOT NULL DEFAULT '[]',            -- 이미지별 alt
   published    BOOLEAN NOT NULL DEFAULT false,
   created_at   TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at   TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+
+CREATE UNIQUE INDEX IF NOT EXISTS portfolio_items_slug_unique
+  ON portfolio_items (slug)
+  WHERE slug IS NOT NULL;
+
+CREATE INDEX IF NOT EXISTS portfolio_items_tags_gin
+  ON portfolio_items USING GIN (tags);
 
 -- 2. 블로그 포스트
 CREATE TABLE IF NOT EXISTS posts (

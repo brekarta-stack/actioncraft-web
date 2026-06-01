@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { getItems, saveItem } from "@/lib/portfolio";
 import type { PortfolioItem } from "@/lib/portfolio";
+import { deriveSlug, slugify } from "@/lib/portfolio-meta";
 import { randomUUID } from "crypto";
 
 export async function GET() {
@@ -18,15 +19,32 @@ export async function POST(request: Request) {
 
   const body = await request.json();
   const now = new Date().toISOString();
+  const id = randomUUID();
+
+  // slug 자동 생성 (명시된 값 우선)
+  const requestedSlug = typeof body.slug === "string" ? slugify(body.slug) : "";
+  const slug =
+    requestedSlug ||
+    deriveSlug({ id, slug: "", client: body.client ?? "", title: body.title ?? "" });
 
   const newItem: PortfolioItem = {
-    id: randomUUID(),
+    id,
     airtableId: body.airtableId,
+    slug,
     title: body.title ?? "",
+    summary: typeof body.summary === "string" ? body.summary : undefined,
     category: body.category ?? "기타",
     description: body.description ?? "",
     client: body.client ?? "",
+    clientType: typeof body.clientType === "string" ? body.clientType : undefined,
+    tags: Array.isArray(body.tags)
+      ? body.tags.filter((t: unknown): t is string => typeof t === "string")
+      : [],
+    keywords: Array.isArray(body.keywords)
+      ? body.keywords.filter((k: unknown): k is string => typeof k === "string")
+      : [],
     images: body.images ?? [],
+    imageAlts: Array.isArray(body.imageAlts) ? body.imageAlts : [],
     published: body.published ?? false,
     createdAt: now,
     updatedAt: now,

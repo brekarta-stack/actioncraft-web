@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { getItemById, saveItem, deleteItem } from "@/lib/portfolio";
+import { slugify } from "@/lib/portfolio-meta";
 
 export async function GET(
   _req: Request,
@@ -30,7 +31,12 @@ export async function PUT(
   if (!item) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
   const body = await request.json();
-  const updated = { ...item, ...body, id, updatedAt: new Date().toISOString() };
+  // slug 가 들어오면 slugify, 빈 문자열이면 기존 slug 유지
+  const slug =
+    typeof body.slug === "string" && body.slug.trim()
+      ? slugify(body.slug)
+      : item.slug;
+  const updated = { ...item, ...body, id, slug, updatedAt: new Date().toISOString() };
   await saveItem(updated);
   return NextResponse.json(updated);
 }

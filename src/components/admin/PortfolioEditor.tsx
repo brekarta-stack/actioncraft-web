@@ -1,10 +1,11 @@
 "use client";
 
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback, useMemo, useRef } from "react";
 import { useRouter } from "next/navigation";
 import type { PortfolioItem } from "@/lib/portfolio-types";
-import { CATEGORIES } from "@/lib/portfolio-types";
+import { CATEGORIES, CLIENT_TYPES, SUGGESTED_TAGS } from "@/lib/portfolio-types";
 import { prepareImageForUpload, formatResizeNote } from "@/lib/image-resize";
+import { slugify } from "@/lib/portfolio-meta";
 
 const MAX_IMAGES = 2;
 
@@ -15,9 +16,28 @@ interface Props {
 export default function PortfolioEditor({ item }: Props) {
   const router = useRouter();
   const [title, setTitle] = useState(item?.title ?? "");
+  const [slug, setSlug] = useState<string>(item?.slug ?? "");
+  const [summary, setSummary] = useState(item?.summary ?? "");
   const [category, setCategory] = useState<string>(item?.category ?? CATEGORIES[0]);
+  const [clientType, setClientType] = useState<string>(item?.clientType ?? "");
+  const [tags, setTags] = useState<string[]>(item?.tags ?? []);
+  const [tagInput, setTagInput] = useState("");
+  const [keywords, setKeywords] = useState<string[]>(item?.keywords ?? []);
+  const [keywordInput, setKeywordInput] = useState("");
   const [description, setDescription] = useState(item?.description ?? "");
   const [client, setClient] = useState(item?.client ?? "");
+  const [imageAlts, setImageAlts] = useState<(string | null)[]>(() => {
+    const base: (string | null)[] = [null, null];
+    (item?.imageAlts ?? []).slice(0, 2).forEach((a, i) => { base[i] = a ?? null; });
+    return base;
+  });
+
+  // slug 자동 생성 미리보기 (사용자가 직접 입력 안 했을 때)
+  const slugPreview = useMemo(() => {
+    if (slug.trim()) return slugify(slug);
+    const auto = [client, title].filter(Boolean).map(slugify).filter(Boolean).join("-");
+    return auto || (item ? `case-${item.id.slice(0, 8)}` : "(저장 시 자동 생성)");
+  }, [slug, client, title, item]);
   // 최대 2장: index 0 = 대표, index 1 = 호버용
   const [images, setImages] = useState<(string | null)[]>(() => {
     const base: (string | null)[] = [null, null];
@@ -41,8 +61,23 @@ export default function PortfolioEditor({ item }: Props) {
       const isPublished = pub !== undefined ? pub : published;
       // null 제거해서 실제 URL만 저장
       const cleanImages = images.filter((u): u is string => !!u);
+      // imageAlts: 이미지 인덱스에 맞춰 정렬, 빈 칸은 null (서버에서 자동 생성)
+      const cleanAlts = images.map((u, i) => (u ? imageAlts[i] ?? "" : null));
       try {
-        const body = { title, category, description, client, images: cleanImages, published: isPublished };
+        const body = {
+          title,
+          slug,
+          summary,
+          category,
+          client,
+          clientType: clientType || undefined,
+          tags,
+          keywords,
+          description,
+          images: cleanImages,
+          imageAlts: cleanAlts,
+          published: isPublished,
+        };
         const res = item
           ? await fetch(`/api/portfolio/${item.id}`, {
               method: "PUT",
@@ -63,8 +98,34 @@ export default function PortfolioEditor({ item }: Props) {
         setSaving(false);
       }
     },
-    [title, category, description, client, images, published, item, router]
+    [title, slug, summary, category, client, clientType, tags, keywords, description, images, imageAlts, published, item, router]
   );
+
+  function addTag(t: string) {
+    const norm = t.trim();
+    if (!norm) return;
+    if (tags.includes(norm)) return;
+    setTags((prev) => [...prev, norm]);
+  }
+  function removeTag(t: string) {
+    setTags((prev) => prev.filter((x) => x !== t));
+  }
+  function addKeyword(k: string) {
+    const norm = k.trim();
+    if (!norm) return;
+    if (keywords.includes(norm)) return;
+    setKeywords((prev) => [...prev, norm]);
+  }
+  function removeKeyword(k: string) {
+    setKeywords((prev) => prev.filter((x) => x !== k));
+  }
+  function updateAlt(slot: number, value: string) {
+    setImageAlts((prev) => {
+      const next = [...prev];
+      next[slot] = value;
+      return next;
+    });
+  }
 
   const handleImageUpload = useCallback(
     async (e: React.ChangeEvent<HTMLInputElement>, slot: number) => {
@@ -197,16 +258,177 @@ export default function PortfolioEditor({ item }: Props) {
           </div>
         </div>
 
-        {/* Description */}
+        {/* Client Type */}
         <div>
-          <label className="text-sm font-medium text-slate-700 block mb-1">설명</label>
+          <label className="text-sm font-medium text-slate-700 block mb-1">
+            클라이언트 유형 <span className="text-slate-400 font-normal">(SEO 매칭 강화)</span>
+          </label>
+          <select
+            value={clientType}
+            onChange={(e) => setClientType(e.target.value)}
+            className="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-300"
+          >
+            <option value="">— 선택 안 함 —</option>
+            {CLIENT_TYPES.map((t) => (
+              <option key={t} value={t}>{t}</option>
+            ))}
+          </select>
+        </div>
+
+        {/* Summary (SEO 요약) */}
+        <div>
+          <label className="text-sm font-medium text-slate-700 block mb-1">
+            요약 <span className="text-slate-400 font-normal">(검색·OG에 노출 · 1~2 문장)</span>
+          </label>
+          <textarea
+            value={summary}
+            onChange={(e) => setSummary(e.target.value)}
+            placeholder="예: 경주박물관 어린이 체험존을 위해 제작한 도토리 캐릭터 팝업 카드. 어린이가 직접 펼치며 전시 주제를 다시 떠올리도록 설계."
+            rows={2}
+            maxLength={200}
+            className="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-300 resize-none"
+          />
+          <p className="text-[11px] text-slate-400 mt-1">{summary.length}/200 자 · 비워두면 본문에서 자동 생성</p>
+        </div>
+
+        {/* Description (본문) */}
+        <div>
+          <label className="text-sm font-medium text-slate-700 block mb-1">상세 설명</label>
           <textarea
             value={description}
             onChange={(e) => setDescription(e.target.value)}
-            placeholder="작품에 대한 간단한 설명을 입력하세요"
-            rows={3}
-            className="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-300 resize-none"
+            placeholder="제작 배경, 사용된 기법, 수량, 협업 과정 등을 자세히 적으면 검색 노출에 유리합니다. 빈 줄로 문단을 나눌 수 있습니다."
+            rows={6}
+            className="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-300 resize-y"
           />
+        </div>
+
+        {/* URL Slug */}
+        <div>
+          <label className="text-sm font-medium text-slate-700 block mb-1">
+            URL 슬러그 <span className="text-slate-400 font-normal">(비워두면 자동 생성)</span>
+          </label>
+          <input
+            type="text"
+            value={slug}
+            onChange={(e) => setSlug(e.target.value)}
+            placeholder="예: gyeongju-museum-acorn-popup"
+            className="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-300 font-mono text-sm"
+          />
+          <p className="text-[11px] text-slate-400 mt-1">
+            URL 미리보기: <span className="font-mono">/portfolio/{slugPreview}</span>
+          </p>
+        </div>
+
+        {/* Tags */}
+        <div>
+          <label className="text-sm font-medium text-slate-700 block mb-1">
+            태그 <span className="text-slate-400 font-normal">(검색 매칭 · 사용자 필터)</span>
+          </label>
+          <div className="flex flex-wrap gap-1.5 mb-2 min-h-[28px]">
+            {tags.map((t) => (
+              <span
+                key={t}
+                className="inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded-full bg-slate-100 text-slate-700"
+              >
+                #{t}
+                <button
+                  type="button"
+                  onClick={() => removeTag(t)}
+                  className="text-slate-400 hover:text-red-500 ml-0.5"
+                  aria-label={`${t} 태그 삭제`}
+                >
+                  ×
+                </button>
+              </span>
+            ))}
+            {tags.length === 0 && <span className="text-xs text-slate-400">아직 태그 없음</span>}
+          </div>
+          <div className="flex gap-2">
+            <input
+              type="text"
+              value={tagInput}
+              onChange={(e) => setTagInput(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === ",") {
+                  e.preventDefault();
+                  addTag(tagInput);
+                  setTagInput("");
+                }
+              }}
+              placeholder="태그 입력 후 Enter (또는 쉼표)"
+              className="flex-1 px-3 py-2 border border-slate-200 rounded-lg text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-300"
+            />
+            <button
+              type="button"
+              onClick={() => { addTag(tagInput); setTagInput(""); }}
+              className="px-3 py-2 bg-slate-100 hover:bg-slate-200 rounded-lg text-sm text-slate-700 font-medium"
+            >
+              추가
+            </button>
+          </div>
+          {/* 추천 태그 */}
+          <div className="mt-2 flex flex-wrap gap-1">
+            {SUGGESTED_TAGS.filter((t) => !tags.includes(t)).slice(0, 8).map((t) => (
+              <button
+                key={t}
+                type="button"
+                onClick={() => addTag(t)}
+                className="text-[11px] px-2 py-0.5 rounded-full text-slate-500 hover:text-blue-700 hover:bg-blue-50 border border-slate-200"
+              >
+                + {t}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Keywords (meta) */}
+        <div>
+          <label className="text-sm font-medium text-slate-700 block mb-1">
+            추가 SEO 키워드 <span className="text-slate-400 font-normal">(검색용, 화면 미표시)</span>
+          </label>
+          <div className="flex flex-wrap gap-1.5 mb-2 min-h-[28px]">
+            {keywords.map((k) => (
+              <span
+                key={k}
+                className="inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700"
+              >
+                {k}
+                <button
+                  type="button"
+                  onClick={() => removeKeyword(k)}
+                  className="text-emerald-400 hover:text-red-500 ml-0.5"
+                  aria-label={`${k} 키워드 삭제`}
+                >
+                  ×
+                </button>
+              </span>
+            ))}
+            {keywords.length === 0 && <span className="text-xs text-slate-400">없음 (선택)</span>}
+          </div>
+          <div className="flex gap-2">
+            <input
+              type="text"
+              value={keywordInput}
+              onChange={(e) => setKeywordInput(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === ",") {
+                  e.preventDefault();
+                  addKeyword(keywordInput);
+                  setKeywordInput("");
+                }
+              }}
+              placeholder="예: 어린이박물관 굿즈, STEAM 교구"
+              className="flex-1 px-3 py-2 border border-slate-200 rounded-lg text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-300"
+            />
+            <button
+              type="button"
+              onClick={() => { addKeyword(keywordInput); setKeywordInput(""); }}
+              className="px-3 py-2 bg-slate-100 hover:bg-slate-200 rounded-lg text-sm text-slate-700 font-medium"
+            >
+              추가
+            </button>
+          </div>
         </div>
 
         {/* Published toggle */}
@@ -334,6 +556,15 @@ export default function PortfolioEditor({ item }: Props) {
                   <p className="text-[11px] text-emerald-600 mt-0.5" title="자동 리사이즈 안내">
                     ✓ {resizeNote}
                   </p>
+                )}
+                {url && (
+                  <input
+                    type="text"
+                    value={imageAlts[slot] ?? ""}
+                    onChange={(e) => updateAlt(slot, e.target.value)}
+                    placeholder={slot === 0 ? "이미지 alt (비우면 자동 생성)" : "디테일 컷 alt (선택)"}
+                    className="w-full mt-2 px-3 py-1.5 border border-slate-200 rounded-lg text-xs text-slate-700 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-300"
+                  />
                 )}
               </div>
             );

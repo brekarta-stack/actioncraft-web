@@ -1,11 +1,14 @@
-﻿import type { Metadata } from "next";
+﻿import { Suspense } from "react";
+import type { Metadata } from "next";
 import { getItems, CATEGORIES } from "@/lib/portfolio";
+import { deriveSlug, deriveSummary } from "@/lib/portfolio-meta";
 import PortfolioGallery from "@/components/PortfolioGallery";
 import { PAGE_META, SITE_NAME, SITE_URL } from "@/lib/site";
 import { PaperNetBg } from "@/components/paper-art";
 import { ArrowRightIcon } from "@/components/icons";
 
-export const dynamic = "force-dynamic";
+// ISR — 새 사례 등록 시 자동 재생성 (force-dynamic 보다 색인 효율 좋음)
+export const revalidate = 300;
 
 export const metadata: Metadata = {
   title: PAGE_META.portfolio.title,
@@ -28,22 +31,29 @@ export const metadata: Metadata = {
  * 포트폴리오 페이지 ItemList / CreativeWork JSON-LD.
  * 검색엔진이 어떤 사례들을 다루는지 파악하도록 ItemList 로 묶음.
  */
-function PortfolioJsonLd({ items }: { items: { title: string; slug?: string; description?: string }[] }) {
+function PortfolioJsonLd({
+  items,
+}: {
+  items: { title: string; slug?: string; description?: string; image?: string; client?: string }[];
+}) {
   const data = {
     "@context": "https://schema.org",
     "@type": "ItemList",
-    name: "CES 제작 사례",
+    name: "Paper Engineering Studio 제작 사례",
     url: `${SITE_URL}/portfolio`,
     numberOfItems: items.length,
-    itemListElement: items.slice(0, 30).map((item, idx) => ({
+    itemListElement: items.slice(0, 50).map((item, idx) => ({
       "@type": "ListItem",
       position: idx + 1,
+      url: item.slug ? `${SITE_URL}/portfolio/${item.slug}` : undefined,
       item: {
         "@type": "CreativeWork",
         name: item.title,
+        headline: item.client ? `${item.client} · ${item.title}` : item.title,
         creator: { "@type": "Organization", name: SITE_NAME },
         ...(item.description ? { description: item.description } : {}),
-        ...(item.slug ? { url: `${SITE_URL}/portfolio#${item.slug}` } : {}),
+        ...(item.slug ? { url: `${SITE_URL}/portfolio/${item.slug}` } : {}),
+        ...(item.image ? { image: item.image } : {}),
       },
     })),
   };
@@ -57,11 +67,24 @@ function PortfolioJsonLd({ items }: { items: { title: string; slug?: string; des
 }
 
 export default async function PortfolioPage() {
-  const items = (await getItems()).filter((i) => i.published);
+  // 빌드 시 Supabase env 없거나 일시 에러면 빈 배열로 안전 fallback (ISR 로 첫 요청 시 채워짐)
+  const items = (await getItems().catch(() => [])).filter((i) => i.published);
+
+  // JSON-LD 용 — slug / description / image 포함
+  const jsonLdItems = items.map((it) => ({
+    title: it.title,
+    slug: deriveSlug(it),
+    description: deriveSummary(it),
+    image: it.images?.[0],
+    client: it.client,
+  }));
+
+  // 클라이언트로 전달 — Gallery 컴포넌트에서 slug 로 상세 페이지 링크
+  const itemsWithSlug = items.map((it) => ({ ...it, slug: deriveSlug(it) }));
 
   return (
     <>
-      <PortfolioJsonLd items={items} />
+      <PortfolioJsonLd items={jsonLdItems} />
       {/* Hero */}
       <section className="relative py-20 md:py-28 overflow-hidden" style={{ background: "#1E22B2" }}>
         <div className="absolute inset-0 pointer-events-none opacity-25">
@@ -86,7 +109,9 @@ export default async function PortfolioPage() {
       {/* Gallery with filter */}
       <section className="py-16 md:py-24 bg-slate-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <PortfolioGallery items={items} categories={[...CATEGORIES]} />
+          <Suspense fallback={<div className="text-center py-24 text-slate-400">불러오는 중…</div>}>
+            <PortfolioGallery items={itemsWithSlug} categories={[...CATEGORIES]} />
+          </Suspense>
         </div>
       </section>
 

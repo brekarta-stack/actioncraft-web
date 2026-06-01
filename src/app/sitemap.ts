@@ -1,5 +1,7 @@
 import type { MetadataRoute } from "next";
 import { getPosts } from "@/lib/blog";
+import { getItems } from "@/lib/portfolio";
+import { deriveSlug } from "@/lib/portfolio-meta";
 import { SITE_URL } from "@/lib/site";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
@@ -25,5 +27,15 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: "monthly" as const,
     }));
 
-  return [...staticPages, ...blogPages];
+  const allCases = await getItems().catch(() => []);
+  const portfolioPages: MetadataRoute.Sitemap = allCases
+    .filter((c) => c.published)
+    .map((c) => ({
+      url: `${base}/portfolio/${deriveSlug(c)}`,
+      lastModified: new Date(c.updatedAt),
+      priority: 0.8,
+      changeFrequency: "monthly" as const,
+    }));
+
+  return [...staticPages, ...blogPages, ...portfolioPages];
 }
