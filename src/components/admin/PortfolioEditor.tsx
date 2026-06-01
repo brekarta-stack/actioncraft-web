@@ -4,6 +4,7 @@ import { useState, useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
 import type { PortfolioItem } from "@/lib/portfolio-types";
 import { CATEGORIES } from "@/lib/portfolio-types";
+import { prepareImageForUpload, formatResizeNote } from "@/lib/image-resize";
 
 const MAX_IMAGES = 2;
 
@@ -26,6 +27,10 @@ export default function PortfolioEditor({ item }: Props) {
   const [published, setPublished] = useState(item?.published ?? false);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState<number | null>(null); // slot index
+  // "리사이즈 중" / "업로드 중" 같은 진행 단계 표시
+  const [uploadStage, setUploadStage] = useState<"resizing" | "uploading" | null>(null);
+  // 마지막 업로드의 리사이즈 안내 ("2.4MB → 0.6MB로 줄였어요")
+  const [resizeNote, setResizeNote] = useState<string | null>(null);
 
   // 각 슬롯의 파일 input ref
   const inputRefs = [useRef<HTMLInputElement>(null), useRef<HTMLInputElement>(null)];
@@ -66,12 +71,27 @@ export default function PortfolioEditor({ item }: Props) {
       const file = e.target.files?.[0];
       if (!file) return;
       setUploading(slot);
+      setUploadStage("resizing");
+      setResizeNote(null);
       try {
+        // 1) 클라이언트에서 자동 리사이즈 (PDF/GIF 는 원본 유지)
+        const prepared = await prepareImageForUpload(file);
+        const note = formatResizeNote(prepared);
+        if (note) setResizeNote(note);
+
+        // 2) 업로드
+        setUploadStage("uploading");
         const formData = new FormData();
-        formData.append("file", file);
+        formData.append("file", prepared.file);
         const res = await fetch("/api/upload", { method: "POST", body: formData });
         if (!res.ok) {
           const err = await res.json().catch(() => ({}));
+          // 413(Payload Too Large) 은 Vercel 의 body limit (서버 코드 닿기 전 차단)
+          if (res.status === 413) {
+            throw new Error(
+              `파일이 너무 큽니다 (서버 한도 초과). 리사이즈 후에도 ${(prepared.file.size / 1024 / 1024).toFixed(1)}MB 입니다. 더 작은 이미지로 시도하세요.`,
+            );
+          }
           throw new Error((err as { error?: string }).error ?? "업로드 실패");
         }
         const { url } = await res.json();
@@ -81,9 +101,11 @@ export default function PortfolioEditor({ item }: Props) {
           return next;
         });
       } catch (err) {
+        setResizeNote(null);
         alert(err instanceof Error ? err.message : "이미지 업로드 중 오류가 발생했습니다.");
       } finally {
         setUploading(null);
+        setUploadStage(null);
         e.target.value = "";
       }
     },
@@ -275,7 +297,16 @@ export default function PortfolioEditor({ item }: Props) {
                       style={{ borderColor: isDisabled ? undefined : undefined }}
                     >
                       {isLoading ? (
-                        <div className="w-8 h-8 border-2 border-slate-300 border-t-blue-500 rounded-full animate-spin" />
+                        <>
+                          <div className="w-8 h-8 border-2 border-slate-300 border-t-blue-500 rounded-full animate-spin" />
+                          <span className="text-xs text-slate-500 text-center px-2">
+                            {uploadStage === "resizing"
+                              ? "이미지 처리 중…"
+                              : uploadStage === "uploading"
+                                ? "업로드 중…"
+                                : "처리 중…"}
+                          </span>
+                        </>
                       ) : (
                         <>
                           <svg className="w-8 h-8 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -299,6 +330,11 @@ export default function PortfolioEditor({ item }: Props) {
                 )}
 
                 <p className="text-[11px] text-slate-400 mt-1.5">{meta.hint}</p>
+                {slot === 0 && resizeNote && (
+                  <p className="text-[11px] text-emerald-600 mt-0.5" title="자동 리사이즈 안내">
+                    ✓ {resizeNote}
+                  </p>
+                )}
               </div>
             );
           })}

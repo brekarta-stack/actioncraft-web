@@ -23,7 +23,9 @@ const ALLOWED_EXTENSIONS: Record<string, string[]> = {
   "application/pdf": [".pdf"],
 };
 
-const MAX_SIZE_BYTES = 10 * 1024 * 1024; // 10 MB
+// 서버에서 받는 최대 크기. Vercel 의 플랫폼 body limit(약 4.5MB) 보다 작아야 의미가 있음.
+// 클라이언트가 prepareImageForUpload() 로 미리 줄여서 보내므로 4MB 정도로 안전 마진 둠.
+const MAX_SIZE_BYTES = 4 * 1024 * 1024; // 4 MB (Vercel body limit 안쪽)
 
 export async function POST(request: Request) {
   /* ── 인증 확인 ── */
@@ -40,7 +42,10 @@ export async function POST(request: Request) {
 
   /* ── 크기 검증 ── */
   if (file.size > MAX_SIZE_BYTES) {
-    return NextResponse.json({ error: "파일 크기는 10MB 이하여야 합니다." }, { status: 400 });
+    return NextResponse.json(
+      { error: `파일 크기는 4MB 이하여야 합니다. 큰 사진은 자동 리사이즈가 적용된 후 업로드되며, 그 결과가 4MB 를 넘으면 더 작은 이미지를 사용해 주세요.` },
+      { status: 400 },
+    );
   }
 
   /* ── MIME 타입 검증 ── */

@@ -11,6 +11,7 @@ import Highlight from "@tiptap/extension-highlight";
 import { useState, useCallback, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import type { Post } from "@/lib/blog";
+import { prepareImageForUpload } from "@/lib/image-resize";
 
 const TAGS = ["제작 과정", "교육", "이야기", "사례 연구", "소재", "디자인"];
 
@@ -101,14 +102,21 @@ function ImagePanel({
     if (!file) return;
     setUploading(true);
     try {
+      // 큰 사진은 클라이언트에서 자동 리사이즈 후 업로드
+      const prepared = await prepareImageForUpload(file);
       const fd = new FormData();
-      fd.append("file", file);
+      fd.append("file", prepared.file);
       const res = await fetch("/api/upload", { method: "POST", body: fd });
-      if (!res.ok) throw new Error("업로드 실패");
+      if (!res.ok) {
+        if (res.status === 413) {
+          throw new Error("파일이 너무 큽니다. 더 작은 이미지를 사용해 주세요.");
+        }
+        throw new Error("업로드 실패");
+      }
       const { url } = await res.json();
-      onInsert(url, file.name);
-    } catch {
-      alert("업로드 중 오류가 발생했습니다.");
+      onInsert(url, prepared.file.name);
+    } catch (err) {
+      alert(err instanceof Error ? err.message : "업로드 중 오류가 발생했습니다.");
     } finally {
       setUploading(false);
       e.target.value = "";
