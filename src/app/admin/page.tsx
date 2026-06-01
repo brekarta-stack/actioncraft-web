@@ -9,9 +9,9 @@ import type { QuoteSubmission } from "@/lib/quote-types";
 
 const PRODUCT_LABELS: Record<string, string> = {
   papercraft: "페이퍼 크래프트",
-  action:     "액션 페이퍼",
+  action:     "액션 페이퍼 토이",
   popup:      "팝업북",
-  foamboard:  "폼보드 크래프트",
+  foamboard:  "폼보드(우드락)",
   unsure:     "미정",
 };
 

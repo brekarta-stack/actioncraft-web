@@ -10,9 +10,9 @@ import type { QuoteSubmission } from "@/lib/quote-types";
 /* ── 견적 알림 메일 발송 (실패해도 사용자 응답에는 영향 없음) ── */
 const PRODUCT_LABEL: Record<string, string> = {
   papercraft: "페이퍼 크래프트",
-  action:     "액션 페이퍼",
+  action:     "액션 페이퍼 토이",
   popup:      "팝업북",
-  foamboard:  "폼보드 크래프트",
+  foamboard:  "폼보드(우드락)",
   unsure:     "잘 모름 — 담당자 상의 희망",
 };
 

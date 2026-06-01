@@ -36,9 +36,9 @@ interface FormState {
 
 const PRODUCTS: { id: ProductType; icon: IconKey; name: string; desc: string }[] = [
   { id: "papercraft", icon: "paperToy", name: "페이퍼 크래프트", desc: "특허 기반 종이 입체 구조" },
-  { id: "action",     icon: "gear",     name: "액션 페이퍼",    desc: "움직이는 종이 메커니즘" },
-  { id: "popup",      icon: "sparkle",  name: "팝업북",         desc: "3D 팝업 카드·북" },
-  { id: "foamboard",  icon: "box",      name: "폼보드 크래프트", desc: "대형 입체 구조물" },
+  { id: "action",     icon: "gear",     name: "액션 페이퍼 토이", desc: "움직이는 종이 메커니즘" },
+  { id: "popup",      icon: "sparkle",  name: "팝업북",            desc: "3D 팝업 카드·북" },
+  { id: "foamboard",  icon: "box",      name: "폼보드(우드락)",   desc: "끼움식 입체 구조" },
 ];
 
 const PURPOSES = ["마케팅/홍보", "교육", "선물", "전시", "행사", "기타"];
