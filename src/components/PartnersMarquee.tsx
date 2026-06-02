@@ -41,20 +41,20 @@ const PARTNERS_ROW1: Partner[] = [
   {
     id: "innocean",
     name: "이노션",
-    logo: null, // Wikimedia 정식 SVG 미확인 — 정식 로고 URL 받으면 교체
-    width: 96,
+    logo: "https://upload.wikimedia.org/wikipedia/commons/7/75/Innocean_logo.png",
+    width: 120,
   },
   {
     id: "samsung-display",
     name: "삼성디스플레이",
-    logo: null, // 정식 로고 URL 받으면 교체
+    logo: null, // 공개 SVG 미확인 — 정식 로고 URL 받으면 교체
     width: 132,
   },
   {
     id: "samyang",
     name: "삼양식품",
-    logo: null,
-    width: 96,
+    logo: "https://upload.wikimedia.org/wikipedia/commons/5/50/Samyang_Foods_Logo.svg",
+    width: 130,
   },
   {
     id: "kaist",
@@ -99,14 +99,14 @@ const PARTNERS_ROW2: Partner[] = [
   {
     id: "ulsan",
     name: "울산시",
-    logo: null,
-    width: 72,
+    logo: "https://upload.wikimedia.org/wikipedia/commons/1/18/Symbol_of_Ulsan.svg",
+    width: 48, // 정사각 심볼
   },
   {
     id: "suwon",
     name: "수원시",
-    logo: null,
-    width: 72,
+    logo: "https://upload.wikimedia.org/wikipedia/commons/8/85/Flag_of_Suwon_%282022%29.svg",
+    width: 80,
   },
   {
     id: "gongju",
