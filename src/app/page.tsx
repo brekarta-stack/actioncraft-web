@@ -17,6 +17,7 @@ import {
 } from "@/components/icons";
 import { PaperToyHero, PortfolioPlaceholder, PatentBadge, PaperNetBg } from "@/components/paper-art";
 import PartnersMarquee from "@/components/PartnersMarquee";
+import HomePortfolioGrid from "@/components/HomePortfolioGrid";
 import { SITE_SHORT } from "@/lib/site";
 
 /* ────────────── 데이터 ────────────── */
@@ -267,17 +268,7 @@ export default function HomePage() {
               <ArrowRightIcon size={18} />
             </Link>
           </div>
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-            {clients.slice(0, 6).map((c) => (
-              <Link
-                key={c.name}
-                href="/portfolio"
-                className="pe-paper-lift block aspect-[4/3]"
-              >
-                <PortfolioPlaceholder variant={c.variant} label={`${c.name} · ${c.work}`} className="w-full h-full" />
-              </Link>
-            ))}
-          </div>
+          <HomePortfolioGrid />
         </div>
       </section>
 
