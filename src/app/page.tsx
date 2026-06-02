@@ -16,6 +16,7 @@ import {
   type IconKey,
 } from "@/components/icons";
 import { PaperToyHero, PortfolioPlaceholder, PatentBadge, PaperNetBg } from "@/components/paper-art";
+import PartnersMarquee from "@/components/PartnersMarquee";
 import { SITE_SHORT } from "@/lib/site";
 
 /* ────────────── 데이터 ────────────── */
@@ -226,7 +227,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ─── Social Proof — Clients (그레이 그리드 + variant illust) ─── */}
+      {/* ─── Social Proof — Partners Marquee (실제 로고 무한 슬라이드) ─── */}
       <section className="py-16 md:py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-10">
@@ -234,14 +235,11 @@ export default function HomePage() {
             <h2 className="text-2xl md:text-3xl font-bold text-slate-900">
               PE Studio와 함께한 파트너들
             </h2>
+            <p className="text-sm text-slate-500 mt-3" style={{ wordBreak: "keep-all" }}>
+              기업·관공서·박물관·교육기관 등 국내 유수의 기관들과 협업하고 있습니다.
+            </p>
           </div>
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3">
-            {clients.map((c) => (
-              <div key={c.name} className="aspect-square">
-                <PortfolioPlaceholder variant={c.variant} label={c.name} className="w-full h-full" />
-              </div>
-            ))}
-          </div>
+          <PartnersMarquee />
           <p className="text-center text-xs text-slate-400 mt-6" style={{ wordBreak: "keep-all" }}>
             * 실제 작업물 사진은 포트폴리오 페이지에서 확인하실 수 있습니다.
           </p>
