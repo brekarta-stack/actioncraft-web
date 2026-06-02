@@ -201,10 +201,10 @@ export default function HomePage() {
               return (
                 <div
                   key={stat.label}
-                  className={`text-center md:text-left ${isHero ? "md:col-span-1" : ""}`}
+                  className={`text-center ${isHero ? "md:col-span-1" : ""}`}
                 >
                   <div
-                    className="pe-num text-3xl md:text-5xl mb-1 flex items-baseline gap-1 justify-center md:justify-start"
+                    className="pe-num text-3xl md:text-5xl mb-1 flex items-baseline gap-1 justify-center"
                     style={{
                       color: isHero ? "#1E22B2" : "#475569",
                     }}
