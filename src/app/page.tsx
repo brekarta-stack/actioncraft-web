@@ -16,7 +16,7 @@ import {
   type IconKey,
 } from "@/components/icons";
 import { PaperToyHero, PortfolioPlaceholder, PatentBadge, PaperNetBg } from "@/components/paper-art";
-import { BRAND_TAGLINE_KR, SITE_SHORT } from "@/lib/site";
+import { SITE_SHORT } from "@/lib/site";
 
 /* ────────────── 데이터 ────────────── */
 
@@ -106,12 +106,36 @@ export default function HomePage() {
     <>
       {/* ─── Hero ─── */}
       <section className="relative overflow-hidden" style={{ background: "#1E22B2" }}>
-        {/* 전개도 배경 */}
-        <div className="absolute inset-0 pointer-events-none select-none opacity-30">
-          <div className="absolute -right-20 top-1/2 -translate-y-1/2 w-[80%] max-w-3xl -rotate-6">
-            <PaperNetBg className="w-full h-auto" />
+        {/* 배경: 영상이 있으면 영상, 없으면 기존 전개도 패턴 */}
+        {process.env.NEXT_PUBLIC_HERO_VIDEO_URL ? (
+          <>
+            <video
+              className="absolute inset-0 w-full h-full object-cover pointer-events-none select-none"
+              src={process.env.NEXT_PUBLIC_HERO_VIDEO_URL}
+              poster={process.env.NEXT_PUBLIC_HERO_VIDEO_POSTER}
+              autoPlay
+              muted
+              loop
+              playsInline
+              preload="metadata"
+              aria-hidden
+            />
+            {/* 어두운 그라데이션 overlay — 텍스트 가독성 보장 */}
+            <div
+              className="absolute inset-0 pointer-events-none"
+              style={{
+                background:
+                  "linear-gradient(135deg, rgba(30,34,178,0.85) 0%, rgba(30,34,178,0.55) 50%, rgba(30,34,178,0.75) 100%)",
+              }}
+            />
+          </>
+        ) : (
+          <div className="absolute inset-0 pointer-events-none select-none opacity-30">
+            <div className="absolute -right-20 top-1/2 -translate-y-1/2 w-[80%] max-w-3xl -rotate-6">
+              <PaperNetBg className="w-full h-auto" />
+            </div>
           </div>
-        </div>
+        )}
 
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 md:py-28">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
@@ -119,19 +143,25 @@ export default function HomePage() {
             <div className="max-w-2xl">
               <span className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-full mb-6 bg-white/10 text-white border border-white/15">
                 <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
-                Paper Engineering Studio · {BRAND_TAGLINE_KR}
+                Paper Engineering Studio : 국내 최고의 페이퍼 엔지니어링 스튜디오
               </span>
 
               <h1 className="text-4xl md:text-6xl font-extrabold text-white mb-6 leading-[1.05] tracking-tight">
                 종이가 움직이면<br />
                 <span className="pe-gradient-text">브랜드가 살아납니다</span>
               </h1>
-              <p className="text-lg md:text-xl text-blue-200 mb-3 leading-relaxed">
+              <p className="text-lg md:text-xl text-blue-200 mb-4 leading-relaxed" style={{ wordBreak: "keep-all" }}>
                 <strong className="text-white">자기 구조 설계 특허 11종</strong>을 보유한
                 {" "}<strong className="text-white">국내 유일의 페이퍼 엔지니어링 스튜디오</strong>.
               </p>
-              <p className="text-blue-300 mb-10">
-                현대백화점, KAIST, 경주박물관 등 <span className="pe-num">650+</span>건 납품. 2013년 창업.
+              <blockquote
+                className="border-l-2 pl-4 mb-4 text-blue-100/90 italic text-sm md:text-base leading-relaxed"
+                style={{ borderColor: "#06C6C8", wordBreak: "keep-all" }}
+              >
+                Since 2013, 지기 구조 설계 특허 11종에 기반한 전문 페이퍼 엔지니어링 스튜디오.
+              </blockquote>
+              <p className="text-blue-200 mb-10" style={{ wordBreak: "keep-all" }}>
+                최고의 페이퍼 크래프트 설계 능력으로 국내 유수의 기업들과 협업하고 있습니다.
               </p>
 
               {/* CTA — Primary dominant + Secondary ghost */}
