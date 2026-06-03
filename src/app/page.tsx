@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import {
   PatentIcon,
@@ -18,7 +19,24 @@ import {
 import { PaperToyHero, PortfolioPlaceholder, PatentBadge, PaperNetBg } from "@/components/paper-art";
 import PartnersMarquee from "@/components/PartnersMarquee";
 import HomePortfolioGrid from "@/components/HomePortfolioGrid";
-import { SITE_SHORT } from "@/lib/site";
+import { PAGE_META, SITE_SHORT } from "@/lib/site";
+
+export const metadata: Metadata = {
+  title: PAGE_META.home.title,
+  description: PAGE_META.home.description,
+  alternates: { canonical: "/" },
+  openGraph: {
+    title: PAGE_META.home.title,
+    description: PAGE_META.home.description,
+    url: "/",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: PAGE_META.home.title,
+    description: PAGE_META.home.description,
+  },
+};
 
 /* ────────────── 데이터 ────────────── */
 

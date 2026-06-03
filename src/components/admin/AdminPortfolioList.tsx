@@ -46,7 +46,7 @@ export default function AdminPortfolioList({ initialItems }: { initialItems: Por
           <div className="w-16 h-16 rounded-lg overflow-hidden bg-slate-100 flex-shrink-0">
             {item.images[0] ? (
               // eslint-disable-next-line @next/next/no-img-element
-              <img src={item.images[0]} alt="" className="w-full h-full object-cover" />
+              <img src={item.images[0]} alt={`${item.title} 썸네일`} className="w-full h-full object-cover" />
             ) : (
               <div className="w-full h-full flex items-center justify-center text-slate-300 text-xl">🖼️</div>
             )}
