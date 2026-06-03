@@ -162,7 +162,7 @@ const usageCategories: UsageCategory[] = [
     name: "홍보용",
     english: "Promotion",
     accent: "#E91E8C",
-    bgGradient: "from-pink-50 to-fuchsia-50",
+    bgGradient: "from-white to-white",
     icon: "sparkle",
     tagline: "캐릭터를 입체로, 브랜드를 손으로 만지는 굿즈",
     description:
