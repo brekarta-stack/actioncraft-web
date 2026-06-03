@@ -63,9 +63,8 @@ const products: Product[] = [
     minOrder: "1,000부",
     leadTime: "약 4주",
     usages: ["education", "promotion", "hobby"],
-    // 이미지 URL 채워주시면 즉시 hover 효과 동작. 두 슬롯 다 같은 URL 가능.
-    // topImage: "https://...",   // 카드 상단 헤더 영역 (현재 아이콘 자리)
-    // hoverImage: "https://...", // 마우스 오버 시 본문 위 overlay (제목+버튼은 유지)
+    topImage: "https://syrfoqwvsciicfbeemqv.supabase.co/storage/v1/object/public/uploads/1780305681024.png",
+    hoverImage: "https://syrfoqwvsciicfbeemqv.supabase.co/storage/v1/object/public/uploads/1780305681024.png",
   },
   {
     icon: "gear",

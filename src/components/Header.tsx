@@ -7,7 +7,7 @@ import { usePathname } from "next/navigation";
 const navLinks = [
   { href: "/", label: "홈" },
   { href: "/about", label: "회사소개" },
-  { href: "/products", label: "제품소개" },
+  { href: "/products", label: "제작 안내" },
   { href: "/portfolio", label: "제작 사례" },
   { href: "/blog", label: "블로그" },
 ];
