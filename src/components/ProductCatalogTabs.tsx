@@ -30,6 +30,10 @@ interface Product {
   minOrder: string;
   leadTime: string;
   usages: UsageKey[];
+  /** 카드 상단 영역 이미지 URL (없으면 기존 아이콘 fallback) */
+  topImage?: string;
+  /** 마우스 오버 시 본문 위에 fade-in 되는 이미지 URL (없으면 hover 효과 없이 기존 본문 유지) */
+  hoverImage?: string;
 }
 
 const USAGE_NAME: Record<UsageKey, string> = {
@@ -59,6 +63,9 @@ const products: Product[] = [
     minOrder: "1,000부",
     leadTime: "약 4주",
     usages: ["education", "promotion", "hobby"],
+    // 이미지 URL 채워주시면 즉시 hover 효과 동작. 두 슬롯 다 같은 URL 가능.
+    // topImage: "https://...",   // 카드 상단 헤더 영역 (현재 아이콘 자리)
+    // hoverImage: "https://...", // 마우스 오버 시 본문 위 overlay (제목+버튼은 유지)
   },
   {
     icon: "gear",
@@ -188,23 +195,37 @@ function ProductIcon({ name, size = 48 }: { name: IconKey; size?: number }) {
 
 function ProductCard({ p }: { p: Product }) {
   return (
-    <div className="pe-paper-lift bg-white border border-slate-100 rounded-2xl overflow-hidden pe-paper-shadow">
-      <div className={`bg-gradient-to-br ${p.bgGradient} h-44 flex items-center justify-center relative`}>
-        <div
-          className="w-20 h-20 rounded-2xl flex items-center justify-center pe-paper-shadow"
-          style={{ background: "white", color: p.accent }}
-          aria-hidden
-        >
-          <ProductIcon name={p.icon} size={40} />
-        </div>
+    <div className="pe-paper-lift group bg-white border border-slate-100 rounded-2xl overflow-hidden pe-paper-shadow">
+      {/* ── 상단 헤더 영역: topImage 있으면 이미지, 없으면 기존 아이콘 ── */}
+      <div className={`${p.topImage ? "" : `bg-gradient-to-br ${p.bgGradient}`} h-44 flex items-center justify-center relative overflow-hidden`}>
+        {p.topImage ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={p.topImage}
+            alt={`${p.subtitle} 대표 이미지`}
+            className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.04]"
+            loading="lazy"
+          />
+        ) : (
+          <div
+            className="w-20 h-20 rounded-2xl flex items-center justify-center pe-paper-shadow"
+            style={{ background: "white", color: p.accent }}
+            aria-hidden
+          >
+            <ProductIcon name={p.icon} size={40} />
+          </div>
+        )}
         <span
-          className="absolute top-4 right-4 text-xs px-2.5 py-1 bg-white/90 text-slate-700 font-semibold rounded-full border border-slate-200"
+          className="absolute top-4 right-4 z-10 text-xs px-2.5 py-1 bg-white/90 text-slate-700 font-semibold rounded-full border border-slate-200 backdrop-blur-sm"
           style={{ wordBreak: "keep-all" }}
         >
           {p.highlight}
         </span>
       </div>
-      <div className="p-6">
+
+      {/* ── 본문 영역 ── */}
+      <div className="p-6 flex flex-col">
+        {/* 제목/태그 — 항상 보임 */}
         <div className="flex items-start justify-between mb-3 gap-3">
           <div className="min-w-0">
             <div className="text-xs text-slate-400 font-medium mb-0.5">{p.name}</div>
@@ -222,30 +243,53 @@ function ProductCard({ p }: { p: Product }) {
             ))}
           </div>
         </div>
-        <p className="text-slate-600 text-sm leading-relaxed mb-4" style={{ wordBreak: "keep-all" }}>
-          {p.description}
-        </p>
-        <ul className="grid grid-cols-2 gap-1.5 mb-5">
-          {p.features.map((f) => (
-            <li key={f} className="text-xs text-slate-600 flex items-start gap-1.5">
-              <CheckIcon size={14} className="flex-shrink-0 mt-0.5" style={{ color: p.accent }} />
-              <span style={{ wordBreak: "keep-all" }}>{f}</span>
-            </li>
-          ))}
-        </ul>
-        <div className="flex gap-4 text-sm text-slate-500 mb-4 pb-4 border-b border-slate-100">
-          <span>최소 <strong className="text-slate-800 pe-num">{p.minOrder}</strong></span>
-          <span className="text-slate-300">·</span>
-          <span>납기 <strong className="text-slate-800 pe-num">{p.leadTime}</strong></span>
+
+        {/* 설명/Features/Min·Lead — hover 시 hoverImage 로 fade overlay */}
+        <div className="relative">
+          <div
+            className={`transition-opacity duration-300 ${p.hoverImage ? "group-hover:opacity-0" : ""}`}
+          >
+            <p className="text-slate-600 text-sm leading-relaxed mb-4" style={{ wordBreak: "keep-all" }}>
+              {p.description}
+            </p>
+            <ul className="grid grid-cols-2 gap-1.5 mb-5">
+              {p.features.map((f) => (
+                <li key={f} className="text-xs text-slate-600 flex items-start gap-1.5">
+                  <CheckIcon size={14} className="flex-shrink-0 mt-0.5" style={{ color: p.accent }} />
+                  <span style={{ wordBreak: "keep-all" }}>{f}</span>
+                </li>
+              ))}
+            </ul>
+            <div className="flex gap-4 text-sm text-slate-500 mb-4 pb-4 border-b border-slate-100">
+              <span>최소 <strong className="text-slate-800 pe-num">{p.minOrder}</strong></span>
+              <span className="text-slate-300">·</span>
+              <span>납기 <strong className="text-slate-800 pe-num">{p.leadTime}</strong></span>
+            </div>
+          </div>
+
+          {/* hover overlay 이미지 — 본문 영역 위에 fade-in */}
+          {p.hoverImage && (
+            <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-xl overflow-hidden pointer-events-none">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={p.hoverImage}
+                alt=""
+                className="w-full h-full object-cover"
+                loading="lazy"
+              />
+            </div>
+          )}
         </div>
+
+        {/* 견적 받기 버튼 — overlay 영향 받지 않고 항상 보임 */}
         <Link
           href="/quote"
-          className="group block text-center py-2.5 text-white text-sm font-semibold rounded-lg transition-opacity hover:opacity-90"
+          className="group/btn block text-center py-2.5 text-white text-sm font-semibold rounded-lg transition-opacity hover:opacity-90 relative z-10"
           style={{ background: `linear-gradient(135deg, ${p.accent}, ${p.accent}cc)` }}
         >
           <span className="inline-flex items-center gap-1">
             이 서비스 견적 받기
-            <ArrowRightIcon size={14} className="transition-transform group-hover:translate-x-0.5" />
+            <ArrowRightIcon size={14} className="transition-transform group-hover/btn:translate-x-0.5" />
           </span>
         </Link>
       </div>
