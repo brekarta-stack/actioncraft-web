@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { getItemById, saveItem, deleteItem } from "@/lib/portfolio";
@@ -38,6 +39,13 @@ export async function PUT(
       : item.slug;
   const updated = { ...item, ...body, id, slug, updatedAt: new Date().toISOString() };
   await saveItem(updated);
+
+  // 변경 즉시 메인·포트폴리오·상세 페이지 갱신
+  revalidatePath("/");
+  revalidatePath("/portfolio");
+  if (item.slug) revalidatePath(`/portfolio/${item.slug}`);
+  if (updated.slug && updated.slug !== item.slug) revalidatePath(`/portfolio/${updated.slug}`);
+
   return NextResponse.json(updated);
 }
 
@@ -53,5 +61,10 @@ export async function DELETE(
   if (!item) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
   await deleteItem(id);
+
+  revalidatePath("/");
+  revalidatePath("/portfolio");
+  if (item.slug) revalidatePath(`/portfolio/${item.slug}`);
+
   return NextResponse.json({ ok: true });
 }

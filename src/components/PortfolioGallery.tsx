@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, useEffect } from "react";
+import { Suspense, useMemo, useState, useEffect } from "react";
 import Link from "next/link";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import type { PortfolioItem, Category } from "@/lib/portfolio-types";
@@ -110,8 +110,8 @@ function PortfolioCard({ item }: { item: PortfolioItem }) {
   );
 }
 
-/* ─── 메인 갤러리 ─── */
-export default function PortfolioGallery({ items, categories }: Props) {
+/* ─── 메인 갤러리 (Inner — useSearchParams 사용) ─── */
+function PortfolioGalleryInner({ items, categories }: Props) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -240,5 +240,25 @@ export default function PortfolioGallery({ items, categories }: Props) {
         ))}
       </div>
     </>
+  );
+}
+
+/* ─── 그리드만 먼저 렌더하는 fallback (useSearchParams 없이 동기 렌더 가능) ─── */
+function PortfolioGridFallback({ items }: { items: PortfolioItem[] }) {
+  return (
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      {items.map((item) => (
+        <PortfolioCard key={item.id} item={item} />
+      ))}
+    </div>
+  );
+}
+
+/* ─── 메인 export (Suspense 로 감싸 inner 의 useSearchParams 안전 처리) ─── */
+export default function PortfolioGallery(props: Props) {
+  return (
+    <Suspense fallback={<PortfolioGridFallback items={props.items} />}>
+      <PortfolioGalleryInner {...props} />
+    </Suspense>
   );
 }

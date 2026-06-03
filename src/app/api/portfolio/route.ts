@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { getItems, saveItem } from "@/lib/portfolio";
@@ -51,5 +52,13 @@ export async function POST(request: Request) {
   };
 
   await saveItem(newItem);
+
+  // 발행된 사례면 메인·포트폴리오·상세 페이지 즉시 갱신
+  if (newItem.published) {
+    revalidatePath("/");
+    revalidatePath("/portfolio");
+    revalidatePath(`/portfolio/${newItem.slug}`);
+  }
+
   return NextResponse.json(newItem, { status: 201 });
 }

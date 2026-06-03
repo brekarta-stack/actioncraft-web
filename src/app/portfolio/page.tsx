@@ -1,5 +1,4 @@
-﻿import { Suspense } from "react";
-import type { Metadata } from "next";
+﻿import type { Metadata } from "next";
 import { getItems, CATEGORIES } from "@/lib/portfolio";
 import { deriveSlug, deriveSummary } from "@/lib/portfolio-meta";
 import PortfolioGallery from "@/components/PortfolioGallery";
@@ -7,8 +6,9 @@ import { PAGE_META, SITE_NAME, SITE_URL } from "@/lib/site";
 import { PaperNetBg } from "@/components/paper-art";
 import { ArrowRightIcon } from "@/components/icons";
 
-// ISR — 새 사례 등록 시 자동 재생성 (force-dynamic 보다 색인 효율 좋음)
-export const revalidate = 300;
+// SSR — 어드민 변경이 즉시 반영되도록 force-dynamic
+// (ISR 5분 캐시는 어드민과의 sync 불일치 + Suspense 무한 fallback 문제 일으킴)
+export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   title: PAGE_META.portfolio.title,
@@ -109,9 +109,7 @@ export default async function PortfolioPage() {
       {/* Gallery with filter */}
       <section className="py-16 md:py-24 bg-slate-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <Suspense fallback={<div className="text-center py-24 text-slate-400">불러오는 중…</div>}>
-            <PortfolioGallery items={itemsWithSlug} categories={[...CATEGORIES]} />
-          </Suspense>
+          <PortfolioGallery items={itemsWithSlug} categories={[...CATEGORIES]} />
         </div>
       </section>
 
