@@ -5,7 +5,7 @@ import {
   ArrowRightIcon,
   type IconKey,
 } from "@/components/icons";
-import { PortfolioPlaceholder, PaperNetBg } from "@/components/paper-art";
+import { PaperNetBg } from "@/components/paper-art";
 import ProductCatalogTabs from "@/components/ProductCatalogTabs";
 
 export const metadata: Metadata = {
@@ -83,15 +83,6 @@ const orderOptions = [
   { category: "조립방식",   options: ["점착 (풀 필요)", "끼우기 (풀 없이)"] },
 ];
 
-const projectWorks: { client: string; character: string; type: string; variant: "department" | "university" | "museum" | "city" | "character" | "generic" }[] = [
-  { client: "경주박물관", character: "도토리 캐릭터",   type: "캐릭터 굿즈",   variant: "museum" },
-  { client: "현대백화점", character: "스마일리",         type: "페이퍼 토이",   variant: "department" },
-  { client: "KAIST",       character: "납육이",            type: "교육 굿즈",     variant: "university" },
-  { client: "수원시",      character: "수원이",            type: "지자체 굿즈",   variant: "city" },
-  { client: "공주시",      character: "고마곰·공주",       type: "캐릭터 굿즈",   variant: "character" },
-  { client: "나주시",      character: "나주배 캐릭터",     type: "지역 특산물",   variant: "generic" },
-];
-
 export default function ProductsPage() {
   return (
     <>
@@ -122,32 +113,6 @@ export default function ProductsPage() {
 
       {/* Catalog — 제품 종류별 / 용도별 토글 */}
       <ProductCatalogTabs />
-
-      {/* Project Works */}
-      <section className="py-16 md:py-20" style={{ background: "#F0F2FF" }}>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-10">
-            <p className="text-xs font-semibold uppercase tracking-widest mb-3" style={{ color: "#06C6C8" }}>
-              Recent Projects
-            </p>
-            <h2 className="text-3xl font-bold text-slate-900 mb-3 tracking-tight">제작 사례</h2>
-            <p className="text-slate-500" style={{ wordBreak: "keep-all" }}>
-              국내 주요 기관·기업과 함께한 페이퍼 엔지니어링 프로젝트.
-            </p>
-          </div>
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3">
-            {projectWorks.map((w) => (
-              <div key={w.client} className="aspect-square">
-                <PortfolioPlaceholder
-                  variant={w.variant}
-                  label={`${w.client} · ${w.character}`}
-                  className="w-full h-full"
-                />
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
 
       {/* Process */}
       <section className="py-16 md:py-24 bg-white">

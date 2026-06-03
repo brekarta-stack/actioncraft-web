@@ -101,7 +101,7 @@ const services = [
 const timeline = [
   { year: "2013", event: "Paper Engineering Studio 창업 — 국내 유일의 페이퍼 엔지니어링 전문 스튜디오 출범" },
   { year: "2015", event: "자기 구조 설계 특허 최초 등록, STEAM 교육 키트 출시" },
-  { year: "2017", event: "국내 최대 페이퍼 토이 커뮤니티 '뚱이천하' 운영 시작" },
+  { year: "2017", event: "국내 최대 페이퍼 토이 커뮤니티 '종이천하' 운영 시작" },
   { year: "2019", event: "누적 특허 11종 달성, KAIST 협력 교육 프로그램 개발" },
   { year: "2021", event: "현대백화점·경주박물관 등 주요 기관 납품 본격화" },
   { year: "2023", event: "누적 납품 650건 돌파, 기업 굿즈 서비스 확장" },
@@ -192,7 +192,7 @@ export default function AboutPage() {
               <ul className="space-y-3 text-sm text-slate-700">
                 {[
                   "자기 구조 설계 관련 11종의 특허 보유",
-                  "국내 최대 페이퍼 토이 커뮤니티 '뚱이천하' 운영",
+                  "국내 최대 페이퍼 토이 커뮤니티 '종이천하' 운영",
                   "국내 유일 PePaKuRa 설계 교육 프로그램 제공",
                   "KAIST 출신 개발자 및 교육 프로그램 개발",
                   "우수한 개발 인적 자원 보유",
