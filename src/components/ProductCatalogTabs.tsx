@@ -127,6 +127,7 @@ const products: Product[] = [
     minOrder: "협의",
     leadTime: "협의",
     usages: ["promotion", "hobby"],
+    topImage: "https://syrfoqwvsciicfbeemqv.supabase.co/storage/v1/object/public/uploads/444444.png",
   },
 ];
 
