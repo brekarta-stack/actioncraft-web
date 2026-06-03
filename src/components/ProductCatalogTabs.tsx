@@ -287,7 +287,7 @@ function UsageCard({ u }: { u: UsageCategory }) {
   return (
     <div className="pe-paper-lift group bg-white border border-slate-100 rounded-2xl overflow-hidden pe-paper-shadow flex flex-col">
       {/* 상단 헤더 영역: topImage 있으면 이미지, 없으면 기존 아이콘 */}
-      <div className={`${u.topImage ? "" : `bg-gradient-to-br ${u.bgGradient}`} aspect-[5/3] flex items-center justify-center relative overflow-hidden`}>
+      <div className={`${u.topImage ? "" : `bg-gradient-to-br ${u.bgGradient}`} aspect-square flex items-center justify-center relative overflow-hidden`}>
         {u.topImage ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
