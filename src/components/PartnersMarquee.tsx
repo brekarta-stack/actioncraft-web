@@ -93,7 +93,7 @@ const PARTNERS_ROW2: Partner[] = [
   {
     id: "gyeongju-museum",
     name: "경주박물관",
-    logo: "https://gyeongju.museum.go.kr/kor/images/common/logo.png",
+    logo: "/partners/gyeongju-museum.png",
     width: 112,
   },
   {
@@ -111,14 +111,8 @@ const PARTNERS_ROW2: Partner[] = [
   {
     id: "gongju",
     name: "공주시",
-    logo: "https://www.gongju.go.kr/images/brand/sub01/sub01_01_01_img01.jpg",
-    width: 96,
-  },
-  {
-    id: "mmca",
-    name: "국립현대미술관",
-    logo: null, // mmca.go.kr 사이트가 hotlink 차단 (400) — 정식 SVG 받으면 교체
-    width: 132,
+    logo: "/partners/gongju.jpg",
+    width: 56, // 세로형 (850×1202) 이라 작게
   },
   {
     id: "seoul",
