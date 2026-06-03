@@ -32,8 +32,6 @@ interface Product {
   usages: UsageKey[];
   /** 카드 상단 영역 이미지 URL (없으면 기존 아이콘 fallback) */
   topImage?: string;
-  /** 마우스 오버 시 본문 위에 fade-in 되는 이미지 URL (없으면 hover 효과 없이 기존 본문 유지) */
-  hoverImage?: string;
 }
 
 const USAGE_NAME: Record<UsageKey, string> = {
@@ -64,7 +62,6 @@ const products: Product[] = [
     leadTime: "약 4주",
     usages: ["education", "promotion", "hobby"],
     topImage: "https://syrfoqwvsciicfbeemqv.supabase.co/storage/v1/object/public/uploads/1780305681024.png",
-    hoverImage: "https://syrfoqwvsciicfbeemqv.supabase.co/storage/v1/object/public/uploads/1780305681024.png",
   },
   {
     icon: "gear",
@@ -86,6 +83,7 @@ const products: Product[] = [
     minOrder: "1,000부",
     leadTime: "약 4주",
     usages: ["education", "promotion"],
+    topImage: "https://syrfoqwvsciicfbeemqv.supabase.co/storage/v1/object/public/uploads/333333333333.png",
   },
   {
     icon: "sparkle",
@@ -107,6 +105,7 @@ const products: Product[] = [
     minOrder: "300부",
     leadTime: "약 3주",
     usages: ["education", "promotion", "hobby"],
+    topImage: "https://syrfoqwvsciicfbeemqv.supabase.co/storage/v1/object/public/uploads/23213213.jpeg",
   },
   {
     icon: "box",
@@ -243,44 +242,25 @@ function ProductCard({ p }: { p: Product }) {
           </div>
         </div>
 
-        {/* 설명/Features/Min·Lead — hover 시 hoverImage 로 fade overlay */}
-        <div className="relative">
-          <div
-            className={`transition-opacity duration-300 ${p.hoverImage ? "group-hover:opacity-0" : ""}`}
-          >
-            <p className="text-slate-600 text-sm leading-relaxed mb-4" style={{ wordBreak: "keep-all" }}>
-              {p.description}
-            </p>
-            <ul className="grid grid-cols-2 gap-1.5 mb-5">
-              {p.features.map((f) => (
-                <li key={f} className="text-xs text-slate-600 flex items-start gap-1.5">
-                  <CheckIcon size={14} className="flex-shrink-0 mt-0.5" style={{ color: p.accent }} />
-                  <span style={{ wordBreak: "keep-all" }}>{f}</span>
-                </li>
-              ))}
-            </ul>
-            <div className="flex gap-4 text-sm text-slate-500 mb-4 pb-4 border-b border-slate-100">
-              <span>최소 <strong className="text-slate-800 pe-num">{p.minOrder}</strong></span>
-              <span className="text-slate-300">·</span>
-              <span>납기 <strong className="text-slate-800 pe-num">{p.leadTime}</strong></span>
-            </div>
-          </div>
-
-          {/* hover overlay 이미지 — 본문 영역 위에 fade-in */}
-          {p.hoverImage && (
-            <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-xl overflow-hidden pointer-events-none">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={p.hoverImage}
-                alt=""
-                className="w-full h-full object-cover"
-                loading="lazy"
-              />
-            </div>
-          )}
+        {/* 설명/Features/Min·Lead */}
+        <p className="text-slate-600 text-sm leading-relaxed mb-4" style={{ wordBreak: "keep-all" }}>
+          {p.description}
+        </p>
+        <ul className="grid grid-cols-2 gap-1.5 mb-5">
+          {p.features.map((f) => (
+            <li key={f} className="text-xs text-slate-600 flex items-start gap-1.5">
+              <CheckIcon size={14} className="flex-shrink-0 mt-0.5" style={{ color: p.accent }} />
+              <span style={{ wordBreak: "keep-all" }}>{f}</span>
+            </li>
+          ))}
+        </ul>
+        <div className="flex gap-4 text-sm text-slate-500 mb-4 pb-4 border-b border-slate-100">
+          <span>최소 <strong className="text-slate-800 pe-num">{p.minOrder}</strong></span>
+          <span className="text-slate-300">·</span>
+          <span>납기 <strong className="text-slate-800 pe-num">{p.leadTime}</strong></span>
         </div>
 
-        {/* 견적 받기 버튼 — overlay 영향 받지 않고 항상 보임 */}
+        {/* 견적 받기 버튼 */}
         <Link
           href="/quote"
           className="group/btn block text-center py-2.5 text-white text-sm font-semibold rounded-lg transition-opacity hover:opacity-90 relative z-10"
