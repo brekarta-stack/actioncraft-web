@@ -11,7 +11,6 @@ import {
   type IconKey,
 } from "@/components/icons";
 import { PatentBadge, PaperNetBg } from "@/components/paper-art";
-import PartnersMarquee from "@/components/PartnersMarquee";
 
 export const metadata: Metadata = {
   title: PAGE_META.about.title,
@@ -278,25 +277,6 @@ export default function AboutPage() {
             ))}
           </div>
         </div>
-      </section>
-
-      {/* Partners — logo marquee */}
-      <section className="py-16 md:py-20 bg-white overflow-hidden">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-10">
-            <p className="text-xs font-semibold uppercase tracking-widest text-slate-400 mb-3">
-              Partners
-            </p>
-            <h2 className="text-2xl md:text-3xl font-bold text-slate-900 mb-2 tracking-tight">
-              PE Studio와 함께한 파트너들
-            </h2>
-            <p className="text-slate-500 text-sm" style={{ wordBreak: "keep-all" }}>
-              국내 주요 기업·기관·관공서와 650건 이상의 프로젝트를 함께했습니다.
-            </p>
-          </div>
-        </div>
-        {/* 전체 너비 — padding 제거해서 로고가 엣지까지 흘러가도록 */}
-        <PartnersMarquee />
       </section>
 
       {/* Timeline */}
