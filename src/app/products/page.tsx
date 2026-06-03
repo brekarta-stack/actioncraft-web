@@ -101,7 +101,7 @@ export default function ProductsPage() {
             Services · {BRAND_TAGLINE_KR}
           </span>
           <h1 className="text-4xl md:text-5xl font-extrabold text-white mb-6 tracking-tight leading-[1.1]" style={{ wordBreak: "keep-all" }}>
-            <span className="pe-gradient-text">제작 안내</span>
+            <span className="pe-gradient-text">주문 제작</span>
           </h1>
           <p className="text-blue-200 text-lg max-w-2xl mx-auto" style={{ wordBreak: "keep-all" }}>
             Paper Engineering · Education Program · Editorial Design
