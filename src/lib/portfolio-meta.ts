@@ -8,17 +8,21 @@ import type { PortfolioItem } from "./portfolio-types";
 
 /**
  * 문자열을 URL slug 로 변환.
- *  - 한국어 글자는 그대로 유지 (한국 검색에 유리)
+ *  - 영문/숫자/대시만 유지 (Next.js dynamic route 안전성 보장)
+ *  - 한국어 글자는 제거 (percent-encoded URL 매핑 시 500 에러 방지)
  *  - 공백·구두점은 하이픈으로
  *  - 영문 대문자는 소문자
  *  - 연속 하이픈 / 양끝 하이픈 정리
+ *
+ * 한국어만 있는 title 은 빈 문자열을 반환 → deriveSlug 에서 case-{id} fallback 적용.
+ * 영문 slug 가 필요하면 어드민 폼의 "URL 슬러그" 필드에 직접 입력 권장.
  */
 export function slugify(input: string): string {
   return input
     .toLowerCase()
     .normalize("NFC")
-    // 한국어 글자(가-힣), 영문, 숫자만 남기고 나머지는 하이픈
-    .replace(/[^\p{Letter}\p{Number}]+/gu, "-")
+    // 영문, 숫자만 유지하고 나머지(한국어 포함)는 하이픈
+    .replace(/[^a-z0-9]+/g, "-")
     .replace(/-{2,}/g, "-")
     .replace(/^-|-$/g, "");
 }
@@ -28,7 +32,10 @@ export function slugify(input: string): string {
  * 우선순위: 명시된 slug → client + title → title → id 앞 8자
  */
 export function deriveSlug(item: Pick<PortfolioItem, "slug" | "client" | "title" | "id">): string {
-  if (item.slug && item.slug.trim()) return slugify(item.slug);
+  if (item.slug && item.slug.trim()) {
+    const s = slugify(item.slug);
+    if (s) return s;
+  }
   const parts = [item.client, item.title].filter(Boolean).map(slugify).filter(Boolean);
   const joined = parts.join("-");
   if (joined) return joined;
