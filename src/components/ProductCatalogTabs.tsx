@@ -167,7 +167,7 @@ const usageCategories: UsageCategory[] = [
     tagline: "캐릭터를 입체로, 브랜드를 손으로 만지는 굿즈",
     description:
       "기업 캐릭터 IP를 활용한 노벨티·전시 부스 굿즈·이벤트 프로모션 등 마케팅 도구로 적합합니다. 받는 순간 만들고 싶어지는 임팩트가 있습니다.",
-    topImage: "https://syrfoqwvsciicfbeemqv.supabase.co/storage/v1/object/public/uploads/666666666.jpg",
+    topImage: "https://syrfoqwvsciicfbeemqv.supabase.co/storage/v1/object/public/uploads/66666.png",
   },
   {
     key: "hobby",
@@ -179,7 +179,7 @@ const usageCategories: UsageCategory[] = [
     tagline: "부담 없이 시작해 완성하는 만들기 경험",
     description:
       "가족·동호회·개인 제작자를 위한 키트. 풀이나 가위 없이도 완성할 수 있는 부담 없는 만들기 경험을 제공합니다.",
-    topImage: "https://syrfoqwvsciicfbeemqv.supabase.co/storage/v1/object/public/uploads/77777777.jpg",
+    topImage: "https://syrfoqwvsciicfbeemqv.supabase.co/storage/v1/object/public/uploads/7777777777.jpg",
   },
 ];
 
