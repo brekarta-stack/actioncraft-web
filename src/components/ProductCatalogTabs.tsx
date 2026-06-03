@@ -140,6 +140,8 @@ interface UsageCategory {
   icon: IconKey;
   tagline: string;
   description: string;
+  /** 카드 상단 영역 이미지 URL (없으면 기존 아이콘 fallback) */
+  topImage?: string;
 }
 
 const usageCategories: UsageCategory[] = [
@@ -153,6 +155,7 @@ const usageCategories: UsageCategory[] = [
     tagline: "손으로 만들며 원리를 배우는 핸즈온 학습 도구",
     description:
       "어린이박물관 체험존·과학관 워크숍·평생학습관·학교 교구 등에 활용할 수 있습니다. 만드는 과정 자체가 학습이 되는 핸즈온 키트입니다.",
+    topImage: "https://syrfoqwvsciicfbeemqv.supabase.co/storage/v1/object/public/uploads/5555555.png",
   },
   {
     key: "promotion",
@@ -164,6 +167,7 @@ const usageCategories: UsageCategory[] = [
     tagline: "캐릭터를 입체로, 브랜드를 손으로 만지는 굿즈",
     description:
       "기업 캐릭터 IP를 활용한 노벨티·전시 부스 굿즈·이벤트 프로모션 등 마케팅 도구로 적합합니다. 받는 순간 만들고 싶어지는 임팩트가 있습니다.",
+    topImage: "https://syrfoqwvsciicfbeemqv.supabase.co/storage/v1/object/public/uploads/666666666.jpg",
   },
   {
     key: "hobby",
@@ -175,6 +179,7 @@ const usageCategories: UsageCategory[] = [
     tagline: "부담 없이 시작해 완성하는 만들기 경험",
     description:
       "가족·동호회·개인 제작자를 위한 키트. 풀이나 가위 없이도 완성할 수 있는 부담 없는 만들기 경험을 제공합니다.",
+    topImage: "https://syrfoqwvsciicfbeemqv.supabase.co/storage/v1/object/public/uploads/77777777.jpg",
   },
 ];
 
@@ -280,15 +285,26 @@ function ProductCard({ p }: { p: Product }) {
 function UsageCard({ u }: { u: UsageCategory }) {
   const matched = products.filter((p) => p.usages.includes(u.key));
   return (
-    <div className="pe-paper-lift bg-white border border-slate-100 rounded-2xl overflow-hidden pe-paper-shadow flex flex-col">
-      <div className={`bg-gradient-to-br ${u.bgGradient} h-44 flex items-center justify-center relative`}>
-        <div
-          className="w-20 h-20 rounded-2xl flex items-center justify-center pe-paper-shadow"
-          style={{ background: "white", color: u.accent }}
-          aria-hidden
-        >
-          <ProductIcon name={u.icon} size={40} />
-        </div>
+    <div className="pe-paper-lift group bg-white border border-slate-100 rounded-2xl overflow-hidden pe-paper-shadow flex flex-col">
+      {/* 상단 헤더 영역: topImage 있으면 이미지, 없으면 기존 아이콘 */}
+      <div className={`${u.topImage ? "" : `bg-gradient-to-br ${u.bgGradient}`} h-44 flex items-center justify-center relative overflow-hidden`}>
+        {u.topImage ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={u.topImage}
+            alt={`${u.name} 대표 이미지`}
+            className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.04]"
+            loading="lazy"
+          />
+        ) : (
+          <div
+            className="w-20 h-20 rounded-2xl flex items-center justify-center pe-paper-shadow"
+            style={{ background: "white", color: u.accent }}
+            aria-hidden
+          >
+            <ProductIcon name={u.icon} size={40} />
+          </div>
+        )}
       </div>
       <div className="p-6 flex flex-col flex-1">
         <div className="mb-3">
