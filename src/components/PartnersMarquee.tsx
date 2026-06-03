@@ -47,7 +47,7 @@ const PARTNERS_ROW1: Partner[] = [
   {
     id: "samsung-display",
     name: "삼성디스플레이",
-    logo: null, // 공개 SVG 미확인 — 정식 로고 URL 받으면 교체
+    logo: "https://upload.wikimedia.org/wikipedia/commons/5/58/Samsung_Display_Logo.jpg",
     width: 132,
   },
   {
@@ -93,7 +93,7 @@ const PARTNERS_ROW2: Partner[] = [
   {
     id: "gyeongju-museum",
     name: "경주박물관",
-    logo: null,
+    logo: "https://gyeongju.museum.go.kr/kor/images/common/logo.png",
     width: 112,
   },
   {
@@ -111,8 +111,14 @@ const PARTNERS_ROW2: Partner[] = [
   {
     id: "gongju",
     name: "공주시",
-    logo: null,
-    width: 72,
+    logo: "https://www.gongju.go.kr/images/brand/sub01/sub01_01_01_img01.jpg",
+    width: 96,
+  },
+  {
+    id: "mmca",
+    name: "국립현대미술관",
+    logo: null, // mmca.go.kr 사이트가 hotlink 차단 (400) — 정식 SVG 받으면 교체
+    width: 132,
   },
   {
     id: "seoul",
