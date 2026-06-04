@@ -485,13 +485,13 @@ function BlogPreview({
   createdAt: string;
 }) {
   return (
-    <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden">
+    <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden flex flex-col h-full">
       {/* 미리보기 헤더 바 */}
-      <div className="bg-slate-50 px-4 py-2 text-xs text-slate-500 font-medium border-b border-slate-100 flex items-center gap-2 sticky top-0 z-10">
+      <div className="bg-slate-50 px-4 py-2 text-xs text-slate-500 font-medium border-b border-slate-100 flex items-center gap-2 flex-shrink-0">
         <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
         실시간 미리보기 — 실제 발행된 모습
       </div>
-      <article className="px-6 py-8">
+      <article className="px-6 py-8 overflow-y-auto flex-1">
         {coverImage && (
           // eslint-disable-next-line @next/next/no-img-element
           <img
@@ -638,11 +638,8 @@ export default function BlogEditor({ post }: Props) {
         </div>
       </div>
 
-      {/* xl 이상: 좌 에디터 / 우 미리보기 2컬럼. 그 미만: 단일 컬럼 (미리보기 숨김) */}
-      <div className="grid grid-cols-1 xl:grid-cols-2 xl:gap-8 items-start">
-        <div>
-          {/* 커버 이미지 */}
-          <CoverImageSection coverImage={coverImage} onChange={setCoverImage} />
+      {/* 커버 + 메타 — 풀폭 상단 (양 컬럼 위) */}
+      <CoverImageSection coverImage={coverImage} onChange={setCoverImage} />
 
       {/* 메타 */}
       <div className="bg-white rounded-2xl border border-slate-200 p-6 mb-5 space-y-4">
@@ -690,33 +687,36 @@ export default function BlogEditor({ post }: Props) {
         </div>
       </div>
 
-      {/* WYSIWYG 에디터 */}
-      <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden">
-        {editor && <Toolbar editor={editor} />}
-        <div className="tiptap-editor" onClick={() => editor?.commands.focus()}>
-          <EditorContent editor={editor} />
-        </div>
-      </div>
-
-      <p className="text-xs text-slate-400 text-center mt-4">
-        Ctrl+B 굵게 · Ctrl+I 기울임 · Ctrl+Z 실행취소 · 이미지는 드래그&드롭 또는 툴바 버튼으로 삽입
-      </p>
-        </div>
-
-        {/* ── 우측 미리보기 컬럼 (xl 이상에서만 노출) ── */}
-        <aside className="hidden xl:block">
-          <div className="sticky top-6 max-h-[calc(100vh-3rem)] overflow-y-auto">
-            <BlogPreview
-              title={title}
-              excerpt={excerpt}
-              tag={tag}
-              coverImage={coverImage}
-              contentHtml={contentHtml}
-              createdAt={previewDate || post?.createdAt || ""}
-            />
+      {/* ── 에디터 + 미리보기 — 1:1 그리드 (xl 이상). items-stretch 로 동일 위치/높이 ── */}
+      <div className="grid grid-cols-1 xl:grid-cols-2 xl:gap-8 xl:items-stretch">
+        {/* WYSIWYG 에디터 (좌) */}
+        <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden flex flex-col">
+          {editor && <Toolbar editor={editor} />}
+          <div
+            className="tiptap-editor flex-1 overflow-y-auto"
+            onClick={() => editor?.commands.focus()}
+          >
+            <EditorContent editor={editor} />
           </div>
+        </div>
+
+        {/* 미리보기 (우, xl 이상에서만 노출) */}
+        <aside className="hidden xl:block">
+          <BlogPreview
+            title={title}
+            excerpt={excerpt}
+            tag={tag}
+            coverImage={coverImage}
+            contentHtml={contentHtml}
+            createdAt={previewDate || post?.createdAt || ""}
+          />
         </aside>
       </div>
+
+      <p className="text-xs text-slate-400 text-center mt-4" style={{ wordBreak: "keep-all" }}>
+        Ctrl+B 굵게 · Ctrl+I 기울임 · Ctrl+Z 실행취소 · 이미지는 드래그&드롭 또는 툴바 버튼으로 삽입 ·
+        본문 이미지는 <strong>클릭 후 Delete/Backspace</strong>로 삭제, 드래그로 위치 이동 가능합니다.
+      </p>
 
       {/* ── Floating Save Bar — 우하단 앵커 (스크롤 위치 무관 항상 노출) ── */}
       <div className="fixed bottom-6 right-6 z-40 flex items-end gap-2">

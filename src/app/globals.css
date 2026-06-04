@@ -231,7 +231,24 @@ a:focus-visible {
   font-size: 0.875em;
 }
 .tiptap-editor .ProseMirror pre code { background: none; color: inherit; padding: 0; }
-.tiptap-editor .ProseMirror img { border-radius: 0.75rem; max-width: 100%; display: block; margin: 0.75rem auto; }
+.tiptap-editor .ProseMirror img {
+  border-radius: 0.75rem;
+  max-width: 100%;
+  display: block;
+  margin: 0.75rem auto;
+  cursor: pointer;
+  transition: outline 0.15s ease, box-shadow 0.15s ease;
+}
+.tiptap-editor .ProseMirror img:hover {
+  outline: 2px solid #93c5fd;
+  outline-offset: 4px;
+}
+/* TipTap 이미지 선택 상태 — 클릭으로 선택됨. Delete/Backspace 로 삭제 */
+.tiptap-editor .ProseMirror img.ProseMirror-selectednode {
+  outline: 3px solid #1E22B2;
+  outline-offset: 4px;
+  box-shadow: 0 8px 25px -5px rgba(30, 34, 178, 0.35);
+}
 .tiptap-editor .ProseMirror hr { border: none; border-top: 1px solid #e2e8f0; margin: 1.5rem 0; }
 .tiptap-editor .ProseMirror a { color: #1E22B2; text-decoration: underline; }
 .tiptap-editor .ProseMirror mark { background: #fef9c3; border-radius: 0.2em; padding: 0.05em 0.2em; }
