@@ -98,10 +98,10 @@ export default async function PortfolioPage() {
             Portfolio
           </span>
           <h1 className="text-4xl md:text-5xl font-extrabold text-white mb-6 tracking-tight leading-[1.1]">
-            페이퍼 엔지니어링 <span className="pe-gradient-text">제작 사례</span>
+            <span className="pe-gradient-text">제작 사례</span>
           </h1>
           <p className="text-blue-200 text-lg max-w-2xl mx-auto" style={{ wordBreak: "keep-all" }}>
-            팝업북부터 액션 크래프트까지, PE Studio가 만들어온 작품들을 소개합니다.
+            Since 2013, PE Studio가 만들어온 대표 제품들을 소개합니다.
           </p>
         </div>
       </section>
