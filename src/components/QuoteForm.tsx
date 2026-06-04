@@ -12,6 +12,7 @@ import {
   ArrowRightIcon,
   type IconKey,
 } from "@/components/icons";
+import { PaperNetBg } from "@/components/paper-art";
 
 type ProductType =
   | "papercraft"
@@ -279,22 +280,32 @@ export default function QuoteForm() {
   const progressPct = ((step - 1) / (STEP_LABELS.length - 1)) * 100;
 
   return (
-    <div className="min-h-screen bg-slate-50 py-20 md:py-24 px-4">
-      <div className="max-w-3xl mx-auto">
-        {/* Header */}
-        <div className="text-center mb-14">
-          <p className="text-xs font-semibold uppercase tracking-widest mb-3" style={{ color: "#E91E8C" }}>
+    <>
+      {/* ── Hero (파란색) — /portfolio · /blog 와 동일 톤 ── */}
+      <section className="relative py-20 md:py-28 overflow-hidden" style={{ background: "#1E22B2" }}>
+        <div className="absolute inset-0 pointer-events-none opacity-25">
+          <div className="absolute -right-32 top-1/4 w-[70%] max-w-3xl rotate-6">
+            <PaperNetBg className="w-full h-auto" />
+          </div>
+        </div>
+        <div className="relative max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <span className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-full mb-6 bg-white/10 text-white border border-white/15">
+            <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
             Quick Quote · 1분이면 충분합니다
-          </p>
-          <h1 className="text-4xl md:text-5xl font-extrabold text-slate-900 mb-4 tracking-tight">
+          </span>
+          <h1 className="text-4xl md:text-5xl font-extrabold text-white mb-6 tracking-tight leading-[1.1]">
             <span className="pe-gradient-text">제작 문의</span>
           </h1>
-          <p className="text-slate-500 text-lg" style={{ wordBreak: "keep-all" }}>
+          <p className="text-blue-200 text-lg max-w-2xl mx-auto" style={{ wordBreak: "keep-all" }}>
             제품 정보를 입력하시면 영업일 1~2일 내 맞춤 견적을 보내드립니다.
           </p>
         </div>
+      </section>
 
-        {/* Progress Bar */}
+      {/* ── 본문 (회색 배경) ── */}
+      <div className="bg-slate-50 py-16 md:py-20 px-4">
+        <div className="max-w-3xl mx-auto">
+          {/* Progress Bar */}
         <div className="mb-12">
           <div className="flex items-center justify-between mb-2 text-xs">
             <span className="font-semibold text-slate-700">
@@ -921,7 +932,8 @@ export default function QuoteForm() {
             중간에 페이지를 벗어나도 작성 내용은 자동 저장되니 안심하고 작성해 주세요.
           </span>
         </div>
+        </div>
       </div>
-    </div>
+    </>
   );
 }
