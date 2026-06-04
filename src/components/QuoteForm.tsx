@@ -53,17 +53,20 @@ interface FormState {
   packaging: PackagingType;
 }
 
-const PRODUCTS: { id: ProductType; icon: IconKey; name: string; desc: string }[] = [
-  { id: "papercraft", icon: "paperToy", name: "페이퍼 크래프트",    desc: "기본적인 종이 모형에서 정교한 설계까지" },
-  { id: "action",     icon: "gear",     name: "액션 페이퍼 토이",   desc: "특허 기반 움직임 메커니즘 적용" },
-  { id: "popup",      icon: "sparkle",  name: "팝업북",              desc: "3D 팝업 카드 및 북 제작" },
-  { id: "foamboard",  icon: "box",      name: "폼보드(우드락)",     desc: "끼워 만드는 입체 구조" },
+/** /products 페이지(ProductCatalogTabs)와 동일한 대표 이미지 — 시각적 일관성 유지 */
+const SUPA_IMG = "https://syrfoqwvsciicfbeemqv.supabase.co/storage/v1/object/public/uploads";
+
+const PRODUCTS: { id: ProductType; icon: IconKey; name: string; desc: string; image?: string }[] = [
+  { id: "papercraft", icon: "paperToy", name: "페이퍼 크래프트",    desc: "기본적인 종이 모형에서 정교한 설계까지", image: `${SUPA_IMG}/1780305681024.png` },
+  { id: "action",     icon: "gear",     name: "액션 페이퍼 토이",   desc: "특허 기반 움직임 메커니즘 적용",          image: `${SUPA_IMG}/action%20craft.png` },
+  { id: "popup",      icon: "sparkle",  name: "팝업북",              desc: "3D 팝업 카드 및 북 제작",                 image: `${SUPA_IMG}/23213213.jpeg` },
+  { id: "foamboard",  icon: "box",      name: "폼보드(우드락)",     desc: "끼워 만드는 입체 구조",                   image: `${SUPA_IMG}/444444.png` },
 ];
 
-const USAGES: { id: ProductType; icon: IconKey; name: string; desc: string }[] = [
-  { id: "education", icon: "education", name: "교육/교구용", desc: "체험존·교구·STEAM 학습 도구" },
-  { id: "promotion", icon: "sparkle",   name: "홍보용",      desc: "브랜드 굿즈·캠페인·전시 부스" },
-  { id: "hobby",     icon: "pencil",    name: "취미용",      desc: "가족·동호회·개인 만들기 키트" },
+const USAGES: { id: ProductType; icon: IconKey; name: string; desc: string; image?: string }[] = [
+  { id: "education", icon: "education", name: "교육/교구용", desc: "체험존·교구·STEAM 학습 도구",     image: `${SUPA_IMG}/5555555.png` },
+  { id: "promotion", icon: "sparkle",   name: "홍보용",      desc: "브랜드 굿즈·캠페인·전시 부스",     image: `${SUPA_IMG}/66666.png` },
+  { id: "hobby",     icon: "pencil",    name: "취미용",      desc: "가족·동호회·개인 만들기 키트",     image: `${SUPA_IMG}/7777777777.jpg` },
 ];
 
 const PURPOSES = ["마케팅/홍보", "교육", "선물", "전시", "행사", "기타"];
@@ -391,7 +394,7 @@ export default function QuoteForm() {
                 </div>
 
                 {step1Mode === "product" ? (
-                  /* 2 × 2 제품 종류 */
+                  /* 2 × 2 제품 종류 — 상단 대표 이미지 (aspect-[2/1] object-cover) */
                   <div className="grid grid-cols-2 gap-5">
                     {PRODUCTS.map((product) => {
                       const isActive = form.product === product.id;
@@ -401,32 +404,41 @@ export default function QuoteForm() {
                           type="button"
                           onClick={() => update("product", product.id)}
                           aria-pressed={isActive}
-                          className={`p-4 rounded-2xl border-2 text-center transition-all pe-paper-lift ${
+                          className={`group rounded-2xl border-2 overflow-hidden text-center transition-all pe-paper-lift bg-white ${
                             isActive
-                              ? "border-[#1E22B2] bg-blue-50"
-                              : "border-slate-200 hover:border-blue-200 bg-white"
+                              ? "border-[#1E22B2] ring-2 ring-[#1E22B2]/15"
+                              : "border-slate-200 hover:border-blue-200"
                           }`}
                         >
-                          <div
-                            className="inline-flex items-center justify-center w-10 h-10 rounded-xl mb-2"
-                            style={{
-                              background: isActive ? "#1E22B2" : "#F0F2FF",
-                              color: isActive ? "white" : "#1E22B2",
-                            }}
-                            aria-hidden
-                          >
-                            <ProductIconRender name={product.icon} />
+                          {/* 상단 이미지 영역 */}
+                          <div className="aspect-[2/1] relative overflow-hidden bg-slate-50">
+                            {product.image ? (
+                              // eslint-disable-next-line @next/next/no-img-element
+                              <img
+                                src={product.image}
+                                alt={`${product.name} 대표 이미지`}
+                                className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.04]"
+                                loading="lazy"
+                              />
+                            ) : (
+                              <div className="absolute inset-0 flex items-center justify-center text-slate-300" aria-hidden>
+                                <ProductIconRender name={product.icon} />
+                              </div>
+                            )}
                           </div>
-                          <div className="font-semibold text-slate-900 text-sm">{product.name}</div>
-                          <div className="text-xs text-slate-500 mt-0.5" style={{ wordBreak: "keep-all" }}>
-                            {product.desc}
+                          {/* 텍스트 영역 */}
+                          <div className={`p-4 ${isActive ? "bg-blue-50" : ""}`}>
+                            <div className="font-semibold text-slate-900 text-sm">{product.name}</div>
+                            <div className="text-xs text-slate-500 mt-0.5" style={{ wordBreak: "keep-all" }}>
+                              {product.desc}
+                            </div>
                           </div>
                         </button>
                       );
                     })}
                   </div>
                 ) : (
-                  /* 1 × 3 용도별 */
+                  /* 1 × 3 용도별 — 정사각형 이미지 (object-contain, 흰 배경 보존) */
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
                     {USAGES.map((usage) => {
                       const isActive = form.product === usage.id;
@@ -436,25 +448,34 @@ export default function QuoteForm() {
                           type="button"
                           onClick={() => update("product", usage.id)}
                           aria-pressed={isActive}
-                          className={`p-4 rounded-2xl border-2 text-center transition-all pe-paper-lift ${
+                          className={`group rounded-2xl border-2 overflow-hidden text-center transition-all pe-paper-lift bg-white ${
                             isActive
-                              ? "border-[#06C6C8] bg-cyan-50"
-                              : "border-slate-200 hover:border-cyan-200 bg-white"
+                              ? "border-[#06C6C8] ring-2 ring-[#06C6C8]/15"
+                              : "border-slate-200 hover:border-cyan-200"
                           }`}
                         >
-                          <div
-                            className="inline-flex items-center justify-center w-10 h-10 rounded-xl mb-2"
-                            style={{
-                              background: isActive ? "#06C6C8" : "#E0FAFB",
-                              color: isActive ? "white" : "#06C6C8",
-                            }}
-                            aria-hidden
-                          >
-                            <ProductIconRender name={usage.icon} />
+                          {/* 상단 정사각형 이미지 영역 — object-contain + 흰 배경 */}
+                          <div className="aspect-square relative overflow-hidden bg-white">
+                            {usage.image ? (
+                              // eslint-disable-next-line @next/next/no-img-element
+                              <img
+                                src={usage.image}
+                                alt={`${usage.name} 대표 이미지`}
+                                className="absolute inset-0 w-full h-full object-contain p-3 transition-transform duration-500 group-hover:scale-[1.04]"
+                                loading="lazy"
+                              />
+                            ) : (
+                              <div className="absolute inset-0 flex items-center justify-center text-slate-300" aria-hidden>
+                                <ProductIconRender name={usage.icon} />
+                              </div>
+                            )}
                           </div>
-                          <div className="font-semibold text-slate-900 text-sm">{usage.name}</div>
-                          <div className="text-xs text-slate-500 mt-0.5" style={{ wordBreak: "keep-all" }}>
-                            {usage.desc}
+                          {/* 텍스트 영역 */}
+                          <div className={`p-4 ${isActive ? "bg-cyan-50" : ""}`}>
+                            <div className="font-semibold text-slate-900 text-sm">{usage.name}</div>
+                            <div className="text-xs text-slate-500 mt-0.5" style={{ wordBreak: "keep-all" }}>
+                              {usage.desc}
+                            </div>
                           </div>
                         </button>
                       );
