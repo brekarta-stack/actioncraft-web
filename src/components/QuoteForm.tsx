@@ -345,12 +345,24 @@ export default function QuoteForm() {
             {/* Step 1: Product Selection */}
             {step === 1 && (
               <div>
-                <h2 className="text-xl font-bold text-slate-900 mb-1 tracking-tight">
-                  어떤 제품을 원하시나요?
-                </h2>
-                <p className="text-slate-500 text-sm mb-4" style={{ wordBreak: "keep-all" }}>
-                  제품 종류를 알고 계시면 종류별로, 잘 모르시면 용도별로 선택하세요.
-                </p>
+                <div className="flex items-start justify-between gap-3 mb-4">
+                  <div className="flex-1">
+                    <h2 className="text-xl font-bold text-slate-900 mb-1 tracking-tight">
+                      어떤 제품을 원하시나요?
+                    </h2>
+                    <p className="text-slate-500 text-sm" style={{ wordBreak: "keep-all" }}>
+                      제품 종류를 알고 계시면 종류별로, 잘 모르시면 용도별로 선택하세요.
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => { update("product", "unsure"); setStep(4); }}
+                    className="text-xs sm:text-sm px-3 py-2 rounded-lg border border-slate-300 bg-white text-slate-700 hover:border-[#1E22B2] hover:text-[#1E22B2] hover:bg-blue-50 transition-colors font-medium whitespace-nowrap flex-shrink-0"
+                    title="이후 단계를 건너뛰고 연락처로 바로 이동"
+                  >
+                    담당자와 상의 →
+                  </button>
+                </div>
 
                 {/* 선택 모드 토글 */}
                 <div className="inline-flex p-1 bg-slate-100 rounded-xl mb-5">
@@ -475,13 +487,23 @@ export default function QuoteForm() {
               const minDateISO = recommended.toISOString().split("T")[0];
               return (
                 <div className="space-y-10">
-                  <div>
-                    <h2 className="text-xl font-bold text-slate-900 mb-1 tracking-tight">
-                      제작 옵션을 알려주세요
-                    </h2>
-                    <p className="text-slate-500 text-sm" style={{ wordBreak: "keep-all" }}>
-                      샘플링·수량·납기·포장 방식을 함께 알려주시면 가장 정확한 견적을 보내드립니다.
-                    </p>
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex-1">
+                      <h2 className="text-xl font-bold text-slate-900 mb-1 tracking-tight">
+                        제작 옵션을 알려주세요
+                      </h2>
+                      <p className="text-slate-500 text-sm" style={{ wordBreak: "keep-all" }}>
+                        샘플링·수량·납기·포장 방식을 함께 알려주시면 가장 정확한 견적을 보내드립니다.
+                      </p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => { update("product", "unsure"); setStep(4); }}
+                      className="text-xs sm:text-sm px-3 py-2 rounded-lg border border-slate-300 bg-white text-slate-700 hover:border-[#1E22B2] hover:text-[#1E22B2] hover:bg-blue-50 transition-colors font-medium whitespace-nowrap flex-shrink-0"
+                      title="이후 단계를 건너뛰고 연락처로 바로 이동"
+                    >
+                      담당자와 상의 →
+                    </button>
                   </div>
 
                   {/* 1) 샘플링 체크박스 */}
@@ -627,13 +649,23 @@ export default function QuoteForm() {
             {/* Step 2: Design Options (NEW — 이전 Step 3 자리로 이동 + 확장) */}
             {step === 2 && (
               <div className="space-y-10">
-                <div>
-                  <h2 className="text-xl font-bold text-slate-900 mb-1 tracking-tight">
-                    디자인을 어떻게 만들까요?
-                  </h2>
-                  <p className="text-slate-500 text-sm" style={{ wordBreak: "keep-all" }}>
-                    참고 자료와 표현 스타일을 알려주시면 더 정확한 견적이 가능합니다.
-                  </p>
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex-1">
+                    <h2 className="text-xl font-bold text-slate-900 mb-1 tracking-tight">
+                      디자인을 어떻게 만들까요?
+                    </h2>
+                    <p className="text-slate-500 text-sm" style={{ wordBreak: "keep-all" }}>
+                      참고 자료와 표현 스타일을 알려주시면 더 정확한 견적이 가능합니다.
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => { update("product", "unsure"); setStep(4); }}
+                    className="text-xs sm:text-sm px-3 py-2 rounded-lg border border-slate-300 bg-white text-slate-700 hover:border-[#1E22B2] hover:text-[#1E22B2] hover:bg-blue-50 transition-colors font-medium whitespace-nowrap flex-shrink-0"
+                    title="이후 단계를 건너뛰고 연락처로 바로 이동"
+                  >
+                    담당자와 상의 →
+                  </button>
                 </div>
 
                 {/* 1) 참고 자료 업로드 — 필수 */}
@@ -825,19 +857,6 @@ export default function QuoteForm() {
                 </button>
               ) : (
                 <div />
-              )}
-              {step < 4 && (
-                <button
-                  type="button"
-                  onClick={() => {
-                    update("product", "unsure");
-                    setStep(4);
-                  }}
-                  className="text-xs sm:text-sm text-slate-500 hover:text-[#1E22B2] underline-offset-4 hover:underline transition-colors"
-                  title="이후 단계를 건너뛰고 담당자와 직접 상의합니다"
-                >
-                  잘 모르겠어요 — 담당자와 상의하기
-                </button>
               )}
               {step < 4 ? (
                 <button
