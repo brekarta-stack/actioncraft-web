@@ -232,7 +232,7 @@ export default function QuoteForm() {
             <CheckIcon size={32} strokeWidth={2.5} />
           </div>
           <h2 className="text-2xl font-bold text-slate-900 mb-3 tracking-tight">
-            견적 문의가 접수됐습니다
+            제작 문의가 접수됐습니다
           </h2>
           <p className="text-slate-500 mb-8" style={{ wordBreak: "keep-all" }}>
             담당자가 영업일 기준 <strong className="text-slate-900">1~2일 내</strong>로 회신 드립니다.
@@ -266,7 +266,7 @@ export default function QuoteForm() {
             className="w-full py-3 font-semibold rounded-xl text-white transition-opacity hover:opacity-90"
             style={{ background: "linear-gradient(135deg, #06C6C8, #E91E8C)" }}
           >
-            새 견적 문의하기
+            새 제작 문의하기
           </button>
         </div>
       </div>
@@ -284,7 +284,7 @@ export default function QuoteForm() {
             Quick Quote · 1분이면 충분합니다
           </p>
           <h1 className="text-4xl md:text-5xl font-extrabold text-slate-900 mb-4 tracking-tight">
-            <span className="pe-gradient-text">견적 문의</span>
+            <span className="pe-gradient-text">제작 문의</span>
           </h1>
           <p className="text-slate-500 text-lg" style={{ wordBreak: "keep-all" }}>
             제품 정보를 입력하시면 영업일 1~2일 내 맞춤 견적을 보내드립니다.
@@ -852,7 +852,7 @@ export default function QuoteForm() {
                   }`}
                   style={canProceed() && !saving ? { background: "linear-gradient(135deg, #06C6C8, #E91E8C)" } : {}}
                 >
-                  {saving ? "제출 중…" : "견적 문의 제출"}
+                  {saving ? "제출 중…" : "제작 문의 제출"}
                   {!saving && <ArrowRightIcon size={18} />}
                 </button>
               )}

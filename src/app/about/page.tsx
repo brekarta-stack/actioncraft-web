@@ -104,7 +104,7 @@ const timeline = [
   { year: "2019", event: "누적 특허 11종 달성, KAIST 협력 교육 프로그램 개발" },
   { year: "2021", event: "현대백화점·경주박물관 등 주요 기관 납품 본격화" },
   { year: "2023", event: "누적 납품 650건 돌파, 기업 굿즈 서비스 확장" },
-  { year: "2024", event: "온라인 견적 문의 서비스 론칭" },
+  { year: "2024", event: "온라인 제작 문의 서비스 론칭" },
 ];
 
 export default function AboutPage() {

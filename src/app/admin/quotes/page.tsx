@@ -52,7 +52,7 @@ export default async function AdminQuotesPage() {
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">견적 문의</h1>
+          <h1 className="text-2xl font-bold text-slate-900">제작 문의</h1>
           <p className="text-slate-500 text-sm mt-0.5">총 {quotes.length}건</p>
         </div>
       </div>
@@ -70,7 +70,7 @@ export default async function AdminQuotesPage() {
       {quotes.length === 0 && !error ? (
         <div className="bg-white rounded-2xl border border-slate-200 p-12 text-center text-slate-400">
           <p className="text-4xl mb-3">📋</p>
-          <p className="font-medium text-slate-600">아직 접수된 견적 문의가 없습니다.</p>
+          <p className="font-medium text-slate-600">아직 접수된 제작 문의가 없습니다.</p>
         </div>
       ) : (
         <div className="space-y-4">

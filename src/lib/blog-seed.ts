@@ -257,7 +257,7 @@ const FigChecklist = oneLine(`<figure class="not-prose my-8 rounded-2xl overflow
       .join("")}
   </g>
 </svg>
-<figcaption class="text-xs text-slate-600 text-center py-2 bg-white/60">▲ 견적 문의 전 5가지만 확인해도 외주 실패를 크게 줄일 수 있습니다.</figcaption>
+<figcaption class="text-xs text-slate-600 text-center py-2 bg-white/60">▲ 제작 문의 전 5가지만 확인해도 외주 실패를 크게 줄일 수 있습니다.</figcaption>
 </figure>`);
 
 // 인지 효과 3원

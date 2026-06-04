@@ -84,7 +84,7 @@ export default async function AdminDashboard() {
             </svg>
           </div>
           <p className="text-3xl font-bold text-slate-900 mb-0.5">{recentQuotes.length > 5 ? "6+" : recentQuotes.length}</p>
-          <p className="text-sm text-slate-500">견적 문의</p>
+          <p className="text-sm text-slate-500">제작 문의</p>
           <p className="text-xs text-slate-400 mt-1">최근 6건 기준</p>
         </Link>
 
@@ -121,10 +121,10 @@ export default async function AdminDashboard() {
         </Link>
       </div>
 
-      {/* ── 최근 견적 문의 ── */}
+      {/* ── 최근 제작 문의 ── */}
       <div className="bg-white rounded-2xl border border-slate-200 mb-6">
         <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100">
-          <h2 className="font-bold text-slate-900">최근 견적 문의</h2>
+          <h2 className="font-bold text-slate-900">최근 제작 문의</h2>
           <Link href="/admin/quotes" className="text-xs font-semibold hover:underline" style={{ color: "#1E22B2" }}>
             전체 보기 →
           </Link>

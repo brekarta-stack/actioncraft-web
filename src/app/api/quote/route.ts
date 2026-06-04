@@ -76,7 +76,7 @@ async function sendInquiryEmail(s: QuoteSubmission): Promise<void> {
   const html = `<!doctype html><html><body style="margin:0;padding:24px;background:#f4f4f5;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
 <div style="max-width:640px;margin:0 auto;background:#fff;border-radius:12px;overflow:hidden;border:1px solid #e5e7eb;">
   <div style="padding:24px 28px 12px;border-bottom:1px solid #e5e7eb;">
-    <div style="font-size:13px;letter-spacing:1px;color:#6366f1;font-weight:700;">PAPERCRAFT.KR · 새 견적 문의</div>
+    <div style="font-size:13px;letter-spacing:1px;color:#6366f1;font-weight:700;">PAPERCRAFT.KR · 새 제작 문의</div>
     <h1 style="margin:8px 0 0;font-size:22px;color:#111;">${esc(s.name)} · ${esc(productLabel)}</h1>
   </div>
   <table style="width:100%;border-collapse:collapse;font-size:14px;">${tableHtml}</table>
@@ -87,10 +87,10 @@ async function sendInquiryEmail(s: QuoteSubmission): Promise<void> {
 </div></body></html>`;
 
   const textLines = rows.map(([k, v]) => `${k}: ${v}`).join("\n");
-  const text = `[papercraft.kr] 새 견적 문의\n\n${textLines}\n\n전체 목록: ${siteUrl}/admin/quotes\n`;
+  const text = `[papercraft.kr] 새 제작 문의\n\n${textLines}\n\n전체 목록: ${siteUrl}/admin/quotes\n`;
 
   const resend = new Resend(apiKey);
-  const subject = `[papercraft.kr] 새 견적 문의 — ${s.name} · ${productLabel}`;
+  const subject = `[papercraft.kr] 새 제작 문의 — ${s.name} · ${productLabel}`;
   await resend.emails.send({
     from,
     to:      [to],
@@ -145,7 +145,7 @@ function checkRateLimit(ip: string): boolean {
   return true;
 }
 
-// POST /api/quote — 견적 문의 저장 (누구나 가능)
+// POST /api/quote — 제작 문의 저장 (누구나 가능)
 export async function POST(request: Request) {
   /* 레이트 리밋 */
   const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";

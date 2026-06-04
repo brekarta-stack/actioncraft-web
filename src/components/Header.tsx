@@ -66,7 +66,7 @@ export default function Header() {
               className="hidden sm:inline-flex items-center px-4 py-2 text-white text-sm font-semibold rounded-lg transition-opacity hover:opacity-90"
               style={{ background: "linear-gradient(135deg, #06C6C8, #1E22B2)" }}
             >
-              견적 문의
+              제작 문의
             </Link>
             <button
               onClick={() => setIsOpen(!isOpen)}
@@ -114,7 +114,7 @@ export default function Header() {
               className="block px-4 py-2.5 text-white text-sm font-semibold rounded-lg transition-opacity hover:opacity-90 text-center mt-2"
               style={{ background: "linear-gradient(135deg, #06C6C8, #1E22B2)" }}
             >
-              견적 문의
+              제작 문의
             </Link>
           </div>
         </div>
