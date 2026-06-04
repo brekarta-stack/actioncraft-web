@@ -42,12 +42,15 @@ export default async function AdminDashboard() {
     deliveryDate: r.delivery_date,
     purpose: r.purpose,
     customDesign: r.custom_design,
+    styleType:    r.style_type ?? "",
+    productText:  r.product_text ?? "",
     colorRequest: r.color_request,
     notes: r.notes,
     name: r.name,
     email: r.email,
     phone: r.phone,
     fileName: r.file_name,
+    logoFileName: r.logo_file_name ?? "",
     createdAt: r.created_at,
   }));
 

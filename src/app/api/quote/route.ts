@@ -32,20 +32,28 @@ async function sendInquiryEmail(s: QuoteSubmission): Promise<void> {
   }
 
   const productLabel = PRODUCT_LABEL[s.product] ?? s.product;
+  const STYLE_LABEL: Record<string, string> = {
+    realism:      "리얼리즘 (현실적·사진처럼)",
+    characterize: "캐릭터라이즈 (캐릭터 원안 최대한 살림)",
+    expert:       "전문가 위임 (PE Studio 해석)",
+  };
   const rows: Array<[string, string]> = [
-    ["제품 유형",     productLabel],
-    ["수량",          s.quantity || "—"],
-    ["희망 납기",     s.deliveryDate || "—"],
-    ["용도",          s.purpose || "—"],
-    ["맞춤 디자인",   s.customDesign === "yes" ? "예 (시안 의뢰)" : s.customDesign === "no" ? "아니오 (기존 디자인 활용)" : "—"],
-    ["별색·옵션",     s.colorRequest || "—"],
-    ["기타 메모",     s.notes || "—"],
-    ["담당자 이름",   s.name],
-    ["이메일",        s.email],
-    ["연락처",        s.phone || "—"],
-    ["첨부 파일",     s.fileName || "—"],
-    ["접수 일시",     s.createdAt],
-    ["문의 ID",       s.id],
+    ["제품 유형",         productLabel],
+    ["수량",              s.quantity || "—"],
+    ["희망 납기",         s.deliveryDate || "—"],
+    ["용도",              s.purpose || "—"],
+    ["디자인 스타일",     s.styleType ? (STYLE_LABEL[s.styleType] ?? s.styleType) : "—"],
+    ["맞춤 디자인 (구)",  s.customDesign === "yes" ? "예" : s.customDesign === "no" ? "아니오" : "—"],
+    ["제품 삽입 문구",    s.productText || "—"],
+    ["색상·디자인 요청",  s.colorRequest || "—"],
+    ["기타 메모",         s.notes || "—"],
+    ["담당자 이름",       s.name],
+    ["이메일",            s.email],
+    ["연락처",            s.phone || "—"],
+    ["참고 자료 파일",    s.fileName || "—"],
+    ["회사 로고 파일",    s.logoFileName || "—"],
+    ["접수 일시",         s.createdAt],
+    ["문의 ID",           s.id],
   ];
 
   const esc = (v: string) =>
@@ -93,13 +101,20 @@ const QuoteSchema = z.object({
   quantity:     z.string().max(20).default(""),
   deliveryDate: z.string().max(30).default(""),
   purpose:      z.string().max(100).default(""),
+  // 기존 customDesign 은 호환 유지 (구버전 제출 케이스), 신규 폼은 styleType 사용
   customDesign: z.enum(["yes", "no", ""]).default(""),
+  // 신규: 디자인 스타일 (리얼리즘/캐릭터라이즈/전문가 위임)
+  styleType:    z.enum(["realism", "characterize", "expert", ""]).default(""),
+  // 신규: 제품에 삽입할 문구
+  productText:  z.string().max(200).default(""),
   colorRequest: z.string().max(500).default(""),
   notes:        z.string().max(500).default(""),
   name:         z.string().min(1, "이름은 필수입니다").max(100),
   email:        z.string().email("올바른 이메일을 입력하세요").max(200),
   phone:        z.string().max(30).default(""),
   fileName:     z.string().max(255).default(""),
+  // 신규: 회사 로고 파일명 (선택)
+  logoFileName: z.string().max(255).default(""),
 });
 
 /* ── 단순 IP 레이트 리밋 (분당 5회) ── */
@@ -149,29 +164,35 @@ export async function POST(request: Request) {
     deliveryDate: data.deliveryDate,
     purpose:      data.purpose,
     customDesign: data.customDesign,
+    styleType:    data.styleType,
+    productText:  data.productText,
     colorRequest: data.colorRequest,
     notes:        data.notes,
     name:         data.name,
     email:        data.email,
     phone:        data.phone,
     fileName:     data.fileName,
+    logoFileName: data.logoFileName,
     createdAt:    new Date().toISOString(),
   };
 
   const { error } = await supabaseAdmin.from("quotes").insert({
-    id:            submission.id,
-    product:       submission.product,
-    quantity:      submission.quantity,
-    delivery_date: submission.deliveryDate,
-    purpose:       submission.purpose,
-    custom_design: submission.customDesign,
-    color_request: submission.colorRequest,
-    notes:         submission.notes,
-    name:          submission.name,
-    email:         submission.email,
-    phone:         submission.phone,
-    file_name:     submission.fileName,
-    created_at:    submission.createdAt,
+    id:             submission.id,
+    product:        submission.product,
+    quantity:       submission.quantity,
+    delivery_date:  submission.deliveryDate,
+    purpose:        submission.purpose,
+    custom_design:  submission.customDesign,
+    style_type:     submission.styleType,
+    product_text:   submission.productText,
+    color_request:  submission.colorRequest,
+    notes:          submission.notes,
+    name:           submission.name,
+    email:          submission.email,
+    phone:          submission.phone,
+    file_name:      submission.fileName,
+    logo_file_name: submission.logoFileName,
+    created_at:     submission.createdAt,
   });
 
   if (error) {
@@ -211,12 +232,15 @@ export async function GET() {
     deliveryDate: r.delivery_date,
     purpose:      r.purpose,
     customDesign: r.custom_design,
+    styleType:    r.style_type ?? "",
+    productText:  r.product_text ?? "",
     colorRequest: r.color_request,
     notes:        r.notes,
     name:         r.name,
     email:        r.email,
     phone:        r.phone,
     fileName:     r.file_name,
+    logoFileName: r.logo_file_name ?? "",
     createdAt:    r.created_at,
   }));
 

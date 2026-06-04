@@ -24,18 +24,26 @@ type ProductType =
   | "hobby"
   | "";
 
+type StyleType = "realism" | "characterize" | "expert" | "";
+
 interface FormState {
   product: ProductType;
   quantity: string;
   deliveryDate: string;
   purpose: string;
-  customDesign: "yes" | "no" | "";
+  /** Step 2 디자인 스타일 — 리얼리즘 / 캐릭터라이즈 / 전문가 위임 */
+  styleType: StyleType;
+  /** 제품에 삽입할 문구 (회사명·슬로건 등) */
+  productText: string;
   colorRequest: string;
   notes: string;
   name: string;
   email: string;
   phone: string;
+  /** 참고 자료 파일명 (필수) — 이미지·ai·문서 */
   fileName: string;
+  /** 회사 로고 파일명 (선택) */
+  logoFileName: string;
 }
 
 const PRODUCTS: { id: ProductType; icon: IconKey; name: string; desc: string }[] = [
@@ -53,21 +61,29 @@ const USAGES: { id: ProductType; icon: IconKey; name: string; desc: string }[] =
 
 const PURPOSES = ["마케팅/홍보", "교육", "선물", "전시", "행사", "기타"];
 
-const STEP_LABELS = ["제품 선택", "수량 & 납기", "디자인 옵션", "연락처"];
+const STEP_LABELS = ["제품 선택", "디자인 옵션", "수량 & 납기", "연락처"];
 
 const INITIAL_FORM: FormState = {
   product: "",
   quantity: "",
   deliveryDate: "",
   purpose: "",
-  customDesign: "",
+  styleType: "",
+  productText: "",
   colorRequest: "",
   notes: "",
   name: "",
   email: "",
   phone: "",
   fileName: "",
+  logoFileName: "",
 };
+
+const STYLE_OPTIONS: { value: StyleType; label: string; desc: string }[] = [
+  { value: "realism",      label: "리얼리즘",     desc: "현실적 스타일로, 사진과 같은 형태로 구현" },
+  { value: "characterize", label: "캐릭터라이즈", desc: "캐릭터 원안의 모습을 최대한 살려 구현" },
+  { value: "expert",       label: "전문가 위임",  desc: "PE Studio가 적절하게 해석하여 적용" },
+];
 
 const STORAGE_KEY = "pe-quote-form-draft";
 
@@ -131,8 +147,10 @@ export default function QuoteForm() {
 
   const canProceed = () => {
     if (step === 1) return form.product !== "";
-    if (step === 2) return form.quantity !== "" && form.deliveryDate !== "";
-    if (step === 3) return form.customDesign !== "";
+    // Step 2: 디자인 옵션 — 참고 자료 + 스타일 필수
+    if (step === 2) return form.fileName !== "" && form.styleType !== "";
+    // Step 3: 수량 & 납기
+    if (step === 3) return form.quantity !== "" && form.deliveryDate !== "";
     if (step === 4) return form.name !== "" && form.email !== "" && form.phone !== "";
     return false;
   };
@@ -418,8 +436,8 @@ export default function QuoteForm() {
               </div>
             )}
 
-            {/* Step 2: Quantity & Delivery */}
-            {step === 2 && (
+            {/* Step 3: Quantity & Delivery (이전 Step 2) */}
+            {step === 3 && (
               <div className="space-y-6">
                 <div>
                   <h2 className="text-xl font-bold text-slate-900 mb-1 tracking-tight">
@@ -486,41 +504,54 @@ export default function QuoteForm() {
             )}
 
             {/* Step 3: Design Options */}
-            {step === 3 && (
+            {/* Step 2: Design Options (NEW — 이전 Step 3 자리로 이동 + 확장) */}
+            {step === 2 && (
               <div className="space-y-6">
                 <div>
                   <h2 className="text-xl font-bold text-slate-900 mb-1 tracking-tight">
-                    디자인 옵션을 선택해 주세요
+                    디자인을 어떻게 만들까요?
                   </h2>
                   <p className="text-slate-500 text-sm" style={{ wordBreak: "keep-all" }}>
-                    커스텀 디자인 적용 여부를 알려주세요.
+                    참고 자료와 표현 스타일을 알려주시면 더 정확한 견적이 가능합니다.
                   </p>
                 </div>
+
+                {/* 1) 참고 자료 업로드 — 필수 */}
+                <div>
+                  <label className="block text-sm font-semibold text-slate-700 mb-2">
+                    참고 자료 업로드 <span style={{ color: "#E91E8C" }}>*</span>
+                  </label>
+                  <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-slate-300 rounded-xl cursor-pointer hover:border-[#1E22B2] hover:bg-blue-50 transition-colors">
+                    <BoxIcon size={28} className="text-slate-400 mb-1" />
+                    <span className="text-sm text-slate-700 font-medium" style={{ wordBreak: "keep-all" }}>
+                      {form.fileName || "파일을 클릭하거나 드래그하여 첨부"}
+                    </span>
+                    <span className="text-xs text-slate-400 mt-1">PDF · AI · PNG · JPG · ZIP (최대 10MB)</span>
+                    <input
+                      type="file"
+                      className="hidden"
+                      accept=".pdf,.ai,.png,.jpg,.jpeg,.zip"
+                      onChange={(e) => update("fileName", e.target.files?.[0]?.name ?? "")}
+                    />
+                  </label>
+                  <p className="text-xs text-slate-500 mt-2" style={{ wordBreak: "keep-all" }}>
+                    만들고자 하는 대상/캐릭터의 이미지, ai파일, 참고 문서 등을 업로드해주세요.
+                  </p>
+                </div>
+
+                {/* 2) 디자인 스타일 — 필수 */}
                 <div>
                   <span className="block text-sm font-semibold text-slate-700 mb-3">
-                    커스텀 디자인 <span style={{ color: "#E91E8C" }}>*</span>
+                    디자인 스타일 <span style={{ color: "#E91E8C" }}>*</span>
                   </span>
-                  <div className="grid grid-cols-2 gap-3">
-                    {[
-                      {
-                        value: "yes",
-                        label: "커스텀 필요",
-                        desc: "로고·색상·이미지 등 맞춤 디자인 적용",
-                        icon: "pencil" as IconKey,
-                      },
-                      {
-                        value: "no",
-                        label: "기본 디자인",
-                        desc: "PE Studio 기본 디자인으로 제작",
-                        icon: "box" as IconKey,
-                      },
-                    ].map((opt) => {
-                      const isActive = form.customDesign === opt.value;
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    {STYLE_OPTIONS.map((opt) => {
+                      const isActive = form.styleType === opt.value;
                       return (
                         <button
                           key={opt.value}
                           type="button"
-                          onClick={() => update("customDesign", opt.value)}
+                          onClick={() => update("styleType", opt.value as string)}
                           aria-pressed={isActive}
                           className={`p-4 rounded-2xl border-2 text-left transition-all pe-paper-lift ${
                             isActive
@@ -528,23 +559,30 @@ export default function QuoteForm() {
                               : "border-slate-200 hover:border-blue-200"
                           }`}
                         >
-                          <div
-                            className="inline-flex items-center justify-center w-10 h-10 rounded-xl mb-2"
-                            style={{
-                              background: isActive ? "#1E22B2" : "#F0F2FF",
-                              color: isActive ? "white" : "#1E22B2",
-                            }}
-                            aria-hidden
-                          >
-                            {opt.icon === "pencil" ? <PencilIcon size={24} /> : <BoxIcon size={24} />}
-                          </div>
-                          <div className="font-semibold text-slate-900 text-sm">{opt.label}</div>
-                          <div className="text-xs text-slate-500 mt-1" style={{ wordBreak: "keep-all" }}>{opt.desc}</div>
+                          <div className="font-semibold text-slate-900 text-sm mb-1">{opt.label}</div>
+                          <div className="text-xs text-slate-500" style={{ wordBreak: "keep-all" }}>{opt.desc}</div>
                         </button>
                       );
                     })}
                   </div>
                 </div>
+
+                {/* 3) 제품에 삽입할 문구 */}
+                <div>
+                  <label htmlFor="productText" className="block text-sm font-semibold text-slate-700 mb-2">
+                    제품에 삽입할 문구
+                  </label>
+                  <input
+                    id="productText"
+                    type="text"
+                    placeholder="예: 회사명·슬로건·이벤트명·QR 코드 옆 문구"
+                    value={form.productText}
+                    onChange={(e) => update("productText", e.target.value)}
+                    className="w-full px-4 py-3 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#1E22B2]/30 focus:border-[#1E22B2] text-slate-900"
+                  />
+                </div>
+
+                {/* 4) 색상 / 디자인 요청사항 */}
                 <div>
                   <label htmlFor="color" className="block text-sm font-semibold text-slate-700 mb-2">
                     색상 / 디자인 요청사항
@@ -558,6 +596,8 @@ export default function QuoteForm() {
                     className="w-full px-4 py-3 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#1E22B2]/30 focus:border-[#1E22B2] text-slate-900 resize-none"
                   />
                 </div>
+
+                {/* 5) 추가 메모 */}
                 <div>
                   <label htmlFor="notes" className="block text-sm font-semibold text-slate-700 mb-2">
                     추가 메모
@@ -570,6 +610,24 @@ export default function QuoteForm() {
                     onChange={(e) => update("notes", e.target.value)}
                     className="w-full px-4 py-3 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#1E22B2]/30 focus:border-[#1E22B2] text-slate-900 resize-none"
                   />
+                </div>
+
+                {/* 6) 회사 로고 업로드 — 선택 */}
+                <div>
+                  <label className="block text-sm font-semibold text-slate-700 mb-2">
+                    회사 로고 업로드 <span className="text-slate-400 font-normal">(선택)</span>
+                  </label>
+                  <label className="flex flex-col items-center justify-center w-full h-24 border-2 border-dashed border-slate-300 rounded-xl cursor-pointer hover:border-[#1E22B2] hover:bg-blue-50 transition-colors">
+                    <span className="text-sm text-slate-600" style={{ wordBreak: "keep-all" }}>
+                      {form.logoFileName || "로고 파일 첨부 (SVG·PNG·AI 권장)"}
+                    </span>
+                    <input
+                      type="file"
+                      className="hidden"
+                      accept=".svg,.png,.ai,.pdf,.jpg,.jpeg"
+                      onChange={(e) => update("logoFileName", e.target.files?.[0]?.name ?? "")}
+                    />
+                  </label>
                 </div>
               </div>
             )}
@@ -629,22 +687,9 @@ export default function QuoteForm() {
                     className="w-full px-4 py-3 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#1E22B2]/30 focus:border-[#1E22B2] text-slate-900 pe-num"
                   />
                 </div>
-                <div>
-                  <span className="block text-sm font-semibold text-slate-700 mb-2">파일 첨부 (선택)</span>
-                  <label className="flex flex-col items-center justify-center w-full h-28 border-2 border-dashed border-slate-300 rounded-xl cursor-pointer hover:border-[#1E22B2] hover:bg-blue-50 transition-colors">
-                    <BoxIcon size={28} className="text-slate-400 mb-1" />
-                    <span className="text-sm text-slate-600" style={{ wordBreak: "keep-all" }}>
-                      {form.fileName || "파일을 클릭하거나 드래그하여 첨부"}
-                    </span>
-                    <span className="text-xs text-slate-400 mt-1">PDF · AI · PNG · JPG (최대 10MB)</span>
-                    <input
-                      type="file"
-                      className="hidden"
-                      accept=".pdf,.ai,.png,.jpg,.jpeg"
-                      onChange={(e) => update("fileName", e.target.files?.[0]?.name ?? "")}
-                    />
-                  </label>
-                </div>
+                <p className="text-xs text-slate-400" style={{ wordBreak: "keep-all" }}>
+                  ※ 참고 자료 파일은 Step 2(디자인 옵션)에서 이미 첨부됨: <strong className="text-slate-600">{form.fileName || "—"}</strong>
+                </p>
               </div>
             )}
 
