@@ -276,23 +276,23 @@ export default function QuoteForm() {
   const progressPct = ((step - 1) / (STEP_LABELS.length - 1)) * 100;
 
   return (
-    <div className="min-h-screen bg-slate-50 py-12 px-4">
-      <div className="max-w-2xl mx-auto">
+    <div className="min-h-screen bg-slate-50 py-20 md:py-24 px-4">
+      <div className="max-w-3xl mx-auto">
         {/* Header */}
-        <div className="text-center mb-8">
-          <p className="text-xs font-semibold uppercase tracking-widest mb-2" style={{ color: "#E91E8C" }}>
+        <div className="text-center mb-14">
+          <p className="text-xs font-semibold uppercase tracking-widest mb-3" style={{ color: "#E91E8C" }}>
             Quick Quote · 1분이면 충분합니다
           </p>
-          <h1 className="text-3xl md:text-4xl font-extrabold text-slate-900 mb-2 tracking-tight">
-            페이퍼 엔지니어링 <span className="pe-gradient-text">자동 견적</span>
+          <h1 className="text-4xl md:text-5xl font-extrabold text-slate-900 mb-4 tracking-tight">
+            <span className="pe-gradient-text">견적 문의</span>
           </h1>
-          <p className="text-slate-500" style={{ wordBreak: "keep-all" }}>
+          <p className="text-slate-500 text-lg" style={{ wordBreak: "keep-all" }}>
             제품 정보를 입력하시면 영업일 1~2일 내 맞춤 견적을 보내드립니다.
           </p>
         </div>
 
         {/* Progress Bar */}
-        <div className="mb-8">
+        <div className="mb-12">
           <div className="flex items-center justify-between mb-2 text-xs">
             <span className="font-semibold text-slate-700">
               Step <span className="pe-num">{step}</span> of <span className="pe-num">{STEP_LABELS.length}</span> ·{" "}
@@ -340,7 +340,7 @@ export default function QuoteForm() {
         </div>
 
         {/* Form Card */}
-        <div className="bg-white rounded-3xl pe-paper-shadow border border-slate-100 p-6 md:p-8">
+        <div className="bg-white rounded-3xl pe-paper-shadow border border-slate-100 p-8 md:p-12">
           <form onSubmit={handleSubmit}>
             {/* Step 1: Product Selection */}
             {step === 1 && (
@@ -380,7 +380,7 @@ export default function QuoteForm() {
 
                 {step1Mode === "product" ? (
                   /* 2 × 2 제품 종류 */
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="grid grid-cols-2 gap-5">
                     {PRODUCTS.map((product) => {
                       const isActive = form.product === product.id;
                       return (
@@ -415,7 +415,7 @@ export default function QuoteForm() {
                   </div>
                 ) : (
                   /* 1 × 3 용도별 */
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
                     {USAGES.map((usage) => {
                       const isActive = form.product === usage.id;
                       return (
@@ -474,7 +474,7 @@ export default function QuoteForm() {
               recommended.setDate(recommended.getDate() + spec.leadWeeks * 7);
               const minDateISO = recommended.toISOString().split("T")[0];
               return (
-                <div className="space-y-6">
+                <div className="space-y-10">
                   <div>
                     <h2 className="text-xl font-bold text-slate-900 mb-1 tracking-tight">
                       제작 옵션을 알려주세요
@@ -570,7 +570,7 @@ export default function QuoteForm() {
                     <span className="block text-sm font-semibold text-slate-700 mb-3">
                       포장 방식 <span style={{ color: "#E91E8C" }}>*</span>
                     </span>
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
                       {PACKAGING_OPTIONS.map((opt) => {
                         const isActive = form.packaging === opt.value;
                         return (
@@ -626,7 +626,7 @@ export default function QuoteForm() {
             {/* Step 3: Design Options */}
             {/* Step 2: Design Options (NEW — 이전 Step 3 자리로 이동 + 확장) */}
             {step === 2 && (
-              <div className="space-y-6">
+              <div className="space-y-10">
                 <div>
                   <h2 className="text-xl font-bold text-slate-900 mb-1 tracking-tight">
                     디자인을 어떻게 만들까요?
@@ -664,7 +664,7 @@ export default function QuoteForm() {
                   <span className="block text-sm font-semibold text-slate-700 mb-3">
                     디자인 스타일 <span style={{ color: "#E91E8C" }}>*</span>
                   </span>
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
                     {STYLE_OPTIONS.map((opt) => {
                       const isActive = form.styleType === opt.value;
                       return (
@@ -754,7 +754,7 @@ export default function QuoteForm() {
 
             {/* Step 4: Contact Info */}
             {step === 4 && (
-              <div className="space-y-5">
+              <div className="space-y-8">
                 <div>
                   <h2 className="text-xl font-bold text-slate-900 mb-1 tracking-tight">
                     연락처를 입력해 주세요
