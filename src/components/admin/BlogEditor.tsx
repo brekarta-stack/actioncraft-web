@@ -10,8 +10,28 @@ import TextAlign from "@tiptap/extension-text-align";
 import Highlight from "@tiptap/extension-highlight";
 import { useState, useCallback, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { marked } from "marked";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
+import rehypeRaw from "rehype-raw";
 import type { Post } from "@/lib/blog";
 import { prepareImageForUpload } from "@/lib/image-resize";
+
+/**
+ * 마크다운/HTML 자동 감지 + 마크다운이면 HTML 로 변환.
+ * 기존에 시드된 블로그 글이 마크다운 형식이라 TipTap 이 plain text 로
+ * 인식해 ##/** 가 그대로 노출되는 문제 해결.
+ */
+function ensureHtml(raw: string): string {
+  if (!raw) return "";
+  // 첫 non-whitespace 글자가 < 이면 HTML 로 간주
+  if (raw.trimStart().startsWith("<")) return raw;
+  try {
+    return marked.parse(raw, { async: false }) as string;
+  } catch {
+    return raw;
+  }
+}
 
 const TAGS = ["제작 과정", "교육", "이야기", "사례 연구", "소재", "디자인"];
 
@@ -519,13 +539,17 @@ function BlogPreview({
           <p className="text-lg text-slate-500 leading-relaxed">{excerpt}</p>
         )}
         <div className="border-t border-slate-200 my-8" />
-        <div
-          className="prose prose-slate prose-lg max-w-none prose-headings:font-bold prose-a:text-orange-600 prose-img:rounded-xl"
-          // eslint-disable-next-line react/no-danger
-          dangerouslySetInnerHTML={{
-            __html: contentHtml || "<p style='color:#94a3b8;font-style:italic;'>내용을 작성하면 여기에 실시간으로 표시됩니다…</p>",
-          }}
-        />
+        <div className="prose prose-slate prose-lg max-w-none prose-headings:font-bold prose-a:text-orange-600 prose-img:rounded-xl">
+          {contentHtml ? (
+            <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw]}>
+              {contentHtml}
+            </ReactMarkdown>
+          ) : (
+            <p style={{ color: "#94a3b8", fontStyle: "italic" }}>
+              내용을 작성하면 여기에 실시간으로 표시됩니다…
+            </p>
+          )}
+        </div>
       </article>
     </div>
   );
@@ -539,8 +563,14 @@ export default function BlogEditor({ post }: Props) {
   const [published, setPublished] = useState(post?.published ?? false);
   const [coverImage, setCoverImage] = useState(post?.coverImage ?? "");
   const [saving, setSaving]     = useState(false);
+  /**
+   * 초기 콘텐츠 — post.content 가 마크다운이면 HTML 로 변환해서 TipTap 에 주입.
+   * 변환된 HTML 은 TipTap 에서 정상 편집되고, 저장 시에는 editor.getHTML() 으로
+   * 다시 HTML 로 저장. 기존 마크다운 글은 한 번 편집·저장 시점에 HTML 로 마이그레이션됨.
+   */
+  const [initialContent] = useState(() => ensureHtml(post?.content ?? ""));
   /** 미리보기용 HTML — TipTap onUpdate 로 실시간 동기화 */
-  const [contentHtml, setContentHtml] = useState(post?.content ?? "");
+  const [contentHtml, setContentHtml] = useState(initialContent);
   /** 미리보기 날짜 — 신규 글은 마운트 시점 한 번 stamp (hydration mismatch 방지) */
   const [previewDate, setPreviewDate] = useState<string>(post?.createdAt ?? "");
   useEffect(() => {
@@ -557,7 +587,7 @@ export default function BlogEditor({ post }: Props) {
       TextAlign.configure({ types: ["heading", "paragraph"] }),
       Highlight,
     ],
-    content: post?.content ?? "",
+    content: initialContent,
     editorProps: {
       attributes: {
         class: "tiptap-content focus:outline-none",
