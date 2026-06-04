@@ -826,6 +826,19 @@ export default function QuoteForm() {
               ) : (
                 <div />
               )}
+              {step < 4 && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    update("product", "unsure");
+                    setStep(4);
+                  }}
+                  className="text-xs sm:text-sm text-slate-500 hover:text-[#1E22B2] underline-offset-4 hover:underline transition-colors"
+                  title="이후 단계를 건너뛰고 담당자와 직접 상의합니다"
+                >
+                  잘 모르겠어요 — 담당자와 상의하기
+                </button>
+              )}
               {step < 4 ? (
                 <button
                   type="button"
