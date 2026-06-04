@@ -37,10 +37,17 @@ async function sendInquiryEmail(s: QuoteSubmission): Promise<void> {
     characterize: "캐릭터라이즈 (캐릭터 원안 최대한 살림)",
     expert:       "전문가 위임 (PE Studio 해석)",
   };
+  const PACKAGING_LABEL: Record<string, string> = {
+    "paper-box": "종이 박스 (고급)",
+    opp:         "OPP 필름 (일반)",
+    bulk:        "벌크 납품 (포장 생략)",
+  };
   const rows: Array<[string, string]> = [
     ["제품 유형",         productLabel],
+    ["샘플링 희망",       s.sampling ? "예 (생산 전 수제작 샘플 발송)" : "아니오"],
     ["수량",              s.quantity || "—"],
-    ["희망 납기",         s.deliveryDate || "—"],
+    ["희망 납기",         s.rushed ? "최대한 빠르게 (긴급)" : (s.deliveryDate || "—")],
+    ["포장 방식",         s.packaging ? (PACKAGING_LABEL[s.packaging] ?? s.packaging) : "—"],
     ["용도",              s.purpose || "—"],
     ["디자인 스타일",     s.styleType ? (STYLE_LABEL[s.styleType] ?? s.styleType) : "—"],
     ["맞춤 디자인 (구)",  s.customDesign === "yes" ? "예" : s.customDesign === "no" ? "아니오" : "—"],
@@ -115,6 +122,10 @@ const QuoteSchema = z.object({
   fileName:     z.string().max(255).default(""),
   // 신규: 회사 로고 파일명 (선택)
   logoFileName: z.string().max(255).default(""),
+  // 제작 옵션 (Step 3 확장)
+  sampling:     z.boolean().default(false),
+  rushed:       z.boolean().default(false),
+  packaging:    z.enum(["paper-box", "opp", "bulk", ""]).default(""),
 });
 
 /* ── 단순 IP 레이트 리밋 (분당 5회) ── */
@@ -173,6 +184,9 @@ export async function POST(request: Request) {
     phone:        data.phone,
     fileName:     data.fileName,
     logoFileName: data.logoFileName,
+    sampling:     data.sampling,
+    rushed:       data.rushed,
+    packaging:    data.packaging,
     createdAt:    new Date().toISOString(),
   };
 
@@ -192,6 +206,9 @@ export async function POST(request: Request) {
     phone:          submission.phone,
     file_name:      submission.fileName,
     logo_file_name: submission.logoFileName,
+    sampling:       submission.sampling,
+    rushed:         submission.rushed,
+    packaging:      submission.packaging,
     created_at:     submission.createdAt,
   });
 
@@ -241,6 +258,9 @@ export async function GET() {
     phone:        r.phone,
     fileName:     r.file_name,
     logoFileName: r.logo_file_name ?? "",
+    sampling:     !!r.sampling,
+    rushed:       !!r.rushed,
+    packaging:    r.packaging ?? "",
     createdAt:    r.created_at,
   }));
 

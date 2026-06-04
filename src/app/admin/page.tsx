@@ -51,6 +51,9 @@ export default async function AdminDashboard() {
     phone: r.phone,
     fileName: r.file_name,
     logoFileName: r.logo_file_name ?? "",
+    sampling:     !!r.sampling,
+    rushed:       !!r.rushed,
+    packaging:    r.packaging ?? "",
     createdAt: r.created_at,
   }));
 

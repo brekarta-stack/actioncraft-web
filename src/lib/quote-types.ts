@@ -17,5 +17,11 @@ export interface QuoteSubmission {
   fileName: string;
   /** 회사 로고 파일명 (선택) */
   logoFileName: string;
+  /** 샘플링 희망 — B2B 기업 주문 시 필수 */
+  sampling: boolean;
+  /** 최대한 빠르게 제작 (납품 희망일 대체) */
+  rushed: boolean;
+  /** 포장 방식 — paper-box / opp / bulk */
+  packaging: string;
   createdAt: string;
 }
