@@ -20,6 +20,7 @@ function toItem(row: any): PortfolioItem {
     images: row.images ?? [],
     imageAlts: Array.isArray(row.image_alts) ? row.image_alts : [],
     published: row.published,
+    featured: row.featured ?? false,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   };
@@ -90,6 +91,7 @@ export async function saveItem(item: PortfolioItem): Promise<void> {
     images: item.images,
     image_alts: item.imageAlts ?? [],
     published: item.published,
+    featured: item.featured ?? false,
     created_at: item.createdAt,
     updated_at: item.updatedAt,
   });

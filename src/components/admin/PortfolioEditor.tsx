@@ -45,6 +45,8 @@ export default function PortfolioEditor({ item }: Props) {
     return base;
   });
   const [published, setPublished] = useState(item?.published ?? false);
+  /** 홈 "이런 걸 만듭니다" 섹션 노출 여부 */
+  const [featured, setFeatured] = useState(item?.featured ?? false);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState<number | null>(null); // slot index
   // "리사이즈 중" / "업로드 중" 같은 진행 단계 표시
@@ -77,6 +79,7 @@ export default function PortfolioEditor({ item }: Props) {
           images: cleanImages,
           imageAlts: cleanAlts,
           published: isPublished,
+          featured,
         };
         const res = item
           ? await fetch(`/api/portfolio/${item.id}`, {
@@ -98,7 +101,7 @@ export default function PortfolioEditor({ item }: Props) {
         setSaving(false);
       }
     },
-    [title, slug, summary, category, client, clientType, tags, keywords, description, images, imageAlts, published, item, router]
+    [title, slug, summary, category, client, clientType, tags, keywords, description, images, imageAlts, published, featured, item, router]
   );
 
   function addTag(t: string) {
@@ -431,22 +434,45 @@ export default function PortfolioEditor({ item }: Props) {
           </div>
         </div>
 
-        {/* Published toggle */}
-        <div className="flex items-center gap-3">
-          <div
-            onClick={() => setPublished((v) => !v)}
-            className={`w-10 h-6 rounded-full transition-colors relative cursor-pointer ${
-              published ? "" : "bg-slate-200"
-            }`}
-            style={published ? { background: "#1E22B2" } : {}}
-          >
+        {/* Published / Featured 토글 */}
+        <div className="flex items-center gap-6 flex-wrap">
+          <div className="flex items-center gap-3">
             <div
-              className={`w-4 h-4 bg-white rounded-full absolute top-1 transition-all shadow-sm ${
-                published ? "left-5" : "left-1"
+              onClick={() => setPublished((v) => !v)}
+              className={`w-10 h-6 rounded-full transition-colors relative cursor-pointer ${
+                published ? "" : "bg-slate-200"
               }`}
-            />
+              style={published ? { background: "#1E22B2" } : {}}
+            >
+              <div
+                className={`w-4 h-4 bg-white rounded-full absolute top-1 transition-all shadow-sm ${
+                  published ? "left-5" : "left-1"
+                }`}
+              />
+            </div>
+            <span className="text-sm text-slate-700 font-medium">공개</span>
           </div>
-          <span className="text-sm text-slate-700 font-medium">공개</span>
+
+          <div className="flex items-center gap-3">
+            <div
+              onClick={() => setFeatured((v) => !v)}
+              className={`w-10 h-6 rounded-full transition-colors relative cursor-pointer ${
+                featured ? "" : "bg-slate-200"
+              }`}
+              style={featured ? { background: "#E91E8C" } : {}}
+              title="홈 '이런 걸 만듭니다' 섹션에 노출"
+            >
+              <div
+                className={`w-4 h-4 bg-white rounded-full absolute top-1 transition-all shadow-sm ${
+                  featured ? "left-5" : "left-1"
+                }`}
+              />
+            </div>
+            <span className="text-sm text-slate-700 font-medium">
+              메인 노출
+              <span className="text-xs text-slate-400 ml-1">(홈 9선)</span>
+            </span>
+          </div>
         </div>
       </div>
 

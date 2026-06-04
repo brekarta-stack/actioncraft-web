@@ -31,9 +31,10 @@ const PLACEHOLDER_CLIENTS: PlaceholderClient[] = [
 
 export default async function HomePortfolioGrid() {
   // 빌드 시 Supabase env 없거나 일시 에러면 빈 배열로 fallback
-  const items = (await getItems().catch(() => []))
-    .filter((i) => i.published)
-    .slice(0, 9);
+  const published = (await getItems().catch(() => [])).filter((i) => i.published);
+  // 어드민에서 '메인' 체크된 항목 우선 노출. 0개면 published 최신순 9개 fallback.
+  const featured = published.filter((i) => i.featured);
+  const items = (featured.length > 0 ? featured : published).slice(0, 9);
 
   // 실제 사례가 하나도 없으면 일러스트로 자리 유지 (현재 모양)
   if (items.length === 0) {

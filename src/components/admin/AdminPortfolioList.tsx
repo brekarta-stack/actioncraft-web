@@ -13,11 +13,37 @@ const categoryColors: Record<string, string> = {
 
 export default function AdminPortfolioList({ initialItems }: { initialItems: PortfolioItem[] }) {
   const [items, setItems] = useState(initialItems);
+  /** 현재 토글 저장 중인 항목 id (UI 비활성화용) */
+  const [savingId, setSavingId] = useState<string | null>(null);
 
   async function deleteItem(id: string) {
     if (!confirm("정말 삭제하시겠습니까?")) return;
     await fetch(`/api/portfolio/${id}`, { method: "DELETE" });
     setItems((prev) => prev.filter((i) => i.id !== id));
+  }
+
+  /**
+   * '메인 노출' 체크박스 토글 — 즉시 PUT API 호출 (낙관적 업데이트).
+   * 실패 시 롤백 + alert.
+   */
+  async function toggleFeatured(id: string, current: boolean) {
+    const next = !current;
+    setSavingId(id);
+    setItems((prev) => prev.map((i) => (i.id === id ? { ...i, featured: next } : i)));
+    try {
+      const res = await fetch(`/api/portfolio/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ featured: next }),
+      });
+      if (!res.ok) throw new Error("저장 실패");
+    } catch {
+      // 롤백
+      setItems((prev) => prev.map((i) => (i.id === id ? { ...i, featured: current } : i)));
+      alert("'메인 노출' 변경에 실패했습니다. 잠시 후 다시 시도해 주세요.");
+    } finally {
+      setSavingId(null);
+    }
   }
 
   if (items.length === 0) {
@@ -42,6 +68,21 @@ export default function AdminPortfolioList({ initialItems }: { initialItems: Por
           key={item.id}
           className="bg-white rounded-xl border border-slate-200 p-4 flex items-center gap-4"
         >
+          {/* '메인 노출' 체크박스 — 홈 "이런 걸 만듭니다" 섹션 노출 여부 */}
+          <label
+            className="flex flex-col items-center justify-center gap-1 cursor-pointer select-none flex-shrink-0"
+            title="홈 '이런 걸 만듭니다' 섹션에 표시"
+          >
+            <input
+              type="checkbox"
+              checked={!!item.featured}
+              disabled={savingId === item.id}
+              onChange={() => toggleFeatured(item.id, !!item.featured)}
+              className="w-5 h-5 rounded border-slate-300 text-[#1E22B2] focus:ring-2 focus:ring-[#1E22B2]/30 cursor-pointer disabled:opacity-50"
+            />
+            <span className="text-[10px] text-slate-500 font-medium leading-none">메인</span>
+          </label>
+
           {/* Thumbnail */}
           <div className="w-16 h-16 rounded-lg overflow-hidden bg-slate-100 flex-shrink-0">
             {item.images[0] ? (

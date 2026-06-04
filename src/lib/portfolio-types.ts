@@ -60,6 +60,8 @@ export interface PortfolioItem {
   /** images 각각의 alt 텍스트 (인덱스 일치). 비어있으면 title 기반 자동 생성. */
   imageAlts?: (string | null)[];
   published: boolean;
+  /** 홈 "이런 걸 만듭니다" 섹션에 노출할지 — 어드민에서 체크박스 토글 */
+  featured?: boolean;
   createdAt: string;
   updatedAt: string;
 }
