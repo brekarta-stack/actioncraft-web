@@ -83,7 +83,7 @@ const products: Product[] = [
     minOrder: "500부",
     leadTime: "약 4주",
     usages: ["education", "promotion"],
-    topImage: "https://syrfoqwvsciicfbeemqv.supabase.co/storage/v1/object/public/uploads/333333333333.png",
+    topImage: "https://syrfoqwvsciicfbeemqv.supabase.co/storage/v1/object/public/uploads/action%20craft.png",
   },
   {
     icon: "sparkle",
