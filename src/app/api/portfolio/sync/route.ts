@@ -116,10 +116,10 @@ export async function POST(request: Request) {
     }
   }
 
-  const rawCategory = record.category ?? "기타";
+  const rawCategory = record.category ?? "팝업북";
   const category = (CATEGORIES as readonly string[]).includes(rawCategory)
     ? (rawCategory as PortfolioItem["category"])
-    : "기타";
+    : "팝업북";
 
   const now = new Date().toISOString();
   const existing = await getItemByAirtableId(record.id);

@@ -34,7 +34,7 @@ export async function POST(request: Request) {
     slug,
     title: body.title ?? "",
     summary: typeof body.summary === "string" ? body.summary : undefined,
-    category: body.category ?? "기타",
+    category: body.category ?? "팝업북",
     description: body.description ?? "",
     client: body.client ?? "",
     clientType: typeof body.clientType === "string" ? body.clientType : undefined,
