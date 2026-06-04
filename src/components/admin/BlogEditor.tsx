@@ -460,6 +460,77 @@ function Toolbar({ editor }: { editor: Editor }) {
  * ────────────────────────────────────── */
 interface Props { post?: Post; }
 
+/** 실제 /blog/[slug] 페이지의 태그 색상 매핑과 일치 */
+const PREVIEW_TAG_COLORS: Record<string, string> = {
+  "제작 과정": "bg-orange-100 text-orange-700",
+  "교육": "bg-blue-100 text-blue-700",
+  "이야기": "bg-amber-100 text-amber-700",
+  "사례 연구": "bg-purple-100 text-purple-700",
+  "소재": "bg-green-100 text-green-700",
+  "디자인": "bg-pink-100 text-pink-700",
+};
+
+/**
+ * 실제 발행 페이지 구조를 그대로 미러링한 미리보기 컴포넌트.
+ * /blog/[slug]/page.tsx 의 article 구조와 일치 — 커버/태그/날짜/h1/excerpt/본문.
+ */
+function BlogPreview({
+  title, excerpt, tag, coverImage, contentHtml, createdAt,
+}: {
+  title: string;
+  excerpt: string;
+  tag: string;
+  coverImage: string;
+  contentHtml: string;
+  createdAt: string;
+}) {
+  return (
+    <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden">
+      {/* 미리보기 헤더 바 */}
+      <div className="bg-slate-50 px-4 py-2 text-xs text-slate-500 font-medium border-b border-slate-100 flex items-center gap-2 sticky top-0 z-10">
+        <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
+        실시간 미리보기 — 실제 발행된 모습
+      </div>
+      <article className="px-6 py-8">
+        {coverImage && (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={coverImage}
+            alt={title || "커버"}
+            className="w-full aspect-[16/7] object-cover rounded-2xl mb-6 pe-paper-shadow"
+          />
+        )}
+        <div className="flex items-center gap-3 mb-4">
+          {tag && (
+            <span className={`px-3 py-1 text-xs font-semibold rounded-full ${PREVIEW_TAG_COLORS[tag] ?? "bg-slate-100 text-slate-600"}`}>
+              {tag}
+            </span>
+          )}
+          {createdAt && (
+            <span className="text-xs text-slate-400">
+              {new Date(createdAt).toLocaleDateString("ko-KR", { year: "numeric", month: "long", day: "numeric" })}
+            </span>
+          )}
+        </div>
+        <h1 className="text-3xl md:text-4xl font-bold text-slate-900 mb-4 leading-tight">
+          {title || <span className="text-slate-300">(제목 없음)</span>}
+        </h1>
+        {excerpt && (
+          <p className="text-lg text-slate-500 leading-relaxed">{excerpt}</p>
+        )}
+        <div className="border-t border-slate-200 my-8" />
+        <div
+          className="prose prose-slate prose-lg max-w-none prose-headings:font-bold prose-a:text-orange-600 prose-img:rounded-xl"
+          // eslint-disable-next-line react/no-danger
+          dangerouslySetInnerHTML={{
+            __html: contentHtml || "<p style='color:#94a3b8;font-style:italic;'>내용을 작성하면 여기에 실시간으로 표시됩니다…</p>",
+          }}
+        />
+      </article>
+    </div>
+  );
+}
+
 export default function BlogEditor({ post }: Props) {
   const router = useRouter();
   const [title, setTitle]       = useState(post?.title ?? "");
@@ -468,6 +539,13 @@ export default function BlogEditor({ post }: Props) {
   const [published, setPublished] = useState(post?.published ?? false);
   const [coverImage, setCoverImage] = useState(post?.coverImage ?? "");
   const [saving, setSaving]     = useState(false);
+  /** 미리보기용 HTML — TipTap onUpdate 로 실시간 동기화 */
+  const [contentHtml, setContentHtml] = useState(post?.content ?? "");
+  /** 미리보기 날짜 — 신규 글은 마운트 시점 한 번 stamp (hydration mismatch 방지) */
+  const [previewDate, setPreviewDate] = useState<string>(post?.createdAt ?? "");
+  useEffect(() => {
+    if (!previewDate) setPreviewDate(new Date().toISOString());
+  }, [previewDate]);
 
   const editor = useEditor({
     extensions: [
@@ -484,6 +562,9 @@ export default function BlogEditor({ post }: Props) {
       attributes: {
         class: "tiptap-content focus:outline-none",
       },
+    },
+    onUpdate: ({ editor }) => {
+      setContentHtml(editor.getHTML());
     },
   });
 
@@ -526,8 +607,8 @@ export default function BlogEditor({ post }: Props) {
   );
 
   return (
-    <div className="max-w-3xl mx-auto px-4 py-10">
-      {/* 헤더 */}
+    <div className="max-w-3xl xl:max-w-[1600px] mx-auto px-4 py-10">
+      {/* 헤더 — 좌우 컬럼 위 전체 폭 */}
       <div className="flex items-center justify-between mb-6">
         <button
           type="button"
@@ -557,8 +638,11 @@ export default function BlogEditor({ post }: Props) {
         </div>
       </div>
 
-      {/* 커버 이미지 */}
-      <CoverImageSection coverImage={coverImage} onChange={setCoverImage} />
+      {/* xl 이상: 좌 에디터 / 우 미리보기 2컬럼. 그 미만: 단일 컬럼 (미리보기 숨김) */}
+      <div className="grid grid-cols-1 xl:grid-cols-2 xl:gap-8 items-start">
+        <div>
+          {/* 커버 이미지 */}
+          <CoverImageSection coverImage={coverImage} onChange={setCoverImage} />
 
       {/* 메타 */}
       <div className="bg-white rounded-2xl border border-slate-200 p-6 mb-5 space-y-4">
@@ -617,6 +701,22 @@ export default function BlogEditor({ post }: Props) {
       <p className="text-xs text-slate-400 text-center mt-4">
         Ctrl+B 굵게 · Ctrl+I 기울임 · Ctrl+Z 실행취소 · 이미지는 드래그&드롭 또는 툴바 버튼으로 삽입
       </p>
+        </div>
+
+        {/* ── 우측 미리보기 컬럼 (xl 이상에서만 노출) ── */}
+        <aside className="hidden xl:block">
+          <div className="sticky top-6 max-h-[calc(100vh-3rem)] overflow-y-auto">
+            <BlogPreview
+              title={title}
+              excerpt={excerpt}
+              tag={tag}
+              coverImage={coverImage}
+              contentHtml={contentHtml}
+              createdAt={previewDate || post?.createdAt || ""}
+            />
+          </div>
+        </aside>
+      </div>
 
       {/* ── Floating Save Bar — 우하단 앵커 (스크롤 위치 무관 항상 노출) ── */}
       <div className="fixed bottom-6 right-6 z-40 flex items-end gap-2">
