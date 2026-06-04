@@ -18,16 +18,19 @@ import type { Post } from "@/lib/blog";
 import { prepareImageForUpload } from "@/lib/image-resize";
 
 /**
- * 마크다운/HTML 자동 감지 + 마크다운이면 HTML 로 변환.
+ * 콘텐츠를 항상 HTML 로 보장.
+ * - 순수 마크다운: marked 로 HTML 변환
+ * - 순수 HTML: marked 가 HTML 태그를 통과시키므로 안전
+ * - 혼합 (HTML 안 마크다운 syntax 가 줄 단위로 섞임): marked 가 두 가지 모두 처리
+ *
  * 기존에 시드된 블로그 글이 마크다운 형식이라 TipTap 이 plain text 로
- * 인식해 ##/** 가 그대로 노출되는 문제 해결.
+ * 인식해 ##/** 가 그대로 노출되던 문제를 해결.
  */
 function ensureHtml(raw: string): string {
   if (!raw) return "";
-  // 첫 non-whitespace 글자가 < 이면 HTML 로 간주
-  if (raw.trimStart().startsWith("<")) return raw;
   try {
-    return marked.parse(raw, { async: false }) as string;
+    const out = marked.parse(raw, { async: false, gfm: true, breaks: false }) as string;
+    return out || raw;
   } catch {
     return raw;
   }
@@ -597,6 +600,22 @@ export default function BlogEditor({ post }: Props) {
       setContentHtml(editor.getHTML());
     },
   });
+
+  /**
+   * TipTap 의 content prop 은 mount 후 변경에 반응하지 않는 알려진 동작.
+   * editor 인스턴스가 ready 된 후 명시적으로 setContent 를 호출해
+   * 마크다운 → HTML 변환 결과가 확실히 반영되도록 보장.
+   * `false` 2번째 인자 = onUpdate 트리거 안 함 (초기 주입은 사용자 편집 아님).
+   */
+  useEffect(() => {
+    if (!editor || !initialContent) return;
+    // 이미 같은 콘텐츠면 skip (re-mount 방지 + cursor reset 방지)
+    const currentHtml = editor.getHTML();
+    const normalize = (s: string) => s.replace(/\s+/g, "");
+    if (normalize(currentHtml) === normalize(initialContent)) return;
+    editor.commands.setContent(initialContent, { emitUpdate: false });
+    setContentHtml(editor.getHTML());
+  }, [editor, initialContent]);
 
   const handleSave = useCallback(
     async (pub?: boolean) => {
