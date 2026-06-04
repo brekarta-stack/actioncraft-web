@@ -11,26 +11,36 @@ import Highlight from "@tiptap/extension-highlight";
 import { useState, useCallback, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { marked } from "marked";
+import TurndownService from "turndown";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import rehypeRaw from "rehype-raw";
 import type { Post } from "@/lib/blog";
 import { prepareImageForUpload } from "@/lib/image-resize";
 
+const turndown = new TurndownService({
+  headingStyle: "atx",
+  bulletListMarker: "-",
+  codeBlockStyle: "fenced",
+});
+
 /**
- * 콘텐츠를 항상 HTML 로 보장.
- * - 순수 마크다운: marked 로 HTML 변환
- * - 순수 HTML: marked 가 HTML 태그를 통과시키므로 안전
- * - 혼합 (HTML 안 마크다운 syntax 가 줄 단위로 섞임): marked 가 두 가지 모두 처리
+ * 콘텐츠를 깨끗한 HTML 로 정규화 (round-trip).
+ * 1) marked.parse: 마크다운→HTML, HTML 은 통과
+ * 2) turndown: HTML→마크다운 (텍스트 노드 안에 박힌 ##/** 같은 syntax 가
+ *    정규화되어 마크다운 노드로 추출됨)
+ * 3) marked.parse: 마크다운→HTML (모든 syntax 가 깨끗한 태그로)
  *
- * 기존에 시드된 블로그 글이 마크다운 형식이라 TipTap 이 plain text 로
- * 인식해 ##/** 가 그대로 노출되던 문제를 해결.
+ * 이 round-trip 으로 입력이 순수 마크다운 / 순수 HTML / HTML 안에 마크다운
+ * 텍스트가 plain text 로 박힌 mixed 케이스 모두 동일한 결과로 정규화됨.
  */
 function ensureHtml(raw: string): string {
   if (!raw) return "";
   try {
-    const out = marked.parse(raw, { async: false, gfm: true, breaks: false }) as string;
-    return out || raw;
+    const html1 = marked.parse(raw, { async: false, gfm: true, breaks: false }) as string;
+    const md    = turndown.turndown(html1);
+    const html2 = marked.parse(md, { async: false, gfm: true, breaks: false }) as string;
+    return html2 || raw;
   } catch {
     return raw;
   }
