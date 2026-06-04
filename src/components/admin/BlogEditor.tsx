@@ -491,7 +491,7 @@ function BlogPreview({
         <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
         실시간 미리보기 — 실제 발행된 모습
       </div>
-      <article className="px-6 py-8 overflow-y-auto flex-1">
+      <article className="px-6 py-8 flex-1">
         {coverImage && (
           // eslint-disable-next-line @next/next/no-img-element
           <img
@@ -687,20 +687,22 @@ export default function BlogEditor({ post }: Props) {
         </div>
       </div>
 
-      {/* ── 에디터 + 미리보기 — 1:1 그리드 (xl 이상). items-stretch 로 동일 위치/높이 ── */}
+      {/* ── 에디터 + 미리보기 — 1:1 그리드 (xl 이상).
+            본문이 길어지면 작성기 카드가 늘어나고 items-stretch 효과로 미리보기도 함께 늘어남.
+            카드 내부에는 overflow 제한 없음 → 콘텐츠와 이미지가 잘리지 않고 모두 표시됨. ── */}
       <div className="grid grid-cols-1 xl:grid-cols-2 xl:gap-8 xl:items-stretch">
         {/* WYSIWYG 에디터 (좌) */}
         <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden flex flex-col">
           {editor && <Toolbar editor={editor} />}
           <div
-            className="tiptap-editor flex-1 overflow-y-auto"
+            className="tiptap-editor flex-1"
             onClick={() => editor?.commands.focus()}
           >
             <EditorContent editor={editor} />
           </div>
         </div>
 
-        {/* 미리보기 (우, xl 이상에서만 노출) */}
+        {/* 미리보기 (우, xl 이상에서만 노출). h-full 로 작성기 높이만큼 stretch */}
         <aside className="hidden xl:block">
           <BlogPreview
             title={title}
