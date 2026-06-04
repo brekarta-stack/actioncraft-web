@@ -571,6 +571,27 @@ export default function PortfolioEditor({ item }: Props) {
           })}
         </div>
       </div>
+
+      {/* ── Floating Save Bar — 우하단 앵커 (스크롤 위치 무관 항상 노출) ── */}
+      <div className="fixed bottom-6 right-6 z-40 flex items-end gap-2">
+        <button
+          type="button"
+          onClick={() => handleSave(false)}
+          disabled={saving}
+          className="px-4 py-2.5 bg-white border border-slate-200 shadow-lg rounded-xl text-slate-700 text-sm font-medium hover:bg-slate-50 transition-colors disabled:opacity-50"
+        >
+          임시저장
+        </button>
+        <button
+          type="button"
+          onClick={() => handleSave(true)}
+          disabled={saving}
+          className="px-5 py-3 text-white font-semibold rounded-xl text-sm transition-opacity hover:opacity-90 disabled:opacity-50"
+          style={{ background: "#1E22B2", boxShadow: "0 10px 30px -10px rgba(30, 34, 178, 0.5)" }}
+        >
+          {saving ? "저장 중…" : "발행하기"}
+        </button>
+      </div>
     </div>
   );
 }
