@@ -25,19 +25,34 @@ const turndown = new TurndownService({
 });
 
 /**
- * 콘텐츠를 깨끗한 HTML 로 정규화 (round-trip).
- * 1) marked.parse: 마크다운→HTML, HTML 은 통과
- * 2) turndown: HTML→마크다운 (텍스트 노드 안에 박힌 ##/** 같은 syntax 가
- *    정규화되어 마크다운 노드로 추출됨)
- * 3) marked.parse: 마크다운→HTML (모든 syntax 가 깨끗한 태그로)
- *
- * 이 round-trip 으로 입력이 순수 마크다운 / 순수 HTML / HTML 안에 마크다운
- * 텍스트가 plain text 로 박힌 mixed 케이스 모두 동일한 결과로 정규화됨.
+ * 마크다운 전처리 — marked 가 헤딩으로 인식하도록 정규화.
+ * 시드 글의 흔한 패턴: 한 줄 안에 ##/### 가 여러 개 흩어져 있음.
+ *   "본문. ## 1. 헤딩... ## 2. 헤딩..."
+ * → 빈 줄로 분리해서 marked 가 헤딩 처리 가능하도록.
+ */
+function preprocessMarkdown(raw: string): string {
+  let s = raw;
+  // 줄 시작 leading whitespace + #+ 정리
+  s = s.replace(/^[ \t]+(#{1,6}\s)/gm, "$1");
+  // 텍스트 중간의 #+ 헤딩을 빈 줄로 분리
+  s = s.replace(/([^\n])\s+(#{1,6}\s+)/g, "$1\n\n$2");
+  // 연속 3+ 줄바꿈 → 2개로
+  s = s.replace(/\n{3,}/g, "\n\n");
+  return s;
+}
+
+/**
+ * 콘텐츠를 깨끗한 HTML 로 정규화 (round-trip + 전처리).
+ * 1) preprocess: 줄 중간 ## 헤딩 분리
+ * 2) marked: 마크다운→HTML (HTML 통과)
+ * 3) turndown: HTML→마크다운 (텍스트 안 ##/** 추출)
+ * 4) marked: 마크다운→HTML (모든 syntax 깨끗한 태그로)
  */
 function ensureHtml(raw: string): string {
   if (!raw) return "";
   try {
-    const html1 = marked.parse(raw, { async: false, gfm: true, breaks: false }) as string;
+    const pre   = preprocessMarkdown(raw);
+    const html1 = marked.parse(pre, { async: false, gfm: true, breaks: false }) as string;
     const md    = turndown.turndown(html1);
     const html2 = marked.parse(md, { async: false, gfm: true, breaks: false }) as string;
     return html2 || raw;
