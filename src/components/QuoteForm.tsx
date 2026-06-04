@@ -7,6 +7,7 @@ import {
   BoxIcon,
   PencilIcon,
   SparkleIcon,
+  EducationIcon,
   CheckIcon,
   ArrowRightIcon,
   type IconKey,
@@ -18,6 +19,9 @@ type ProductType =
   | "popup"
   | "foamboard"
   | "unsure"
+  | "education"
+  | "promotion"
+  | "hobby"
   | "";
 
 interface FormState {
@@ -35,10 +39,16 @@ interface FormState {
 }
 
 const PRODUCTS: { id: ProductType; icon: IconKey; name: string; desc: string }[] = [
-  { id: "papercraft", icon: "paperToy", name: "페이퍼 크래프트", desc: "특허 기반 종이 입체 구조" },
-  { id: "action",     icon: "gear",     name: "액션 페이퍼 토이", desc: "움직이는 종이 메커니즘" },
-  { id: "popup",      icon: "sparkle",  name: "팝업북",            desc: "3D 팝업 카드·북" },
-  { id: "foamboard",  icon: "box",      name: "폼보드(우드락)",   desc: "끼움식 입체 구조" },
+  { id: "papercraft", icon: "paperToy", name: "페이퍼 크래프트",    desc: "기본적인 종이 모형에서 정교한 설계까지" },
+  { id: "action",     icon: "gear",     name: "액션 페이퍼 토이",   desc: "특허 기반 움직임 메커니즘 적용" },
+  { id: "popup",      icon: "sparkle",  name: "팝업북",              desc: "3D 팝업 카드 및 북 제작" },
+  { id: "foamboard",  icon: "box",      name: "폼보드(우드락)",     desc: "끼워 만드는 입체 구조" },
+];
+
+const USAGES: { id: ProductType; icon: IconKey; name: string; desc: string }[] = [
+  { id: "education", icon: "education", name: "교육/교구용", desc: "체험존·교구·STEAM 학습 도구" },
+  { id: "promotion", icon: "sparkle",   name: "홍보용",      desc: "브랜드 굿즈·캠페인·전시 부스" },
+  { id: "hobby",     icon: "pencil",    name: "취미용",      desc: "가족·동호회·개인 만들기 키트" },
 ];
 
 const PURPOSES = ["마케팅/홍보", "교육", "선물", "전시", "행사", "기타"];
@@ -64,12 +74,20 @@ const STORAGE_KEY = "pe-quote-form-draft";
 /** 아이콘 색상 — 카드 활성/비활성 통일 */
 function ProductIconRender({ name }: { name: IconKey }) {
   switch (name) {
-    case "paperToy": return <PaperToyIcon size={28} />;
-    case "gear":     return <GearIcon size={28} />;
-    case "sparkle":  return <SparkleIcon size={28} />;
-    case "box":      return <BoxIcon size={28} />;
-    default:         return <PaperToyIcon size={28} />;
+    case "paperToy":  return <PaperToyIcon size={28} />;
+    case "gear":      return <GearIcon size={28} />;
+    case "sparkle":   return <SparkleIcon size={28} />;
+    case "box":       return <BoxIcon size={28} />;
+    case "pencil":    return <PencilIcon size={28} />;
+    case "education": return <EducationIcon size={28} />;
+    default:          return <PaperToyIcon size={28} />;
   }
+}
+
+/** 어떤 모드의 선택지인지 판별 */
+const USAGE_IDS: ProductType[] = ["education", "promotion", "hobby"];
+function isUsageId(id: ProductType): boolean {
+  return USAGE_IDS.includes(id);
 }
 
 export default function QuoteForm() {
@@ -78,6 +96,8 @@ export default function QuoteForm() {
   const [saving, setSaving] = useState(false);
   const [form, setForm] = useState<FormState>(INITIAL_FORM);
   const [hydrated, setHydrated] = useState(false);
+  /** Step 1 선택 모드 — 제품 종류별 / 용도별 토글 */
+  const [step1Mode, setStep1Mode] = useState<"product" | "usage">("product");
 
   // localStorage 에서 작성 중인 폼 복원 (이탈 방지)
   useEffect(() => {
@@ -148,7 +168,8 @@ export default function QuoteForm() {
     }
   };
 
-  const selectedProduct = PRODUCTS.find((p) => p.id === form.product);
+  const selectedProduct =
+    PRODUCTS.find((p) => p.id === form.product) ?? USAGES.find((u) => u.id === form.product);
 
   /* ────────── 제출 완료 화면 ────────── */
   if (submitted) {
@@ -279,44 +300,109 @@ export default function QuoteForm() {
                 <h2 className="text-xl font-bold text-slate-900 mb-1 tracking-tight">
                   어떤 제품을 원하시나요?
                 </h2>
-                <p className="text-slate-500 text-sm mb-6" style={{ wordBreak: "keep-all" }}>
-                  해당하는 제품 종류를 선택해 주세요. 정확히 모르셔도 괜찮습니다.
+                <p className="text-slate-500 text-sm mb-4" style={{ wordBreak: "keep-all" }}>
+                  제품 종류를 알고 계시면 종류별로, 잘 모르시면 용도별로 선택하세요.
                 </p>
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                  {PRODUCTS.map((product) => {
-                    const isActive = form.product === product.id;
-                    return (
-                      <button
-                        key={product.id}
-                        type="button"
-                        onClick={() => update("product", product.id)}
-                        aria-pressed={isActive}
-                        className={`p-4 rounded-2xl border-2 text-center transition-all pe-paper-lift ${
-                          isActive
-                            ? "border-[#1E22B2] bg-blue-50"
-                            : "border-slate-200 hover:border-blue-200 bg-white"
-                        }`}
-                      >
-                        <div
-                          className="inline-flex items-center justify-center w-10 h-10 rounded-xl mb-2"
-                          style={{
-                            background: isActive ? "#1E22B2" : "#F0F2FF",
-                            color: isActive ? "white" : "#1E22B2",
-                          }}
-                          aria-hidden
-                        >
-                          <ProductIconRender name={product.icon} />
-                        </div>
-                        <div className="font-semibold text-slate-900 text-sm">{product.name}</div>
-                        <div className="text-xs text-slate-500 mt-0.5" style={{ wordBreak: "keep-all" }}>
-                          {product.desc}
-                        </div>
-                      </button>
-                    );
-                  })}
+
+                {/* 선택 모드 토글 */}
+                <div className="inline-flex p-1 bg-slate-100 rounded-xl mb-5">
+                  <button
+                    type="button"
+                    onClick={() => setStep1Mode("product")}
+                    className={`px-4 py-1.5 text-sm font-semibold rounded-lg transition-all ${
+                      step1Mode === "product"
+                        ? "bg-white text-slate-900 shadow-sm"
+                        : "text-slate-500 hover:text-slate-700"
+                    }`}
+                  >
+                    제품 종류별
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setStep1Mode("usage")}
+                    className={`px-4 py-1.5 text-sm font-semibold rounded-lg transition-all ${
+                      step1Mode === "usage"
+                        ? "bg-white text-slate-900 shadow-sm"
+                        : "text-slate-500 hover:text-slate-700"
+                    }`}
+                  >
+                    용도별
+                  </button>
                 </div>
 
-                {/* "잘 모르겠어요" 옵션 */}
+                {step1Mode === "product" ? (
+                  /* 2 × 2 제품 종류 */
+                  <div className="grid grid-cols-2 gap-3">
+                    {PRODUCTS.map((product) => {
+                      const isActive = form.product === product.id;
+                      return (
+                        <button
+                          key={product.id}
+                          type="button"
+                          onClick={() => update("product", product.id)}
+                          aria-pressed={isActive}
+                          className={`p-4 rounded-2xl border-2 text-center transition-all pe-paper-lift ${
+                            isActive
+                              ? "border-[#1E22B2] bg-blue-50"
+                              : "border-slate-200 hover:border-blue-200 bg-white"
+                          }`}
+                        >
+                          <div
+                            className="inline-flex items-center justify-center w-10 h-10 rounded-xl mb-2"
+                            style={{
+                              background: isActive ? "#1E22B2" : "#F0F2FF",
+                              color: isActive ? "white" : "#1E22B2",
+                            }}
+                            aria-hidden
+                          >
+                            <ProductIconRender name={product.icon} />
+                          </div>
+                          <div className="font-semibold text-slate-900 text-sm">{product.name}</div>
+                          <div className="text-xs text-slate-500 mt-0.5" style={{ wordBreak: "keep-all" }}>
+                            {product.desc}
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  /* 1 × 3 용도별 */
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    {USAGES.map((usage) => {
+                      const isActive = form.product === usage.id;
+                      return (
+                        <button
+                          key={usage.id}
+                          type="button"
+                          onClick={() => update("product", usage.id)}
+                          aria-pressed={isActive}
+                          className={`p-4 rounded-2xl border-2 text-center transition-all pe-paper-lift ${
+                            isActive
+                              ? "border-[#06C6C8] bg-cyan-50"
+                              : "border-slate-200 hover:border-cyan-200 bg-white"
+                          }`}
+                        >
+                          <div
+                            className="inline-flex items-center justify-center w-10 h-10 rounded-xl mb-2"
+                            style={{
+                              background: isActive ? "#06C6C8" : "#E0FAFB",
+                              color: isActive ? "white" : "#06C6C8",
+                            }}
+                            aria-hidden
+                          >
+                            <ProductIconRender name={usage.icon} />
+                          </div>
+                          <div className="font-semibold text-slate-900 text-sm">{usage.name}</div>
+                          <div className="text-xs text-slate-500 mt-0.5" style={{ wordBreak: "keep-all" }}>
+                            {usage.desc}
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+
+                {/* "잘 모르겠어요" 옵션 — 두 모드 공통 */}
                 <button
                   type="button"
                   onClick={() => update("product", "unsure")}

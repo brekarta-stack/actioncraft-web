@@ -9,6 +9,9 @@ const PRODUCT_LABELS: Record<string, string> = {
   popup:      "팝업북",
   foamboard:  "폼보드(우드락)",
   unsure:     "미정 (상담 원함)",
+  education:  "용도 · 교육/교구",
+  promotion:  "용도 · 홍보",
+  hobby:      "용도 · 취미",
 };
 
 export default async function AdminQuotesPage() {

@@ -14,6 +14,9 @@ const PRODUCT_LABEL: Record<string, string> = {
   popup:      "팝업북",
   foamboard:  "폼보드(우드락)",
   unsure:     "잘 모름 — 담당자 상의 희망",
+  education:  "용도 · 교육/교구용",
+  promotion:  "용도 · 홍보용",
+  hobby:      "용도 · 취미용",
 };
 
 async function sendInquiryEmail(s: QuoteSubmission): Promise<void> {
@@ -86,7 +89,7 @@ async function sendInquiryEmail(s: QuoteSubmission): Promise<void> {
 
 /* ── 입력 스키마 (Zod) ── */
 const QuoteSchema = z.object({
-  product:      z.enum(["papercraft", "action", "popup", "foamboard", "unsure"]),
+  product:      z.enum(["papercraft", "action", "popup", "foamboard", "unsure", "education", "promotion", "hobby"]),
   quantity:     z.string().max(20).default(""),
   deliveryDate: z.string().max(30).default(""),
   purpose:      z.string().max(100).default(""),
