@@ -249,6 +249,24 @@ a:focus-visible {
   outline-offset: 4px;
   box-shadow: 0 8px 25px -5px rgba(30, 34, 178, 0.35);
 }
+
+/* ──────────────────────────────────────
+ * 본문 이미지 정렬·크기 (작성기 + 미리보기 + 실제 발행 페이지 공통)
+ * BubbleMenu 에서 적용한 class 가 모든 렌더링 컨텍스트에 동일 적용됨
+ * ────────────────────────────────────── */
+/* 정렬 */
+img.img-align-left   { margin-left: 0;    margin-right: auto; display: block; }
+img.img-align-center { margin-left: auto; margin-right: auto; display: block; }
+img.img-align-right  { margin-left: auto; margin-right: 0;    display: block; }
+/* 크기 — 데스크톱 기준 */
+img.img-size-small   { max-width: 40%; width: auto; }
+img.img-size-medium  { max-width: 65%; width: auto; }
+img.img-size-large   { max-width: 100%; width: auto; }
+img.img-size-full    { max-width: 100%; width: 100%; }
+/* 모바일에서는 small/medium 도 100% 로 (좁은 화면 가독성) */
+@media (max-width: 640px) {
+  img.img-size-small, img.img-size-medium { max-width: 100%; }
+}
 .tiptap-editor .ProseMirror hr { border: none; border-top: 1px solid #e2e8f0; margin: 1.5rem 0; }
 .tiptap-editor .ProseMirror a { color: #1E22B2; text-decoration: underline; }
 .tiptap-editor .ProseMirror mark { background: #fef9c3; border-radius: 0.2em; padding: 0.05em 0.2em; }

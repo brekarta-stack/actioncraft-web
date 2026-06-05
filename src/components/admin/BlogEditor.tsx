@@ -1,6 +1,7 @@
 "use client";
 
 import { useEditor, EditorContent, type Editor } from "@tiptap/react";
+import { BubbleMenu } from "@tiptap/react/menus";
 import StarterKit from "@tiptap/starter-kit";
 import ImageExtension from "@tiptap/extension-image";
 import LinkExtension from "@tiptap/extension-link";
@@ -8,6 +9,32 @@ import Placeholder from "@tiptap/extension-placeholder";
 import Underline from "@tiptap/extension-underline";
 import TextAlign from "@tiptap/extension-text-align";
 import Highlight from "@tiptap/extension-highlight";
+
+/**
+ * 본문 이미지에 정렬(left/center/right) + 크기(small/medium/large/full) attribute 추가.
+ * data-* 속성으로 보존되어 ReactMarkdown(rehype-raw) 미리보기·실제 발행 페이지에
+ * 동일 className 형태로 그대로 전달됨.
+ */
+const ImageWithAttrs = ImageExtension.extend({
+  addAttributes() {
+    return {
+      ...this.parent?.(),
+      align: {
+        default: "center",
+        parseHTML: (el) => el.getAttribute("data-align") || "center",
+        renderHTML: (attrs) => ({
+          "data-align": attrs.align,
+          class: `img-align-${attrs.align} img-size-${attrs.size || "large"}`,
+        }),
+      },
+      size: {
+        default: "large",
+        parseHTML: (el) => el.getAttribute("data-size") || "large",
+        renderHTML: (attrs) => ({ "data-size": attrs.size }),
+      },
+    };
+  },
+});
 import { useState, useCallback, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { marked } from "marked";
@@ -504,6 +531,125 @@ function Toolbar({ editor }: { editor: Editor }) {
 }
 
 /* ──────────────────────────────────────
+ * 이미지 BubbleMenu — 선택 시 위에 떠 있는 작은 툴바
+ * 정렬(좌/중/우) · 크기(S/M/L/Full) · alt 편집 · 교체 · 삭제
+ * ────────────────────────────────────── */
+function ImageBubbleMenu({
+  editor,
+  onReplaceUpload,
+}: {
+  editor: Editor;
+  onReplaceUpload: (editor: Editor, file: File, pos?: number) => void;
+}) {
+  const replaceInputRef = useRef<HTMLInputElement>(null);
+
+  function setAlign(align: "left" | "center" | "right") {
+    editor.chain().focus().updateAttributes("image", { align }).run();
+  }
+  function setSize(size: "small" | "medium" | "large" | "full") {
+    editor.chain().focus().updateAttributes("image", { size }).run();
+  }
+  function editAlt() {
+    const cur = (editor.getAttributes("image").alt as string) ?? "";
+    const next = window.prompt("이미지 설명(alt) — SEO·접근성용", cur);
+    if (next === null) return;
+    editor.chain().focus().updateAttributes("image", { alt: next }).run();
+  }
+  function removeImage() {
+    editor.chain().focus().deleteSelection().run();
+  }
+
+  const current = editor.getAttributes("image");
+  const curAlign = (current.align as string) || "center";
+  const curSize  = (current.size as string)  || "large";
+
+  return (
+    <BubbleMenu
+      editor={editor}
+      shouldShow={({ editor }) => editor.isActive("image")}
+    >
+      <div className="flex items-center gap-1 bg-white border border-slate-200 rounded-xl shadow-xl p-1.5 text-sm">
+        {/* 정렬 */}
+        <div className="flex items-center gap-0.5 pr-1.5 border-r border-slate-200">
+          {(["left", "center", "right"] as const).map((a) => (
+            <button
+              key={a}
+              type="button"
+              onMouseDown={(e) => { e.preventDefault(); setAlign(a); }}
+              title={`정렬: ${a === "left" ? "좌측" : a === "center" ? "가운데" : "우측"}`}
+              className={`w-7 h-7 flex items-center justify-center rounded-md text-xs transition-colors ${
+                curAlign === a ? "bg-blue-100 text-[#1E22B2]" : "text-slate-500 hover:bg-slate-100"
+              }`}
+            >
+              {a === "left" ? "◀" : a === "center" ? "▬" : "▶"}
+            </button>
+          ))}
+        </div>
+        {/* 크기 */}
+        <div className="flex items-center gap-0.5 pr-1.5 border-r border-slate-200">
+          {(["small", "medium", "large", "full"] as const).map((s) => (
+            <button
+              key={s}
+              type="button"
+              onMouseDown={(e) => { e.preventDefault(); setSize(s); }}
+              title={`크기: ${s === "small" ? "작게" : s === "medium" ? "보통" : s === "large" ? "크게" : "꽉 채우기"}`}
+              className={`px-2 h-7 flex items-center justify-center rounded-md text-xs font-semibold transition-colors ${
+                curSize === s ? "bg-blue-100 text-[#1E22B2]" : "text-slate-500 hover:bg-slate-100"
+              }`}
+            >
+              {s === "small" ? "S" : s === "medium" ? "M" : s === "large" ? "L" : "Full"}
+            </button>
+          ))}
+        </div>
+        {/* alt 편집 */}
+        <button
+          type="button"
+          onMouseDown={(e) => { e.preventDefault(); editAlt(); }}
+          title="이미지 설명(alt) 편집"
+          className="px-2 h-7 flex items-center justify-center rounded-md text-xs text-slate-600 hover:bg-slate-100"
+        >
+          Alt
+        </button>
+        {/* 교체 */}
+        <button
+          type="button"
+          onMouseDown={(e) => { e.preventDefault(); replaceInputRef.current?.click(); }}
+          title="이미지 교체 (파일 선택)"
+          className="px-2 h-7 flex items-center justify-center rounded-md text-xs text-slate-600 hover:bg-slate-100"
+        >
+          교체
+        </button>
+        <input
+          ref={replaceInputRef}
+          type="file"
+          accept="image/jpeg,image/png,image/webp,image/gif"
+          className="hidden"
+          onChange={(e) => {
+            const f = e.target.files?.[0];
+            if (f) {
+              // 기존 이미지 삭제 후 새 이미지 삽입
+              const pos = editor.state.selection.from;
+              editor.chain().focus().deleteSelection().run();
+              onReplaceUpload(editor, f, pos);
+            }
+            e.target.value = "";
+          }}
+        />
+        {/* 삭제 */}
+        <button
+          type="button"
+          onMouseDown={(e) => { e.preventDefault(); removeImage(); }}
+          title="이미지 삭제"
+          className="w-7 h-7 flex items-center justify-center rounded-md text-red-500 hover:bg-red-50"
+        >
+          🗑
+        </button>
+      </div>
+    </BubbleMenu>
+  );
+}
+
+/* ──────────────────────────────────────
  * 메인 BlogEditor
  * ────────────────────────────────────── */
 interface Props { post?: Post; }
@@ -605,10 +751,33 @@ export default function BlogEditor({ post }: Props) {
     if (!previewDate) setPreviewDate(new Date().toISOString());
   }, [previewDate]);
 
+  /**
+   * 본문 안 이미지 드래그앤드롭 / 클립보드 paste 업로드 핸들러.
+   * 파일이 들어오면 클라이언트 리사이즈 → /api/upload → 성공 시 커서 위치에 이미지 삽입.
+   */
+  const handleFileInsert = useCallback(
+    async (editor: Editor, file: File, pos?: number) => {
+      try {
+        const prepared = await prepareImageForUpload(file);
+        const fd = new FormData();
+        fd.append("file", prepared.file);
+        const res = await fetch("/api/upload", { method: "POST", body: fd });
+        if (!res.ok) throw new Error("업로드 실패");
+        const { url } = await res.json();
+        const chain = editor.chain().focus();
+        if (typeof pos === "number") chain.setTextSelection(pos);
+        chain.setImage({ src: url, alt: prepared.file.name }).run();
+      } catch (err) {
+        alert(err instanceof Error ? err.message : "이미지 업로드 중 오류가 발생했습니다.");
+      }
+    },
+    []
+  );
+
   const editor = useEditor({
     extensions: [
       StarterKit,
-      ImageExtension.configure({ inline: false, allowBase64: false }),
+      ImageWithAttrs.configure({ inline: false, allowBase64: false }),
       LinkExtension.configure({ openOnClick: false }),
       Placeholder.configure({ placeholder: "내용을 여기에 작성하세요…" }),
       Underline,
@@ -619,6 +788,38 @@ export default function BlogEditor({ post }: Props) {
     editorProps: {
       attributes: {
         class: "tiptap-content focus:outline-none",
+      },
+      /**
+       * 드래그앤드롭: 본문에 이미지 파일 떨어뜨리면 자동 업로드 후 삽입.
+       * (URL/text drop 은 ProseMirror 기본 동작 그대로)
+       */
+      handleDrop: (view, event, _slice, moved) => {
+        if (moved) return false;
+        const files = Array.from(event.dataTransfer?.files || []).filter((f) =>
+          f.type.startsWith("image/")
+        );
+        if (files.length === 0) return false;
+        event.preventDefault();
+        const coords = { left: event.clientX, top: event.clientY };
+        const pos = view.posAtCoords(coords)?.pos;
+        files.forEach((file) => {
+          if (editor) handleFileInsert(editor, file, pos);
+        });
+        return true;
+      },
+      /**
+       * 클립보드 paste: 이미지 데이터 있으면 업로드 후 삽입.
+       */
+      handlePaste: (_view, event) => {
+        const files = Array.from(event.clipboardData?.files || []).filter((f) =>
+          f.type.startsWith("image/")
+        );
+        if (files.length === 0) return false;
+        event.preventDefault();
+        files.forEach((file) => {
+          if (editor) handleFileInsert(editor, file);
+        });
+        return true;
       },
     },
     onUpdate: ({ editor }) => {
@@ -773,6 +974,7 @@ export default function BlogEditor({ post }: Props) {
             onClick={() => editor?.commands.focus()}
           >
             <EditorContent editor={editor} />
+            {editor && <ImageBubbleMenu editor={editor} onReplaceUpload={handleFileInsert} />}
           </div>
         </div>
 
