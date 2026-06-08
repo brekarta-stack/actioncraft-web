@@ -8,7 +8,7 @@ import Link from "next/link";
 import { readFileSync } from "fs";
 import path from "path";
 
-const TABLES = ["portfolio_items", "posts", "quotes"] as const;
+const TABLES = ["portfolio_items", "posts", "quotes", "analytics_events"] as const;
 
 async function checkTable(name: string): Promise<"ok" | "missing" | "error"> {
   try {

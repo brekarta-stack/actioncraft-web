@@ -166,7 +166,19 @@ export default async function AdminDashboard() {
       </div>
 
       {/* ── 빠른 작업 ── */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+        <Link
+          href="/admin/analytics"
+          className="flex items-center gap-3 bg-white border border-slate-200 rounded-xl px-4 py-3.5 hover:border-blue-300 hover:shadow-sm transition-all group"
+        >
+          <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: "#EEF0FF" }}>
+            <svg viewBox="0 0 20 20" fill="#1E22B2" className="w-4 h-4">
+              <path d="M2 11a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1v-5zM8 7a1 1 0 011-1h2a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1V7zM14 4a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z" />
+            </svg>
+          </div>
+          <span className="text-sm font-semibold text-slate-700 group-hover:text-slate-900">유입·클릭 분석</span>
+        </Link>
+
         <Link
           href="/admin/portfolio/new"
           className="flex items-center gap-3 bg-white border border-slate-200 rounded-xl px-4 py-3.5 hover:border-pink-300 hover:shadow-sm transition-all group"
