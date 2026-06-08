@@ -32,7 +32,7 @@ export const metadata: Metadata = {
 const stats: { num: string; sub?: string; label: string }[] = [
   { num: "11", sub: "종", label: "자기구조 설계 특허" },
   { num: "650+", label: "누적 납품 프로젝트" },
-  { num: "국내 유일", label: "페이퍼 엔지니어링 스튜디오" },
+  { num: "지기구조", label: "전문 설계 스튜디오" },
   { num: "KAIST", label: "출신 개발 인력" },
 ];
 
@@ -98,7 +98,7 @@ const services = [
 ];
 
 const timeline = [
-  { year: "2013", event: "Paper Engineering Studio 창업 — 국내 유일의 페이퍼 엔지니어링 전문 스튜디오 출범" },
+  { year: "2013", event: "Paper Engineering Studio 창업 — 지기구조 전문 설계 페이퍼 엔지니어링 스튜디오 출범" },
   { year: "2015", event: "자기 구조 설계 특허 최초 등록, STEAM 교육 키트 출시" },
   { year: "2017", event: "국내 최대 페이퍼 토이 커뮤니티 '종이천하' 운영 시작" },
   { year: "2019", event: "누적 특허 11종 달성, KAIST 협력 교육 프로그램 개발" },
@@ -170,7 +170,7 @@ export default function AboutPage() {
               <div className="space-y-4 text-slate-600 leading-relaxed" style={{ wordBreak: "keep-all" }}>
                 <p>
                   <strong className="text-slate-900">{SITE_NAME}(PE Studio)</strong>는
-                  창의적 발상을 기반으로 디자이너 크루들이 모인 국내 유일의 페이퍼 엔지니어링 스튜디오입니다.
+                  창의적 발상을 기반으로 디자이너 크루들이 모인 지기구조 전문 설계 스튜디오, 페이퍼 엔지니어링 스튜디오 (P.E Studio)입니다.
                 </p>
                 <p>
                   단순한 심미적 디자인을 넘어, 고객의 실제 니즈를 파악하여
@@ -179,7 +179,7 @@ export default function AboutPage() {
                 <p>
                   수많은 페이퍼 엔지니어링 설계 경험과 <strong className="text-slate-900">11종의 특허</strong>,
                   국내 유일의 종이 모델 디자이너 교육 시스템, KAIST 출신 개발 인력을 통해
-                  국내 유일의 페이퍼 엔지니어링 스튜디오로 자리잡았습니다.
+                  지기구조 전문 설계 페이퍼 엔지니어링 스튜디오로 자리잡았습니다.
                 </p>
                 <p>
                   타업체와 비교해도 뛰어난 서비스와 합리적인 가격, 신속한 납품이 가능합니다.
@@ -217,7 +217,7 @@ export default function AboutPage() {
             </p>
             <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-3 tracking-tight">차별화 포인트</h2>
             <p className="text-slate-500" style={{ wordBreak: "keep-all" }}>
-              국내 유일의 페이퍼 엔지니어링 스튜디오로서의 강점.
+              지기구조 전문 설계 페이퍼 엔지니어링 스튜디오로서의 강점.
             </p>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">

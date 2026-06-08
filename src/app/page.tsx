@@ -44,14 +44,14 @@ const trustStats: { num: string; label: string; sub?: string; since?: string }[]
   { num: "11",     label: "자기구조 설계 특허",        sub: "종" },
   { num: "650+",   label: "누적 납품 프로젝트",         sub: "건", since: "Since 2013" },
   { num: "약 4주 내", label: "평균 납기" },
-  { num: "국내 유일", label: "페이퍼 엔지니어링 스튜디오" },
+  { num: "지기구조", label: "전문 설계 스튜디오" },
 ];
 
 const features: { icon: IconKey; title: string; desc: string; gradient: string }[] = [
   {
     icon: "patent",
     title: "검증된 페이퍼 엔지니어링 특허",
-    desc: "자기 구조 설계 관련 11종의 특허를 보유한 국내 유일의 페이퍼 엔지니어링 스튜디오. 체계적이고 정밀한 설계로 다양한 움직임을 구현합니다.",
+    desc: "자기 구조 설계 관련 11종의 특허를 보유한 지기구조 전문 설계 페이퍼 엔지니어링 스튜디오. 체계적이고 정밀한 설계로 다양한 움직임을 구현합니다.",
     gradient: "from-cyan-400 to-blue-500",
   },
   {
@@ -163,7 +163,7 @@ export default function HomePage() {
             <div className="max-w-2xl">
               <span className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-full mb-6 bg-white/10 text-white border border-white/15">
                 <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
-                Paper Engineering Studio : 국내 최고의 페이퍼 엔지니어링 스튜디오
+                Paper Engineering Studio : 지기구조 전문 설계 페이퍼 엔지니어링 스튜디오
               </span>
 
               <h1 className="text-4xl md:text-6xl font-extrabold text-white mb-6 leading-[1.05] tracking-tight">
@@ -172,7 +172,7 @@ export default function HomePage() {
               </h1>
               <p className="text-lg md:text-xl text-blue-200 mb-4 leading-relaxed" style={{ wordBreak: "keep-all" }}>
                 <strong className="text-white">자기 구조 설계 특허 11종</strong>을 보유한
-                {" "}<strong className="text-white">국내 유일의 페이퍼 엔지니어링 스튜디오</strong>.
+                {" "}<strong className="text-white">지기구조 전문 설계 스튜디오, 페이퍼 엔지니어링 스튜디오 (P.E Studio)</strong>입니다.
               </p>
               <blockquote
                 className="border-l-2 pl-4 mb-4 text-blue-100/90 italic text-sm md:text-base leading-relaxed"
@@ -298,7 +298,7 @@ export default function HomePage() {
               Why {SITE_SHORT}
             </p>
             <h2 className="text-3xl md:text-4xl font-bold mb-4" style={{ color: "#1E22B2", wordBreak: "keep-all" }}>
-              왜 국내 유일의<br className="md:hidden" /> 페이퍼 엔지니어링 스튜디오인가
+              왜 지기구조 전문 설계<br className="md:hidden" /> 페이퍼 엔지니어링 스튜디오인가
             </h2>
             <p className="text-slate-500" style={{ wordBreak: "keep-all" }}>
               단순 제작이 아닌, 검증된 페이퍼 엔지니어링 기술과 글로벌 네트워크로 만드는 차이.
@@ -456,7 +456,7 @@ export default function HomePage() {
             <span className="pe-gradient-text">준비됐나요?</span>
           </h2>
           <p className="text-blue-200 text-lg mb-2" style={{ wordBreak: "keep-all" }}>
-            국내 유일의 페이퍼 엔지니어링 스튜디오가 함께합니다.
+            지기구조 전문 설계 페이퍼 엔지니어링 스튜디오가 함께합니다.
           </p>
           <p className="text-blue-300 text-sm mb-10">
             제품 정보 입력 → 영업일 1~2일 내 담당자 회신 · 최소 수량 1,000부 · 평균 납기 약 4주

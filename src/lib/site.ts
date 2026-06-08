@@ -13,15 +13,15 @@ export const SITE_URL =
  *
  * - 정식 명칭: Paper Engineering Studio
  * - 약칭: PE Studio
- * - 한글 슬로건: "국내 유일의 페이퍼 엔지니어링 스튜디오" (검색어 자산 확보용 반복 키워드)
+ * - 한글 슬로건: "지기구조 전문 설계 스튜디오, 페이퍼 엔지니어링 스튜디오 (P.E Studio)" (검색어 자산 확보용 반복 키워드)
  */
 export const SITE_NAME = "Paper Engineering Studio";
 export const SITE_SHORT = "PE Studio";
-export const BRAND_TAGLINE_KR = "국내 유일의 페이퍼 엔지니어링 스튜디오";
-export const BRAND_TAGLINE_EN = "Korea's Only Paper Engineering Studio";
+export const BRAND_TAGLINE_KR = "지기구조 전문 설계 스튜디오";
+export const BRAND_TAGLINE_EN = "Specialist Paper Engineering Studio";
 
 export const SITE_DESCRIPTION =
-  "Paper Engineering Studio(PE Studio)는 자기 구조 설계 특허 11종을 보유한 국내 유일의 페이퍼 엔지니어링 스튜디오입니다. 움직이는 페이퍼 크래프트·액션 페이퍼 토이·팝업북·폼보드(우드락)를 주문 제작합니다. 2013년 창업, 현대백화점·KAIST 등 650건 이상 납품 실적.";
+  "Paper Engineering Studio(PE Studio)는 자기 구조 설계 특허 11종을 보유한 지기구조 전문 설계 스튜디오, 페이퍼 엔지니어링 스튜디오 (P.E Studio)입니다. 움직이는 페이퍼 크래프트·액션 페이퍼 토이·팝업북·폼보드(우드락)를 주문 제작합니다. 2013년 창업, 현대백화점·KAIST 등 650건 이상 납품 실적.";
 
 /**
  * 회사 정보 (Schema.org Organization, 푸터, 연락처 등에서 공통 사용)
@@ -88,12 +88,12 @@ export const PAGE_META = {
   home: {
     title: "페이퍼토이·팝업북·액션페이퍼 제작 외주",
     description:
-      "Paper Engineering Studio — 자기 구조 설계 특허 11종을 보유한 국내 유일의 페이퍼 엔지니어링 스튜디오. 페이퍼 크래프트·액션 페이퍼 토이·팝업북·폼보드(우드락)를 주문 제작합니다. 2013년 창업, 현대백화점·KAIST 등 650건 이상 납품.",
+      "Paper Engineering Studio — 자기 구조 설계 특허 11종을 보유한 지기구조 전문 설계 스튜디오, 페이퍼 엔지니어링 스튜디오 (P.E Studio). 페이퍼 크래프트·액션 페이퍼 토이·팝업북·폼보드(우드락)를 주문 제작합니다. 2013년 창업, 현대백화점·KAIST 등 650건 이상 납품.",
   },
   about: {
-    title: "회사소개 — 국내 유일의 페이퍼 엔지니어링 스튜디오",
+    title: "회사소개 — 지기구조 전문 설계 페이퍼 엔지니어링 스튜디오",
     description:
-      "PE Studio(Paper Engineering Studio)는 자기 구조 설계 특허 11종을 보유한 국내 유일의 페이퍼 엔지니어링 스튜디오입니다. KAIST 출신 개발자, 글로벌 아티스트 네트워크, STEAM 교육 전문성을 갖췄습니다.",
+      "PE Studio(Paper Engineering Studio)는 자기 구조 설계 특허 11종을 보유한 지기구조 전문 설계 스튜디오, 페이퍼 엔지니어링 스튜디오 (P.E Studio)입니다. KAIST 출신 개발자, 글로벌 아티스트 네트워크, STEAM 교육 전문성을 갖췄습니다.",
   },
   products: {
     title: "페이퍼 엔지니어링 주문 제작 서비스",

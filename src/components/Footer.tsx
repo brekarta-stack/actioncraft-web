@@ -21,7 +21,7 @@ export default function Footer() {
               </div>
             </div>
             <p className="text-sm leading-relaxed text-blue-200" style={{ wordBreak: "keep-all" }}>
-              국내 유일의 페이퍼 엔지니어링 스튜디오.
+              지기구조 전문 설계 스튜디오, 페이퍼 엔지니어링 스튜디오 (P.E Studio).
               <br />
               움직이는 종이로 브랜드를 살아 숨쉬게 합니다.
             </p>
