@@ -21,7 +21,7 @@ const PRODUCT_LABEL: Record<string, string> = {
 
 async function sendInquiryEmail(s: QuoteSubmission): Promise<void> {
   const apiKey = process.env.RESEND_API_KEY;
-  const to     = process.env.INQUIRY_TO_EMAIL ?? "ceo@actioncraft.co.kr";
+  const to     = process.env.INQUIRY_TO_EMAIL ?? "ask@papercraft.kr";
   const bcc    = process.env.INQUIRY_BCC_EMAIL;
   const from   = process.env.INQUIRY_FROM_EMAIL ?? "Papercraft Quote <onboarding@resend.dev>";
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://papercraft.kr";
