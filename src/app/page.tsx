@@ -167,8 +167,8 @@ export default function HomePage() {
               </span>
 
               <h1 className="text-4xl md:text-5xl font-extrabold text-white mb-6 leading-[1.2] tracking-tight">
-                여기는 <span className="pe-gradient-text">{"'종이 설계의 모든 것'"}</span><br />
-                페이퍼 엔지니어링 스튜디오가 만듭니다.
+                모든 종이 설계는<br />
+                <span className="pe-gradient-text">P.E. 스튜디오</span>로 통합니다.
               </h1>
               <p className="text-lg md:text-xl text-blue-200 mb-4 leading-relaxed" style={{ wordBreak: "keep-all" }}>
                 <strong className="text-white">자기 구조 설계 특허 11종</strong>을 보유한
