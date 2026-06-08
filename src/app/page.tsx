@@ -166,9 +166,9 @@ export default function HomePage() {
                 지기구조 전문 설계 · 페이퍼 엔지니어링 스튜디오
               </span>
 
-              <h1 className="text-4xl md:text-6xl font-extrabold text-white mb-6 leading-[1.05] tracking-tight">
-                움직이는 종이,<br />
-                <span className="pe-gradient-text">그 구조를 설계합니다</span>
+              <h1 className="text-4xl md:text-5xl font-extrabold text-white mb-6 leading-[1.2] tracking-tight">
+                여기는 <span className="pe-gradient-text">{"'종이 설계의 모든 것'"}</span><br />
+                페이퍼 엔지니어링 스튜디오가 만듭니다.
               </h1>
               <p className="text-lg md:text-xl text-blue-200 mb-4 leading-relaxed" style={{ wordBreak: "keep-all" }}>
                 <strong className="text-white">자기 구조 설계 특허 11종</strong>을 보유한
