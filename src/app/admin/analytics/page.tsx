@@ -83,6 +83,7 @@ export default async function AnalyticsPage() {
   const maxSource = Math.max(1, ...s.sources.map((x) => x.sessions));
   const maxPage = Math.max(1, ...s.topPages.map((x) => x.count));
   const maxClick = Math.max(1, ...s.topClicks.map((x) => x.count));
+  const maxCampaign = Math.max(1, ...s.campaigns.map((x) => x.count));
 
   const nf = (n: number) => n.toLocaleString("ko-KR");
 
@@ -201,6 +202,30 @@ export default async function AnalyticsPage() {
               )}
             </Section>
           </div>
+
+          {/* ── 캠페인별 유입 (광고/UTM 캠페인이 있을 때만) ── */}
+          {s.campaigns.length > 0 && (
+            <div className="mt-6">
+              <Section title="캠페인별 유입 (UTM 캠페인 · 광고 효과)">
+                <ul className="space-y-2.5">
+                  {s.campaigns.map((c) => {
+                    const pct = Math.round((c.count / maxCampaign) * 100);
+                    return (
+                      <li key={c.key}>
+                        <div className="flex items-center justify-between text-sm mb-1">
+                          <span className="text-slate-700 font-medium truncate">🎯 {c.key}</span>
+                          <span className="font-bold text-slate-900 tabular-nums flex-shrink-0 ml-2">{nf(c.count)} 방문</span>
+                        </div>
+                        <div className="h-2 rounded-full bg-slate-100 overflow-hidden">
+                          <div className="h-full rounded-full" style={{ width: `${pct}%`, background: "#F59E0B" }} />
+                        </div>
+                      </li>
+                    );
+                  })}
+                </ul>
+              </Section>
+            </div>
+          )}
 
           {/* ── 클릭 순위 ── */}
           <div className="mt-6">

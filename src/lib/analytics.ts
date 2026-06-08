@@ -20,6 +20,10 @@ export interface TrackPayload {
   utmSource?: string;
   utmMedium?: string;
   utmCampaign?: string;
+  /** Google Ads 클릭 ID (자동 태깅) */
+  gclid?: string;
+  /** UTM 미설정 광고 클릭 힌트 ('google' | 'naver') */
+  adHint?: string;
   label?: string;
   href?: string;
   /** 'dwell' 이벤트의 페이지 체류 시간(ms) */
@@ -90,25 +94,43 @@ function matchSpecialHost(bare: string): Acquisition | null {
   return null;
 }
 
+/** utm_medium 정규화 — 유료광고 계열(cpc/ppc/paid…)은 'cpc'(=광고)로 통일 */
+function normalizeMedium(m?: string | null): string {
+  const v = (m ?? "").trim().toLowerCase();
+  if (!v) return "";
+  if (/^(cpc|ppc|paid|paidsearch|paid-search|paid_search|sa|cpm|display|banner|ad|ads)$/.test(v))
+    return "cpc";
+  return v.slice(0, 60);
+}
+
 /**
- * referrer + UTM → { source, medium }.
- * 우선순위: UTM > 직접유입(referrer 없음) > 내부이동 > 소셜 > 검색엔진 > 일반 referral.
+ * referrer + UTM(+광고 클릭 식별자) → { source, medium }.
+ * 우선순위: UTM > 광고클릭(gclid/adHint) > 직접유입 > 내부이동 > 소셜 > 검색엔진 > referral.
  */
 export function parseAcquisition(opts: {
   referrer?: string | null;
   utmSource?: string | null;
   utmMedium?: string | null;
+  /** Google Ads 자동 태깅 클릭 ID */
+  gclid?: string | null;
+  /** UTM 미설정 광고 클릭 힌트 ('google' | 'naver') */
+  adHint?: string | null;
   siteHost?: string | null;
 }): Acquisition {
-  const { referrer, utmSource, utmMedium, siteHost } = opts;
+  const { referrer, utmSource, utmMedium, gclid, adHint, siteHost } = opts;
 
-  // 1) UTM 캠페인 태그가 있으면 최우선
+  // 1) UTM 태그가 있으면 최우선 (유료광고 medium 은 'cpc'(광고)로 통일)
   if (utmSource && utmSource.trim()) {
     return {
       source: utmSource.trim().toLowerCase().slice(0, 60),
-      medium: (utmMedium?.trim() || "campaign").toLowerCase().slice(0, 60),
+      medium: normalizeMedium(utmMedium) || "campaign",
     };
   }
+
+  // 2) UTM 없이도 광고 클릭 식별 (구글애즈 gclid / 네이버·구글 광고 파라미터)
+  if (gclid && gclid.trim()) return { source: "google", medium: "cpc" };
+  if (adHint === "google") return { source: "google", medium: "cpc" };
+  if (adHint === "naver") return { source: "naver", medium: "cpc" };
 
   // 2) referrer 가 없으면 직접 유입 (북마크/주소 직접입력/앱 등)
   if (!referrer || !referrer.trim()) return { source: "direct", medium: "direct" };
@@ -205,6 +227,7 @@ export interface AnalyticsSummary {
   topClicks: ClickStat[];
   daily: DailyStat[];
   journeys: Journey[]; // 최근 방문 흐름
+  campaigns: Counted[]; // UTM 캠페인별 세션 수 (광고/캠페인 효과 추적)
 }
 
 const KST_OFFSET_MS = 9 * 60 * 60 * 1000;
@@ -235,25 +258,29 @@ export function summarize(rows: AnalyticsRow[], days = 14): AnalyticsSummary {
   const sessionIds = new Set<string>();
   for (const r of pageviews) if (r.session_id) sessionIds.add(r.session_id);
 
-  /* 유입 출처: 세션 단위로 집계 (세션의 대표 source/medium 1개) */
-  const sessionAcq = new Map<string, { source: string; medium: string }>();
+  /* 유입 출처: 세션 단위로 집계 (세션의 대표 source/medium/campaign 1개) */
+  const sessionAcq = new Map<string, { source: string; medium: string; campaign: string }>();
   for (const r of pageviews) {
     const sid = r.session_id ?? `anon-${r.created_at}`;
     if (!sessionAcq.has(sid)) {
       sessionAcq.set(sid, {
         source: r.source || "direct",
         medium: r.medium || "direct",
+        campaign: (r.utm_campaign || "").trim(),
       });
     }
   }
   const sourceMap = new Map<string, SourceStat>();
-  for (const { source, medium } of sessionAcq.values()) {
+  const campaignMap = new Map<string, number>();
+  for (const { source, medium, campaign } of sessionAcq.values()) {
     const key = `${source}|${medium}`;
     const cur = sourceMap.get(key);
     if (cur) cur.sessions += 1;
     else sourceMap.set(key, { source, medium, sessions: 1 });
+    if (campaign) campaignMap.set(campaign, (campaignMap.get(campaign) ?? 0) + 1);
   }
   const sources = [...sourceMap.values()].sort((a, b) => b.sessions - a.sessions);
+  const campaigns = topN(campaignMap, 12);
 
   /* 페이지별 체류 시간 (dwell 이벤트 평균) */
   const dwells = rows.filter((r) => r.type === "dwell" && (r.duration_ms ?? 0) > 0);
@@ -369,6 +396,7 @@ export function summarize(rows: AnalyticsRow[], days = 14): AnalyticsSummary {
     topClicks,
     daily,
     journeys: allJourneys.slice(0, 15),
+    campaigns,
   };
 }
 
@@ -379,6 +407,7 @@ export const MEDIUM_META: Record<string, { label: string; color: string }> = {
   referral: { label: "추천 링크", color: "#0EA5E9" },
   direct: { label: "직접 유입", color: "#64748B" },
   internal: { label: "내부 이동", color: "#94A3B8" },
+  cpc: { label: "광고", color: "#DC2626" },
   campaign: { label: "캠페인", color: "#F59E0B" },
 };
 

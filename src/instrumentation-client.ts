@@ -23,6 +23,8 @@ type Acq = {
   utmSource: string;
   utmMedium: string;
   utmCampaign: string;
+  gclid: string;
+  adHint: string;
 };
 
 function uid(): string {
@@ -66,11 +68,21 @@ function getAcquisition(): Acq {
     /* noop */
   }
   const params = new URLSearchParams(location.search);
+  const gclid = params.get("gclid") || "";
+  // UTM 미설정 광고 클릭 식별 (구글애즈 gclid/gbraid / 네이버 자동추적 파라미터)
+  let adHint = "";
+  if (gclid || params.get("gad_source") || params.get("gbraid") || params.get("wbraid")) {
+    adHint = "google";
+  } else if (params.get("n_media") || params.get("NaPm") || params.get("n_ad")) {
+    adHint = "naver";
+  }
   const acq: Acq = {
     referrer: document.referrer || "",
     utmSource: params.get("utm_source") || "",
     utmMedium: params.get("utm_medium") || "",
     utmCampaign: params.get("utm_campaign") || "",
+    gclid,
+    adHint,
   };
   try {
     sessionStorage.setItem(ACQ_KEY, JSON.stringify(acq));
