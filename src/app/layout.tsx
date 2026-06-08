@@ -76,9 +76,15 @@ export const metadata: Metadata = {
     googleBot: { index: true, follow: true },
   },
   verification: {
-    // TODO: Google Search Console / Naver Webmaster Tools 인증 코드 (사용자 입력 필요)
-    // google: "google-site-verification=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
-    // other: { "naver-site-verification": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" },
+    // 인증 코드는 Vercel 환경변수로 주입 → 코드 수정·재배포 없이 등록 가능.
+    //   GOOGLE_SITE_VERIFICATION : Google Search Console > 'HTML 태그' 방식의 content 값
+    //   NAVER_SITE_VERIFICATION  : 네이버 서치어드바이저 > '메타 태그' 방식의 content 값
+    ...(process.env.GOOGLE_SITE_VERIFICATION
+      ? { google: process.env.GOOGLE_SITE_VERIFICATION }
+      : {}),
+    ...(process.env.NAVER_SITE_VERIFICATION
+      ? { other: { "naver-site-verification": process.env.NAVER_SITE_VERIFICATION } }
+      : {}),
   },
 };
 
@@ -153,6 +159,50 @@ function WebSiteJsonLd() {
   );
 }
 
+/**
+ * LocalBusiness(ProfessionalService) JSON-LD — 로컬/지역 검색 노출 강화.
+ * Organization 과 별개로 주소·전화·영업 분야를 가진 '사업장' 엔티티를 명시해
+ * Google 로컬 검색·지식패널에서의 인식 가능성을 높인다.
+ * (네이버 지역 노출은 별도로 '네이버 플레이스' 등록 필요)
+ */
+function LocalBusinessJsonLd() {
+  const data = {
+    "@context": "https://schema.org",
+    "@type": "ProfessionalService",
+    "@id": `${SITE_URL}/#localbusiness`,
+    name: COMPANY.name,
+    alternateName: COMPANY.shortName,
+    description: SITE_DESCRIPTION,
+    url: SITE_URL,
+    image: `${SITE_URL}/opengraph-image`,
+    ...(COMPANY.phone ? { telephone: COMPANY.phone } : {}),
+    email: COMPANY.email,
+    priceRange: "₩₩",
+    foundingDate: COMPANY.foundingYear,
+    address: {
+      "@type": "PostalAddress",
+      streetAddress: COMPANY.address.streetAddress,
+      addressLocality: COMPANY.address.locality,
+      addressRegion: COMPANY.address.region,
+      addressCountry: COMPANY.address.country,
+    },
+    areaServed: { "@type": "Country", name: "대한민국" },
+    knowsLanguage: ["ko", "en"],
+    sameAs: [
+      COMPANY.social.instagram,
+      COMPANY.social.youtube,
+      COMPANY.social.community,
+    ].filter(Boolean),
+  };
+  return (
+    <script
+      type="application/ld+json"
+      // eslint-disable-next-line react/no-danger
+      dangerouslySetInnerHTML={{ __html: JSON.stringify(data) }}
+    />
+  );
+}
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -163,6 +213,7 @@ export default function RootLayout({
       <body className="min-h-screen flex flex-col antialiased">
         <OrganizationJsonLd />
         <WebSiteJsonLd />
+        <LocalBusinessJsonLd />
         <Header />
         <main className="flex-1">{children}</main>
         <Footer />
