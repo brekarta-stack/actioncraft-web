@@ -62,15 +62,41 @@ CREATE TABLE IF NOT EXISTS quotes (
   created_at    TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
+-- 4. 유입·클릭 분석 이벤트
+--    (외부 GA 없이 자체 수집 → /admin/analytics. IP·UA·쿠키 미사용)
+CREATE TABLE IF NOT EXISTS analytics_events (
+  id            BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+  type          TEXT NOT NULL,                       -- 'pageview' | 'click'
+  path          TEXT NOT NULL DEFAULT '',
+  referrer      TEXT,
+  source        TEXT,                                -- google/naver/instagram/direct…
+  medium        TEXT,                                -- organic | social | referral | direct
+  utm_source    TEXT,
+  utm_medium    TEXT,
+  utm_campaign  TEXT,
+  label         TEXT,                                -- 클릭된 요소 라벨
+  href          TEXT,                                -- 링크 목적지
+  session_id    TEXT,                                -- 익명 세션 식별자 (PII 아님)
+  device        TEXT,                                -- 'mobile' | 'desktop'
+  created_at    TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS analytics_events_created_idx
+  ON analytics_events (created_at DESC);
+
+CREATE INDEX IF NOT EXISTS analytics_events_type_created_idx
+  ON analytics_events (type, created_at DESC);
+
 -- ============================================================
 -- RLS (Row Level Security) 활성화
 -- 서버는 service_role 키 사용 → RLS 자동 우회
 -- 외부에서 anon 키로 직접 접근 시 아래 정책만 허용
 -- ============================================================
 
-ALTER TABLE portfolio_items ENABLE ROW LEVEL SECURITY;
+ALTER TABLE portfolio_items  ENABLE ROW LEVEL SECURITY;
 ALTER TABLE posts            ENABLE ROW LEVEL SECURITY;
 ALTER TABLE quotes           ENABLE ROW LEVEL SECURITY;
+ALTER TABLE analytics_events ENABLE ROW LEVEL SECURITY;
 
 -- portfolio_items: 공개된 항목만 anon 읽기 허용 (쓰기는 service_role만)
 DROP POLICY IF EXISTS "Public read published portfolio" ON portfolio_items;
@@ -86,3 +112,6 @@ CREATE POLICY "Public read published posts"
 
 -- quotes: anon 접근 전면 차단 (삽입 포함) — 모든 접근은 service_role을 통해서만
 -- (견적 폼 → /api/quote → supabaseAdmin 경유)
+
+-- analytics_events: anon 접근 전면 차단 — 수집/조회 모두 service_role 경유
+-- (수집 → /api/track, 조회 → /admin/analytics)
