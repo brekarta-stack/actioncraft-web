@@ -13,7 +13,7 @@ import { parseAcquisition } from "@/lib/analytics";
 
 /* ── 입력 스키마 ── */
 const TrackSchema = z.object({
-  type: z.enum(["pageview", "click"]),
+  type: z.enum(["pageview", "click", "dwell"]),
   path: z.string().max(512).default(""),
   referrer: z.string().max(1024).optional().default(""),
   utmSource: z.string().max(120).optional().default(""),
@@ -21,6 +21,7 @@ const TrackSchema = z.object({
   utmCampaign: z.string().max(120).optional().default(""),
   label: z.string().max(200).optional().default(""),
   href: z.string().max(1024).optional().default(""),
+  durationMs: z.number().int().min(0).max(3_600_000).optional(),
   sessionId: z.string().max(64).optional().default(""),
   device: z.enum(["mobile", "desktop", ""]).optional().default(""),
 });
@@ -94,6 +95,7 @@ export async function POST(request: Request) {
     utm_campaign: e.utmCampaign || null,
     label: e.type === "click" ? e.label || null : null,
     href: e.type === "click" ? e.href || null : null,
+    duration_ms: e.type === "dwell" ? (e.durationMs ?? null) : null,
     session_id: e.sessionId || null,
     device: e.device || null,
   });

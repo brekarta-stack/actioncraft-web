@@ -7,6 +7,7 @@ import {
   summarize,
   sourceLabel,
   MEDIUM_META,
+  formatDuration,
   type AnalyticsRow,
 } from "@/lib/analytics";
 
@@ -34,7 +35,7 @@ export default async function AnalyticsPage() {
   const { data, error } = await supabaseAdmin
     .from("analytics_events")
     .select(
-      "type,path,referrer,source,medium,utm_source,utm_medium,utm_campaign,label,href,session_id,device,created_at"
+      "type,path,referrer,source,medium,utm_source,utm_medium,utm_campaign,label,href,duration_ms,session_id,device,created_at"
     )
     .gte("created_at", since)
     .order("created_at", { ascending: false })
@@ -106,9 +107,10 @@ export default async function AnalyticsPage() {
       ) : (
         <>
           {/* ── 요약 카드 ── */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
             <SummaryCard label="방문 (세션)" value={nf(s.totalSessions)} hint={`최근 ${WINDOW_DAYS}일`} bg="#EEF0FF" fg="#1E22B2" />
             <SummaryCard label="페이지뷰" value={nf(s.totalPageviews)} hint="전체 페이지 조회" bg="#E0F2FE" fg="#0369A1" />
+            <SummaryCard label="평균 체류시간" value={formatDuration(s.avgSessionMs)} hint="방문당 평균 머문 시간" bg="#ECFDF5" fg="#0F766E" />
             <SummaryCard label="클릭" value={nf(s.totalClicks)} hint="버튼·링크 클릭" bg="#FFF3F9" fg="#E91E8C" />
           </div>
 
@@ -180,7 +182,14 @@ export default async function AnalyticsPage() {
                       <li key={x.key}>
                         <div className="flex items-center justify-between text-sm mb-1">
                           <code className="text-slate-600 truncate font-mono text-xs">{x.key}</code>
-                          <span className="font-bold text-slate-900 tabular-nums flex-shrink-0 ml-2">{nf(x.count)}</span>
+                          <span className="flex items-center gap-2 flex-shrink-0 ml-2">
+                            {x.avgDwellMs > 0 && (
+                              <span className="text-[11px] text-slate-400" title="평균 체류 시간">
+                                {formatDuration(x.avgDwellMs)}
+                              </span>
+                            )}
+                            <span className="font-bold text-slate-900 tabular-nums">{nf(x.count)}</span>
+                          </span>
                         </div>
                         <div className="h-2 rounded-full bg-slate-100 overflow-hidden">
                           <div className="h-full rounded-full" style={{ width: `${pct}%`, background: "#0EA5E9" }} />
@@ -218,6 +227,48 @@ export default async function AnalyticsPage() {
                             </div>
                           </div>
                           <span className="font-bold text-slate-900 tabular-nums w-12 text-right flex-shrink-0">{nf(x.count)}</span>
+                        </div>
+                      </li>
+                    );
+                  })}
+                </ul>
+              )}
+            </Section>
+          </div>
+
+          {/* ── 방문자 여정 ── */}
+          <div className="mt-6">
+            <Section title="방문자 여정 (최근 방문 흐름)">
+              {s.journeys.length === 0 ? (
+                <Empty />
+              ) : (
+                <ul className="space-y-3">
+                  {s.journeys.map((j) => {
+                    const meta = MEDIUM_META[j.medium] ?? { label: j.medium, color: "#64748B" };
+                    return (
+                      <li key={j.sessionId} className="border border-slate-100 rounded-xl p-3">
+                        <div className="flex items-center gap-2 mb-1.5 flex-wrap">
+                          <span
+                            className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full"
+                            style={{ background: `${meta.color}1A`, color: meta.color }}
+                          >
+                            {sourceLabel(j.source)} · {meta.label}
+                          </span>
+                          <span className="text-[11px] text-slate-400">
+                            {j.device === "mobile" ? "📱 모바일" : "💻 데스크톱"}
+                          </span>
+                          <span className="text-[11px] text-slate-400">· {j.pageCount}페이지</span>
+                          <span className="text-[11px] text-slate-400">· 체류 {formatDuration(j.durationMs)}</span>
+                        </div>
+                        <div className="flex items-center gap-1 flex-wrap">
+                          {j.pages.map((p, i) => (
+                            <span key={i} className="flex items-center gap-1">
+                              {i > 0 && <span className="text-slate-300 text-xs">→</span>}
+                              <code className="text-[11px] font-mono px-1.5 py-0.5 rounded bg-slate-50 text-slate-600">
+                                {p}
+                              </code>
+                            </span>
+                          ))}
                         </div>
                       </li>
                     );

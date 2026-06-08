@@ -76,6 +76,7 @@ CREATE TABLE IF NOT EXISTS analytics_events (
   utm_campaign  TEXT,
   label         TEXT,                                -- 클릭된 요소 라벨
   href          TEXT,                                -- 링크 목적지
+  duration_ms   BIGINT,                              -- 페이지 체류 시간(ms) — type='dwell'
   session_id    TEXT,                                -- 익명 세션 식별자 (PII 아님)
   device        TEXT,                                -- 'mobile' | 'desktop'
   created_at    TIMESTAMPTZ NOT NULL DEFAULT NOW()

@@ -108,13 +108,35 @@ function send(payload: Record<string, unknown>): void {
 let lastPath = "";
 let lastAt = 0;
 
+/* ── 체류 시간(dwell) 측정 ── */
+let dwellPath = ""; // 현재 체류 측정 중인 경로
+let dwellStart = 0; // 진입 시각(ms)
+let dwellSent = false; // 이 페이지의 dwell 전송 여부
+
+/** 현재 페이지의 체류 시간을 한 번 전송 (이탈 시 호출). */
+function flushDwell(): void {
+  if (!dwellPath || dwellSent || !dwellStart) return;
+  dwellSent = true;
+  const ms = Date.now() - dwellStart;
+  // 0 초과 ~ 30분 미만만 (백그라운드 방치 등 비정상값 제외)
+  if (ms > 0 && ms < 30 * 60 * 1000) {
+    send({ type: "dwell", path: dwellPath, durationMs: ms });
+  }
+}
+
 function trackPageview(path: string): void {
   if (!isTracked(path)) return;
   const now = Date.now();
   // 프리패치/Strict Mode 중복 호출 방지
   if (path === lastPath && now - lastAt < 800) return;
+  // 직전 페이지의 체류 시간 먼저 전송
+  flushDwell();
   lastPath = path;
   lastAt = now;
+  // 새 페이지 체류 측정 시작
+  dwellPath = path;
+  dwellStart = now;
+  dwellSent = false;
   send({ type: "pageview", path });
 }
 
@@ -150,10 +172,15 @@ function onClick(ev: MouseEvent): void {
   }
 }
 
-/* ── 초기화: 최초 페이지뷰 + 전역 클릭 리스너 ── */
+/* ── 초기화: 최초 페이지뷰 + 전역 클릭 리스너 + 이탈 시 체류 전송 ── */
 try {
   trackPageview(location.pathname);
   document.addEventListener("click", onClick, { capture: true, passive: true });
+  // 탭 닫기 / 전체 새로고침 / 외부 이동 시 마지막 페이지 체류 전송
+  window.addEventListener("pagehide", flushDwell);
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "hidden") flushDwell();
+  });
 } catch {
   /* 무시 */
 }

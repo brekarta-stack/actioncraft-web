@@ -10,7 +10,7 @@
 
 /* ───────────────────────── 타입 ───────────────────────── */
 
-export type AnalyticsEventType = "pageview" | "click";
+export type AnalyticsEventType = "pageview" | "click" | "dwell";
 
 /** 브라우저가 /api/track 으로 보내는 페이로드 */
 export interface TrackPayload {
@@ -22,6 +22,8 @@ export interface TrackPayload {
   utmCampaign?: string;
   label?: string;
   href?: string;
+  /** 'dwell' 이벤트의 페이지 체류 시간(ms) */
+  durationMs?: number;
   sessionId?: string;
   device?: "mobile" | "desktop";
 }
@@ -38,6 +40,7 @@ export interface AnalyticsRow {
   utm_campaign: string | null;
   label: string | null;
   href: string | null;
+  duration_ms: number | null;
   session_id: string | null;
   device: string | null;
   created_at: string;
@@ -173,14 +176,35 @@ export interface DailyStat {
   sessions: number;
 }
 
+export interface PageStat {
+  key: string; // path
+  count: number; // pageviews
+  avgDwellMs: number; // 평균 체류 시간 (dwell 이벤트 기반, 없으면 0)
+}
+
+/** 한 방문(세션)의 이동 흐름 */
+export interface Journey {
+  sessionId: string;
+  source: string;
+  medium: string;
+  device: string | null;
+  pages: string[]; // 방문 순서대로의 경로
+  pageCount: number;
+  durationMs: number; // 세션 체류 시간
+  startedAt: string;
+}
+
 export interface AnalyticsSummary {
   totalPageviews: number;
   totalSessions: number;
   totalClicks: number;
+  avgSessionMs: number; // 평균 세션 체류 시간
+  avgPageMs: number; // 평균 페이지 체류 시간
   sources: SourceStat[];
-  topPages: Counted[];
+  topPages: PageStat[];
   topClicks: ClickStat[];
   daily: DailyStat[];
+  journeys: Journey[]; // 최근 방문 흐름
 }
 
 const KST_OFFSET_MS = 9 * 60 * 60 * 1000;
@@ -231,13 +255,27 @@ export function summarize(rows: AnalyticsRow[], days = 14): AnalyticsSummary {
   }
   const sources = [...sourceMap.values()].sort((a, b) => b.sessions - a.sessions);
 
-  /* 인기 페이지: pageview 경로별 카운트 */
+  /* 페이지별 체류 시간 (dwell 이벤트 평균) */
+  const dwells = rows.filter((r) => r.type === "dwell" && (r.duration_ms ?? 0) > 0);
+  const pageDwell = new Map<string, { total: number; n: number }>();
+  for (const r of dwells) {
+    const p = r.path || "/";
+    const cur = pageDwell.get(p) ?? { total: 0, n: 0 };
+    cur.total += r.duration_ms ?? 0;
+    cur.n += 1;
+    pageDwell.set(p, cur);
+  }
+
+  /* 인기 페이지: pageview 경로별 카운트 + 평균 체류 */
   const pageMap = new Map<string, number>();
   for (const r of pageviews) {
     const p = r.path || "/";
     pageMap.set(p, (pageMap.get(p) ?? 0) + 1);
   }
-  const topPages = topN(pageMap, 12);
+  const topPages: PageStat[] = topN(pageMap, 12).map((c) => {
+    const d = pageDwell.get(c.key);
+    return { key: c.key, count: c.count, avgDwellMs: d ? Math.round(d.total / d.n) : 0 };
+  });
 
   /* 클릭 순위: label 별 카운트 (+ 대표 href) */
   const clickMap = new Map<string, number>();
@@ -279,14 +317,58 @@ export function summarize(rows: AnalyticsRow[], days = 14): AnalyticsSummary {
     });
   }
 
+  /* 방문자 여정 (세션별 페이지 이동 흐름) + 평균 체류 시간 */
+  const bySession = new Map<string, AnalyticsRow[]>();
+  for (const r of rows) {
+    if (!r.session_id) continue;
+    const arr = bySession.get(r.session_id);
+    if (arr) arr.push(r);
+    else bySession.set(r.session_id, [r]);
+  }
+  const allJourneys: Journey[] = [];
+  bySession.forEach((evs, sid) => {
+    evs.sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
+    const pvs = evs.filter((e) => e.type === "pageview");
+    if (pvs.length === 0) return;
+    const times = evs.map((e) => new Date(e.created_at).getTime());
+    const spanMs = Math.max(...times) - Math.min(...times);
+    const dwellMs = evs
+      .filter((e) => e.type === "dwell")
+      .reduce((s, e) => s + (e.duration_ms ?? 0), 0);
+    const first = pvs[0];
+    allJourneys.push({
+      sessionId: sid,
+      source: first.source || "direct",
+      medium: first.medium || "direct",
+      device: first.device,
+      pages: pvs.map((p) => p.path || "/"),
+      pageCount: pvs.length,
+      durationMs: Math.max(dwellMs, spanMs),
+      startedAt: first.created_at,
+    });
+  });
+  allJourneys.sort(
+    (a, b) => new Date(b.startedAt).getTime() - new Date(a.startedAt).getTime()
+  );
+
+  const avgSessionMs = allJourneys.length
+    ? Math.round(allJourneys.reduce((s, j) => s + j.durationMs, 0) / allJourneys.length)
+    : 0;
+  const avgPageMs = dwells.length
+    ? Math.round(dwells.reduce((s, r) => s + (r.duration_ms ?? 0), 0) / dwells.length)
+    : 0;
+
   return {
     totalPageviews: pageviews.length,
     totalSessions: sessionIds.size,
     totalClicks: clicks.length,
+    avgSessionMs,
+    avgPageMs,
     sources,
     topPages,
     topClicks,
     daily,
+    journeys: allJourneys.slice(0, 15),
   };
 }
 
@@ -317,4 +399,17 @@ export function sourceLabel(source: string): string {
     band: "밴드",
   };
   return map[source] ?? source;
+}
+
+/** ms → "45초" / "1분 23초" / "1시간 5분" 형식 (체류 시간 표시용) */
+export function formatDuration(ms: number): string {
+  if (!ms || ms < 0) return "0초";
+  const totalSec = Math.round(ms / 1000);
+  if (totalSec < 60) return `${totalSec}초`;
+  const min = Math.floor(totalSec / 60);
+  const sec = totalSec % 60;
+  if (min < 60) return sec ? `${min}분 ${sec}초` : `${min}분`;
+  const hr = Math.floor(min / 60);
+  const m = min % 60;
+  return m ? `${hr}시간 ${m}분` : `${hr}시간`;
 }
