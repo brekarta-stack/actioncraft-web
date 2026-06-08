@@ -11,6 +11,7 @@ const categoryColors: Record<string, { bg: string; text: string }> = {
   "페이퍼 크래프트": { bg: "#EEF0FF", text: "#1E22B2" },
   "액션 크래프트":  { bg: "#FFF3F9", text: "#E91E8C" },
   "우드락":         { bg: "#FFFBEB", text: "#B45309" },
+  "모자/마스크":     { bg: "#E0F7FA", text: "#0E7490" },
   "기타":           { bg: "#F1F5F9", text: "#475569" },
 };
 

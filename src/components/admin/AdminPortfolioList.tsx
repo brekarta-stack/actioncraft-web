@@ -8,6 +8,7 @@ const categoryColors: Record<string, string> = {
   "페이퍼 크래프트": "bg-blue-100 text-blue-700",
   "액션 크래프트": "bg-orange-100 text-orange-700",
   "우드락": "bg-amber-100 text-amber-700",
+  "모자/마스크": "bg-cyan-100 text-cyan-700",
   "기타": "bg-slate-100 text-slate-600",
 };
 

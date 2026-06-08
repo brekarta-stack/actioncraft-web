@@ -1,7 +1,6 @@
-// "기타" 카테고리는 사용자 요청으로 제거됨 — DB에 기존 "기타" 데이터는
-// 화면 필터에서 보이지 않지만 "전체" 탭에선 그대로 노출됨.
-// chip 색상 맵(PortfolioGallery/AdminPortfolioList)엔 "기타" fallback 유지.
-export const CATEGORIES = ["팝업북", "페이퍼 크래프트", "액션 크래프트", "우드락"] as const;
+// 카테고리 목록 — 갤러리 필터 탭 + 어드민 에디터 셀렉트의 단일 출처.
+// (구) catch-all "기타" 제거됨. 미사용이던 "우드락"을 "모자/마스크"로 교체.
+export const CATEGORIES = ["팝업북", "페이퍼 크래프트", "액션 크래프트", "모자/마스크"] as const;
 export type Category = (typeof CATEGORIES)[number];
 
 /**
