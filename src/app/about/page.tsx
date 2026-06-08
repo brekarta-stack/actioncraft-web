@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { PAGE_META, BRAND_TAGLINE_KR, SITE_SHORT, SITE_NAME } from "@/lib/site";
+import { PAGE_META, BRAND_TAGLINE_KR, SITE_NAME } from "@/lib/site";
 import {
   PatentIcon,
   GlobeIcon,
@@ -66,7 +66,7 @@ const strengths: { icon: IconKey; title: string; description: string }[] = [
 const services = [
   {
     num: "01",
-    title: "Paper Engineering",
+    title: "페이퍼 엔지니어링",
     items: [
       "교육용·홍보용 캐릭터 종이 모형 외주 제작",
       "구동 가능 플랫폼 제공 및 캐릭터 디자인",
@@ -77,7 +77,7 @@ const services = [
   },
   {
     num: "02",
-    title: "Education Program",
+    title: "교육 프로그램",
     items: [
       "방과 후 교육 프로그램 및 재료 판매",
       "업사이클링 교육 키트",
@@ -87,7 +87,7 @@ const services = [
   },
   {
     num: "03",
-    title: "Editorial Design",
+    title: "편집 디자인",
     items: [
       "캐릭터 제작",
       "기관·관공서·기업 BI/CI 제작",
@@ -104,7 +104,7 @@ const timeline = [
   { year: "2019", event: "누적 특허 11종 달성, KAIST 협력 교육 프로그램 개발" },
   { year: "2021", event: "현대백화점·경주박물관 등 주요 기관 납품 본격화" },
   { year: "2023", event: "누적 납품 650건 돌파, 기업 굿즈 서비스 확장" },
-  { year: "2024", event: "온라인 제작 문의 서비스 론칭" },
+  { year: "2024", event: "온라인 제작 문의 서비스 시작" },
 ];
 
 export default function AboutPage() {
@@ -122,15 +122,15 @@ export default function AboutPage() {
           <div className="max-w-3xl">
             <span className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-full mb-6 bg-white/10 text-white border border-white/15">
               <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
-              About {SITE_SHORT}
+              회사소개
             </span>
             <h1 className="text-4xl md:text-5xl font-extrabold text-white mb-6 leading-[1.1] tracking-tight" style={{ wordBreak: "keep-all" }}>
               {BRAND_TAGLINE_KR}<br />
               <span className="pe-gradient-text">PE Studio</span>입니다
             </h1>
             <p className="text-blue-200 text-lg leading-relaxed" style={{ wordBreak: "keep-all" }}>
-              디자인 프로세스와 디자인 씽킹을 바탕으로 Paper Engineering,
-              Education Program, Editorial Design 서비스를 제공합니다.
+              디자인 사고를 바탕으로 페이퍼 엔지니어링, 교육 프로그램,
+              편집 디자인을 제공합니다.
             </p>
           </div>
         </div>
@@ -164,7 +164,7 @@ export default function AboutPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-start">
             <div>
               <p className="text-xs font-semibold uppercase tracking-widest mb-3" style={{ color: "#06C6C8" }}>
-                Our Story
+                소개
               </p>
               <h2 className="text-3xl font-bold text-slate-900 mb-6 tracking-tight">우리의 이야기</h2>
               <div className="space-y-4 text-slate-600 leading-relaxed" style={{ wordBreak: "keep-all" }}>
@@ -213,9 +213,9 @@ export default function AboutPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
             <p className="text-xs font-semibold uppercase tracking-widest mb-3" style={{ color: "#E91E8C" }}>
-              Differentiation
+              차별점
             </p>
-            <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-3 tracking-tight">차별화 포인트</h2>
+            <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-3 tracking-tight">우리의 강점</h2>
             <p className="text-slate-500" style={{ wordBreak: "keep-all" }}>
               지기구조 전문 설계 페이퍼 엔지니어링 스튜디오로서의 강점.
             </p>
@@ -240,7 +240,7 @@ export default function AboutPage() {
           {/* Patent badges */}
           <div className="mt-12 pt-8 border-t border-slate-100">
             <p className="text-center text-xs font-semibold uppercase tracking-widest text-slate-400 mb-5">
-자기 구조 설계 특허 11종 보유 (KIPO 등록)
+자기 구조 설계 특허 11종 보유 (특허청 등록)
             </p>
             <div className="flex flex-wrap justify-center gap-3">
               <PatentBadge number="설계 특허" title="자기구조 페이퍼토이 설계 방법" />
@@ -256,9 +256,9 @@ export default function AboutPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
             <p className="text-xs font-semibold uppercase tracking-widest mb-3" style={{ color: "#1E22B2" }}>
-              Services
+              제공 분야
             </p>
-            <h2 className="text-3xl font-bold text-slate-900 mb-3 tracking-tight">제공 서비스</h2>
+            <h2 className="text-3xl font-bold text-slate-900 mb-3 tracking-tight">우리가 하는 일</h2>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
             {services.map((svc) => (
@@ -284,7 +284,7 @@ export default function AboutPage() {
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
             <p className="text-xs font-semibold uppercase tracking-widest mb-3" style={{ color: "#1E22B2" }}>
-              Timeline
+              걸어온 길
             </p>
             <h2 className="text-3xl font-bold text-slate-900 tracking-tight">연혁</h2>
           </div>
@@ -321,10 +321,10 @@ export default function AboutPage() {
         </div>
         <div className="relative max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="text-2xl md:text-3xl font-bold text-white mb-4 tracking-tight">
-            프로젝트를 함께 시작해볼까요?
+            함께 만들 것이 있으신가요
           </h2>
           <p className="text-blue-200 mb-8" style={{ wordBreak: "keep-all" }}>
-            아이디어가 있다면 언제든지 무료 견적을 요청해주세요.
+            생각하고 계신 작업이 있다면 언제든 견적을 요청해 주세요.
           </p>
           <Link
             href="/quote"

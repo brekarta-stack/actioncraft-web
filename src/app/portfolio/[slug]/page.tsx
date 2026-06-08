@@ -232,7 +232,7 @@ export default async function PortfolioDetailPage({ params }: Props) {
 
             {tags.length > 0 && (
               <div className="mt-8">
-                <div className="text-xs font-semibold text-slate-500 mb-2 uppercase tracking-widest">Tags</div>
+                <div className="text-xs font-semibold text-slate-500 mb-2 tracking-wide">태그</div>
                 <div className="flex flex-wrap gap-2">
                   {tags.map((t) => (
                     <Link
@@ -323,7 +323,7 @@ export default async function PortfolioDetailPage({ params }: Props) {
         </div>
         <div className="relative max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="text-2xl md:text-3xl font-bold text-white mb-3 tracking-tight">
-            {item.client || "이와 비슷한 작업"}처럼, 우리도 만들고 싶은데
+            {item.client || "이런 작업"}처럼 만들고 싶으신가요
           </h2>
           <p className="text-blue-200 mb-8" style={{ wordBreak: "keep-all" }}>
             지기구조 전문 설계 페이퍼 엔지니어링 스튜디오에 직접 의뢰해 보세요. 영업일 1~2일 내 회신 드립니다.

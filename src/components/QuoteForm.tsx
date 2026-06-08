@@ -291,7 +291,7 @@ export default function QuoteForm() {
         <div className="relative max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <span className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-full mb-6 bg-white/10 text-white border border-white/15">
             <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
-            Quick Quote · 1분이면 충분합니다
+            1분이면 충분합니다
           </span>
           <h1 className="text-4xl md:text-5xl font-extrabold text-white mb-6 tracking-tight leading-[1.1]">
             <span className="pe-gradient-text">제작 문의</span>
@@ -309,7 +309,7 @@ export default function QuoteForm() {
         <div className="mb-12">
           <div className="flex items-center justify-between mb-2 text-xs">
             <span className="font-semibold text-slate-700">
-              Step <span className="pe-num">{step}</span> of <span className="pe-num">{STEP_LABELS.length}</span> ·{" "}
+              <span className="pe-num">{step}</span> / <span className="pe-num">{STEP_LABELS.length}</span>단계 ·{" "}
               <span style={{ color: "#1E22B2" }}>{STEP_LABELS[step - 1]}</span>
             </span>
             <span className="text-slate-400 pe-num">{Math.round(((step) / STEP_LABELS.length) * 100)}%</span>

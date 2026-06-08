@@ -58,7 +58,7 @@ export default async function BlogPage() {
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <span className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-full mb-6 bg-white/10 text-white border border-white/15">
             <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
-            Blog · {BRAND_TAGLINE_KR}
+            {BRAND_TAGLINE_KR}
           </span>
           <h1 className="text-4xl md:text-5xl font-extrabold text-white mb-6 tracking-tight leading-[1.1]">
             {SITE_SHORT} <span className="pe-gradient-text">블로그</span>
@@ -192,10 +192,10 @@ export default async function BlogPage() {
       <section className="py-16 md:py-20" style={{ background: "#F0F2FF" }}>
         <div className="max-w-3xl mx-auto px-4 sm:px-6 text-center">
           <h2 className="text-2xl md:text-3xl font-bold text-slate-900 mb-3 tracking-tight">
-            페이퍼 엔지니어링 프로젝트를 시작해볼까요?
+            페이퍼 엔지니어링 작업을 의뢰하고 싶으신가요
           </h2>
           <p className="text-slate-500 mb-8" style={{ wordBreak: "keep-all" }}>
-            블로그에서 본 사례 같은 작업을 의뢰하고 싶으시다면, 자동 견적으로 빠르게 문의해 주세요.
+            블로그에서 본 사례 같은 작업이 필요하시면, 견적 문의를 남겨 주세요.
           </p>
           <Link
             href="/quote"

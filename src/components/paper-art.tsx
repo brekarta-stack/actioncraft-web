@@ -421,8 +421,8 @@ export function PatentBadge({
         </svg>
       </div>
       <div className="leading-tight">
-        <div className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">
-          KIPO Patent
+        <div className="text-[10px] font-semibold tracking-wider text-slate-400">
+          특허청 등록
         </div>
         <div className="text-sm font-bold text-slate-900">{number}</div>
         <div className="text-xs text-slate-500" style={{ wordBreak: "keep-all" }}>{title}</div>

@@ -95,13 +95,13 @@ export default async function PortfolioPage() {
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <span className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-full mb-6 bg-white/10 text-white border border-white/15">
             <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
-            Portfolio
+            제작 사례
           </span>
           <h1 className="text-4xl md:text-5xl font-extrabold text-white mb-6 tracking-tight leading-[1.1]">
             <span className="pe-gradient-text">제작 사례</span>
           </h1>
           <p className="text-blue-200 text-lg max-w-2xl mx-auto" style={{ wordBreak: "keep-all" }}>
-            Since 2013, PE Studio가 만들어온 대표 제품들을 소개합니다.
+            2013년부터 우리가 만들어 온 대표 작업들입니다.
           </p>
         </div>
       </section>

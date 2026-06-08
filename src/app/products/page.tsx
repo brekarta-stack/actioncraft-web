@@ -98,13 +98,13 @@ export default function ProductsPage() {
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <span className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-full mb-6 bg-white/10 text-white border border-white/15">
             <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
-            Services · {BRAND_TAGLINE_KR}
+            {BRAND_TAGLINE_KR}
           </span>
           <h1 className="text-4xl md:text-5xl font-extrabold text-white mb-6 tracking-tight leading-[1.1]" style={{ wordBreak: "keep-all" }}>
             <span className="pe-gradient-text">주문 제작</span>
           </h1>
           <p className="text-blue-200 text-lg max-w-2xl mx-auto" style={{ wordBreak: "keep-all" }}>
-            Paper Engineering · Education Program · Editorial Design
+            페이퍼 엔지니어링 · 교육 프로그램 · 편집 디자인
             <br />
             <span className="text-blue-300 text-base">특허 기술 기반, 기획부터 납품까지 원스톱 제작.</span>
           </p>
@@ -119,10 +119,10 @@ export default function ProductsPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
             <p className="text-xs font-semibold uppercase tracking-widest mb-3" style={{ color: "#E91E8C" }}>
-              Process
+              제작 과정
             </p>
             <h2 className="text-3xl font-bold text-slate-900 mb-3 tracking-tight">
-              페이퍼 엔지니어링 주문 제작 프로세스
+              주문은 이렇게 진행됩니다
             </h2>
             <p className="text-slate-500">
               대부분의 제품은 <strong style={{ color: "#1E22B2" }}>약 4주 내 납품</strong> 가능합니다.
@@ -187,11 +187,11 @@ export default function ProductsPage() {
           </div>
         </div>
         <div className="relative max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-3xl font-bold text-white mb-3 tracking-tight">프로젝트를 시작해볼까요?</h2>
+          <h2 className="text-3xl font-bold text-white mb-3 tracking-tight">만들고 싶은 것이 있으신가요</h2>
           <p className="text-blue-200 mb-2" style={{ wordBreak: "keep-all" }}>
-            최소 1,000부부터 대량 제작까지, 합리적인 가격으로 제공합니다.
+            최소 1,000부부터 대량 제작까지 가능합니다.
           </p>
-          <p className="text-blue-300 text-sm mb-8">자동 견적 폼을 통해 빠르게 견적을 받아보세요.</p>
+          <p className="text-blue-300 text-sm mb-8">견적 문의를 남겨 주시면 빠르게 회신드립니다.</p>
           <Link
             href="/quote"
             className="group inline-flex items-center justify-center gap-2 px-10 py-4 font-bold rounded-xl text-white text-lg shadow-xl shadow-pink-500/30 hover:-translate-y-0.5 transition-all"

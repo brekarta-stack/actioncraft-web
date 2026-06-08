@@ -36,7 +36,7 @@ export default function Header() {
             <span className="font-bold text-lg text-slate-900 tracking-tight">
               PE Studio
               <span className="hidden lg:inline text-slate-400 font-medium text-sm ml-1.5">
-                · Paper Engineering
+                · 페이퍼 엔지니어링
               </span>
             </span>
           </Link>

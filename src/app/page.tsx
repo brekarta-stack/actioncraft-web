@@ -19,7 +19,7 @@ import {
 import { PaperToyHero, PortfolioPlaceholder, PatentBadge, PaperNetBg } from "@/components/paper-art";
 import PartnersMarquee from "@/components/PartnersMarquee";
 import HomePortfolioGrid from "@/components/HomePortfolioGrid";
-import { PAGE_META, SITE_SHORT } from "@/lib/site";
+import { PAGE_META } from "@/lib/site";
 
 export const metadata: Metadata = {
   title: PAGE_META.home.title,
@@ -42,7 +42,7 @@ export const metadata: Metadata = {
 
 const trustStats: { num: string; label: string; sub?: string; since?: string }[] = [
   { num: "11",     label: "자기구조 설계 특허",        sub: "종" },
-  { num: "650+",   label: "누적 납품 프로젝트",         sub: "건", since: "Since 2013" },
+  { num: "650+",   label: "누적 납품 프로젝트",         sub: "건", since: "2013년부터" },
   { num: "약 4주 내", label: "평균 납기" },
   { num: "지기구조", label: "전문 설계 스튜디오" },
 ];
@@ -56,7 +56,7 @@ const features: { icon: IconKey; title: string; desc: string; gradient: string }
   },
   {
     icon: "globe",
-    title: "글로벌 메커니즘 네트워크",
+    title: "세계 엔지니어 네트워크",
     desc: "세계 각지의 페이퍼 엔지니어들과 지속적으로 교류하며 설계 메커니즘을 고도화합니다. PePaKuRa 설계 프로그램 공식 교육 운영.",
     gradient: "from-amber-400 to-orange-500",
   },
@@ -163,25 +163,25 @@ export default function HomePage() {
             <div className="max-w-2xl">
               <span className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-full mb-6 bg-white/10 text-white border border-white/15">
                 <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
-                Paper Engineering Studio : 지기구조 전문 설계 페이퍼 엔지니어링 스튜디오
+                지기구조 전문 설계 · 페이퍼 엔지니어링 스튜디오
               </span>
 
               <h1 className="text-4xl md:text-6xl font-extrabold text-white mb-6 leading-[1.05] tracking-tight">
-                종이가 움직이면<br />
-                <span className="pe-gradient-text">브랜드가 살아납니다</span>
+                움직이는 종이,<br />
+                <span className="pe-gradient-text">그 구조를 설계합니다</span>
               </h1>
               <p className="text-lg md:text-xl text-blue-200 mb-4 leading-relaxed" style={{ wordBreak: "keep-all" }}>
                 <strong className="text-white">자기 구조 설계 특허 11종</strong>을 보유한
                 {" "}<strong className="text-white">지기구조 전문 설계 스튜디오, 페이퍼 엔지니어링 스튜디오 (P.E Studio)</strong>입니다.
               </p>
               <blockquote
-                className="border-l-2 pl-4 mb-4 text-blue-100/90 italic text-sm md:text-base leading-relaxed"
+                className="border-l-2 pl-4 mb-4 text-blue-100/90 text-sm md:text-base leading-relaxed"
                 style={{ borderColor: "#06C6C8", wordBreak: "keep-all" }}
               >
-                Since 2013, 지기 구조 설계 특허 11종에 기반한 전문 페이퍼 엔지니어링 스튜디오.
+                2013년부터 종이의 구조와 움직임을 설계해 왔습니다.
               </blockquote>
               <p className="text-blue-200 mb-10" style={{ wordBreak: "keep-all" }}>
-                최고의 페이퍼 크래프트 설계 능력으로 국내 유수의 기업들과 협업하고 있습니다.
+                그동안 기업과 공공기관, 박물관과 학교가 우리와 함께 일했습니다.
               </p>
 
               {/* CTA — Primary dominant + Secondary ghost */}
@@ -250,17 +250,17 @@ export default function HomePage() {
       <section className="py-16 md:py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-10">
-            <p className="text-slate-500 text-xs font-semibold uppercase tracking-widest mb-2">Trusted By</p>
+            <p className="text-slate-500 text-xs font-semibold tracking-wide mb-2">함께 일한 곳</p>
             <h2 className="text-2xl md:text-3xl font-bold text-slate-900">
-              PE Studio와 함께한 파트너들
+              우리와 함께 일한 곳들
             </h2>
             <p className="text-sm text-slate-500 mt-3" style={{ wordBreak: "keep-all" }}>
-              기업·관공서·박물관·교육기관 등 국내 유수의 기관들과 협업하고 있습니다.
+              기업과 공공기관, 박물관과 교육기관이 우리와 함께 일했습니다.
             </p>
           </div>
           <PartnersMarquee />
           <p className="text-center text-xs text-slate-400 mt-6" style={{ wordBreak: "keep-all" }}>
-            * 실제 작업물 사진은 포트폴리오 페이지에서 확인하실 수 있습니다.
+            * 실제 작업물 사진은 제작 사례 페이지에서 확인하실 수 있습니다.
           </p>
         </div>
       </section>
@@ -271,10 +271,10 @@ export default function HomePage() {
           <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-10">
             <div>
               <h2 className="text-3xl md:text-4xl font-bold mb-3" style={{ color: "#1E22B2" }}>
-                이런 걸 만듭니다
+                우리가 만든 것
               </h2>
               <p className="text-slate-500" style={{ wordBreak: "keep-all" }}>
-                기관·기업·교육 현장에서 살아남은 페이퍼 엔지니어링 작업물.
+                기관과 기업, 교육 현장에서 쓰인 작업들입니다.
               </p>
             </div>
             <Link
@@ -294,14 +294,14 @@ export default function HomePage() {
       <section className="py-16 md:py-24 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12 max-w-2xl mx-auto">
-            <p className="text-cyan-600 text-xs font-semibold uppercase tracking-widest mb-3">
-              Why {SITE_SHORT}
+            <p className="text-cyan-600 text-xs font-semibold tracking-wide mb-3">
+              우리를 택하는 이유
             </p>
             <h2 className="text-3xl md:text-4xl font-bold mb-4" style={{ color: "#1E22B2", wordBreak: "keep-all" }}>
-              왜 지기구조 전문 설계<br className="md:hidden" /> 페이퍼 엔지니어링 스튜디오인가
+              만들기 전에, 설계합니다
             </h2>
             <p className="text-slate-500" style={{ wordBreak: "keep-all" }}>
-              단순 제작이 아닌, 검증된 페이퍼 엔지니어링 기술과 글로벌 네트워크로 만드는 차이.
+              특허로 검증한 구조 설계와 오래 쌓아온 경험으로 차이를 만듭니다.
             </p>
           </div>
 
@@ -325,7 +325,7 @@ export default function HomePage() {
           {/* Patent badges row */}
           <div className="mt-12 pt-10 border-t border-slate-100">
             <p className="text-center text-xs font-semibold uppercase tracking-widest text-slate-400 mb-5">
-              자기 구조 설계 특허 11종 보유 (KIPO 등록)
+              자기 구조 설계 특허 11종 보유 (특허청 등록)
             </p>
             <div className="flex flex-wrap justify-center gap-3">
               <PatentBadge number="설계 특허" title="자기구조 페이퍼토이 설계 방법" />
@@ -344,7 +344,7 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
             <p className="text-xs font-semibold uppercase tracking-widest mb-3" style={{ color: "#E91E8C" }}>
-              Services
+              제작 분야
             </p>
             <h2 className="text-3xl md:text-4xl font-bold mb-3" style={{ color: "#1E22B2" }}>
               우리가 만드는 것
@@ -356,7 +356,7 @@ export default function HomePage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
             {services.map((s) => (
               <Link
-                key={s.en}
+                key={s.ko}
                 href="/products"
                 className="pe-paper-lift group flex gap-5 p-6 rounded-2xl bg-white pe-paper-shadow border border-slate-100"
               >
@@ -371,7 +371,6 @@ export default function HomePage() {
                   {s.icon === "pencil" && <PencilIcon size={28} />}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <div className="text-xs text-slate-400 font-medium mb-0.5">{s.en}</div>
                   <h3 className="font-bold text-lg mb-1 tracking-tight" style={{ color: "#1E22B2" }}>{s.ko}</h3>
                   <p className="text-sm text-slate-600 mb-3" style={{ wordBreak: "keep-all" }}>{s.desc}</p>
                   <div className="flex flex-wrap gap-1.5">
@@ -396,10 +395,10 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
             <p className="text-xs font-semibold uppercase tracking-widest mb-3" style={{ color: "#06C6C8" }}>
-              Process
+              제작 과정
             </p>
             <h2 className="text-3xl md:text-4xl font-bold mb-3" style={{ color: "#1E22B2" }}>
-              페이퍼 엔지니어링 주문 제작 프로세스
+              주문은 이렇게 진행됩니다
             </h2>
             <p className="text-slate-500">
               대부분의 제품은 <strong style={{ color: "#1E22B2" }}>약 4주 내 납품</strong> 가능합니다.
@@ -449,11 +448,11 @@ export default function HomePage() {
         </div>
         <div className="relative max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <p className="text-amber-300 text-xs font-semibold uppercase tracking-widest mb-4">
-            Let&apos;s Move Your Brand
+            제작 의뢰
           </p>
           <h2 className="text-3xl md:text-5xl font-extrabold text-white mb-5 leading-tight">
-            브랜드를 움직이게 할<br />
-            <span className="pe-gradient-text">준비됐나요?</span>
+            종이의 움직임이 필요할 때,<br />
+            <span className="pe-gradient-text">우리를 찾아 주세요</span>
           </h2>
           <p className="text-blue-200 text-lg mb-2" style={{ wordBreak: "keep-all" }}>
             지기구조 전문 설계 페이퍼 엔지니어링 스튜디오가 함께합니다.

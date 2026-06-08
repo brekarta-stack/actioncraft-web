@@ -309,7 +309,7 @@ function UsageCard({ u }: { u: UsageCategory }) {
       <div className="p-6 flex flex-col flex-1">
         <div className="mb-3">
           <div className="text-xs font-semibold uppercase tracking-widest mb-1" style={{ color: u.accent }}>
-            Usage · {u.english}
+            용도별
           </div>
           <h3 className="text-xl font-bold text-slate-900 tracking-tight">{u.name}</h3>
           <p className="text-sm font-medium mt-1" style={{ color: u.accent, wordBreak: "keep-all" }}>
@@ -362,7 +362,7 @@ export default function ProductCatalogTabs() {
         {/* Segmented Toggle */}
         <div className="flex flex-col items-center mb-10 md:mb-12">
           <p className="text-xs font-semibold uppercase tracking-widest mb-3 text-slate-400">
-            Browse by
+            보기 방식
           </p>
           <div
             role="tablist"
