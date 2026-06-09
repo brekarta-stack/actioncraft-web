@@ -59,6 +59,7 @@ CREATE TABLE IF NOT EXISTS quotes (
   email         TEXT NOT NULL DEFAULT '',
   phone         TEXT NOT NULL DEFAULT '',
   file_name     TEXT,
+  acquisition   JSONB,                                  -- 광고 유입정보 {gclid,utm…} (마이그레이션 20260609)
   created_at    TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 

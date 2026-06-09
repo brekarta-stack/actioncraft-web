@@ -44,8 +44,28 @@ export default async function AdminQuotesPage() {
         sampling:     !!r.sampling,
         rushed:       !!r.rushed,
         packaging:    r.packaging ?? "",
+        acquisition:  r.acquisition ?? null,
         createdAt: r.created_at,
       }));
+
+  /* 유입 배지 — 광고(빨강)/일반 유입(회색). acquisition 없으면 렌더 안 함 */
+  const acqBadge = (q: QuoteSubmission) => {
+    const a = q.acquisition;
+    if (!a) return null;
+    const isAd = !!(a.adHint || a.gclid || a.utmMedium === "cpc");
+    const src = a.utmSource || (a.gclid ? "google" : a.adHint) || "";
+    if (!src && !isAd) return null;
+    const label = a.utmCampaign ? `${src || "광고"}·${a.utmCampaign}` : src || "광고";
+    return (
+      <span
+        className="inline-block mt-1 text-[11px] px-2 py-0.5 rounded-full font-medium whitespace-nowrap"
+        style={{ background: isAd ? "#FEE2E2" : "#F1F5F9", color: isAd ? "#B91C1C" : "#475569" }}
+      >
+        {isAd ? "광고 " : "유입 "}
+        {label}
+      </span>
+    );
+  };
 
   return (
     <div className="p-6 md:p-8 max-w-5xl mx-auto">
@@ -90,6 +110,7 @@ export default async function AdminQuotesPage() {
                     <p className="text-xs text-slate-400 mt-0.5">
                       {new Date(q.createdAt).toLocaleString("ko-KR")}
                     </p>
+                    {acqBadge(q)}
                   </div>
                 </div>
                 <span

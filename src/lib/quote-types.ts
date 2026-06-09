@@ -1,3 +1,15 @@
+/** 광고 유입정보 — 세션 첫 진입의 gclid/UTM (instrumentation-client.ts 가 수집). 견적 제출에 첨부 */
+export interface QuoteAcquisition {
+  referrer: string;
+  utmSource: string;
+  utmMedium: string;
+  utmCampaign: string;
+  /** Google Ads 클릭 ID — 구글 오프라인 전환 임포트의 키 */
+  gclid: string;
+  /** UTM 미설정 광고 클릭 힌트 'google' | 'naver' | '' */
+  adHint: string;
+}
+
 export interface QuoteSubmission {
   id: string;
   product: string;
@@ -23,5 +35,7 @@ export interface QuoteSubmission {
   rushed: boolean;
   /** 포장 방식 — paper-box / opp / bulk */
   packaging: string;
+  /** 광고 유입정보 (gclid·UTM) — 전환 측정/오프라인 임포트용. 마이그레이션 적용 전이면 저장 생략 */
+  acquisition?: QuoteAcquisition | null;
   createdAt: string;
 }

@@ -6,6 +6,7 @@ import { randomUUID } from "crypto";
 import { z } from "zod";
 import { Resend } from "resend";
 import type { QuoteSubmission } from "@/lib/quote-types";
+import { parseAcquisition } from "@/lib/analytics";
 
 /* ── 견적 알림 메일 발송 (실패해도 사용자 응답에는 영향 없음) ── */
 const PRODUCT_LABEL: Record<string, string> = {
@@ -42,6 +43,20 @@ async function sendInquiryEmail(s: QuoteSubmission): Promise<void> {
     opp:         "OPP 필름 (일반)",
     bulk:        "벌크 납품 (포장 생략)",
   };
+  const acqText = (() => {
+    const a = s.acquisition;
+    if (!a) return "직접/자연 유입 (광고 외)";
+    const { source, medium } = parseAcquisition({
+      referrer: a.referrer,
+      utmSource: a.utmSource,
+      utmMedium: a.utmMedium,
+      gclid: a.gclid,
+      adHint: a.adHint,
+    });
+    const camp = a.utmCampaign ? ` · 캠페인:${a.utmCampaign}` : "";
+    return `${source} / ${medium}${camp}`;
+  })();
+
   const rows: Array<[string, string]> = [
     ["제품 유형",         productLabel],
     ["샘플링 희망",       s.sampling ? "예 (생산 전 수제작 샘플 발송)" : "아니오"],
@@ -59,6 +74,8 @@ async function sendInquiryEmail(s: QuoteSubmission): Promise<void> {
     ["연락처",            s.phone || "—"],
     ["참고 자료 파일",    s.fileName || "—"],
     ["회사 로고 파일",    s.logoFileName || "—"],
+    ["유입 경로",         acqText],
+    ["광고 클릭ID(gclid)", s.acquisition?.gclid || "—"],
     ["접수 일시",         s.createdAt],
     ["문의 ID",           s.id],
   ];
@@ -126,6 +143,18 @@ const QuoteSchema = z.object({
   sampling:     z.boolean().default(false),
   rushed:       z.boolean().default(false),
   packaging:    z.enum(["paper-box", "opp", "bulk", ""]).default(""),
+  // 광고 유입정보 (gclid·UTM) — 선택. 전환 측정/오프라인 임포트용
+  acquisition: z
+    .object({
+      referrer:    z.string().max(1024).default(""),
+      utmSource:   z.string().max(120).default(""),
+      utmMedium:   z.string().max(120).default(""),
+      utmCampaign: z.string().max(120).default(""),
+      gclid:       z.string().max(400).default(""),
+      adHint:      z.string().max(20).default(""),
+    })
+    .nullable()
+    .optional(),
 });
 
 /* ── 단순 IP 레이트 리밋 (분당 5회) ── */
@@ -187,6 +216,7 @@ export async function POST(request: Request) {
     sampling:     data.sampling,
     rushed:       data.rushed,
     packaging:    data.packaging,
+    acquisition:  data.acquisition ?? null,
     createdAt:    new Date().toISOString(),
   };
 
@@ -215,6 +245,18 @@ export async function POST(request: Request) {
   if (error) {
     console.error("[api/quote] DB insert error:", error);
     return NextResponse.json({ error: "견적 접수 중 오류가 발생했습니다. 잠시 후 다시 시도해 주세요." }, { status: 500 });
+  }
+
+  /* 광고 유입정보 best-effort 저장 — 'acquisition' 컬럼(마이그레이션 20260609)이 없으면 조용히 건너뜀.
+     별도 update 라 컬럼 부재 시에도 위 insert(견적 접수)에는 영향이 없다. */
+  if (submission.acquisition) {
+    const { error: acqErr } = await supabaseAdmin
+      .from("quotes")
+      .update({ acquisition: submission.acquisition })
+      .eq("id", submission.id);
+    if (acqErr) {
+      console.warn("[api/quote] acquisition 미저장 (마이그레이션 대기?):", acqErr.message);
+    }
   }
 
   /* 알림 메일 발송 — 실패해도 사용자에게는 201 응답 유지 */
@@ -261,6 +303,7 @@ export async function GET() {
     sampling:     !!r.sampling,
     rushed:       !!r.rushed,
     packaging:    r.packaging ?? "",
+    acquisition:  r.acquisition ?? null,
     createdAt:    r.created_at,
   }));
 

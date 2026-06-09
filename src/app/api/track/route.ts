@@ -19,7 +19,7 @@ const TrackSchema = z.object({
   utmSource: z.string().max(120).optional().default(""),
   utmMedium: z.string().max(120).optional().default(""),
   utmCampaign: z.string().max(120).optional().default(""),
-  gclid: z.string().max(200).optional().default(""),
+  gclid: z.string().max(400).optional().default(""),
   adHint: z.enum(["google", "naver", ""]).optional().default(""),
   label: z.string().max(200).optional().default(""),
   href: z.string().max(1024).optional().default(""),

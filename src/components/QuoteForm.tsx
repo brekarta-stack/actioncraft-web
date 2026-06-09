@@ -13,6 +13,7 @@ import {
   type IconKey,
 } from "@/components/icons";
 import { PaperNetBg } from "@/components/paper-art";
+import { getStoredAcquisition } from "@/lib/acquisition-client";
 
 type ProductType =
   | "papercraft"
@@ -193,15 +194,33 @@ export default function QuoteForm() {
     e.preventDefault();
     if (!canProceed()) return;
     setSaving(true);
+    const acquisition = getStoredAcquisition();
     try {
       const res = await fetch("/api/quote", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
+        body: JSON.stringify({ ...form, acquisition }),
       });
       if (!res.ok) throw new Error("제출 실패");
       setSubmitted(true);
       localStorage.removeItem(STORAGE_KEY);
+      /* 광고 전환 신호 — 외부 픽셀 없이 1st-party 로 '견적 제출 완료' 전환을 /admin/analytics 에 기록 */
+      try {
+        const beacon = JSON.stringify({
+          type: "click",
+          path: "/quote",
+          label: "견적 제출 완료",
+          referrer: acquisition?.referrer ?? "",
+          utmSource: acquisition?.utmSource ?? "",
+          utmMedium: acquisition?.utmMedium ?? "",
+          utmCampaign: acquisition?.utmCampaign ?? "",
+          gclid: acquisition?.gclid ?? "",
+          adHint: acquisition?.adHint ?? "",
+        });
+        navigator.sendBeacon?.("/api/track", new Blob([beacon], { type: "application/json" }));
+      } catch {
+        /* 전환 신호 실패는 무시 */
+      }
     } catch {
       alert("제출 중 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.");
     } finally {
