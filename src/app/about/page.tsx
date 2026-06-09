@@ -32,34 +32,34 @@ export const metadata: Metadata = {
 const stats: { num: string; sub?: string; label: string }[] = [
   { num: "11", sub: "종", label: "자기구조 설계 특허" },
   { num: "650+", label: "누적 납품 프로젝트" },
+  { num: "2", sub: "회", label: "문화체육관광부 장관상" },
   { num: "지기구조", label: "전문 설계 스튜디오" },
-  { num: "KAIST", label: "출신 개발 인력" },
 ];
 
 const strengths: { icon: IconKey; title: string; description: string }[] = [
   {
     icon: "patent",
-    title: "자기 구조 설계 특허 11종",
+    title: "막다른 길마다 남긴 특허",
     description:
-      "수많은 페이퍼 엔지니어링 설계 경험과 다수의 지식 재산권을 바탕으로, 국내 유일 수준의 구동형 페이퍼 모델 기술을 보유하고 있습니다.",
+      "움직이는 종이는 한 번 길을 찾기까지가 오래 걸립니다. 그렇게 찾은 해법을 자기구조 설계 특허 11종으로 정리해 두었습니다. 새 작업도 검증된 구조 위에서 시작합니다.",
   },
   {
     icon: "globe",
-    title: "세계 페이퍼 엔지니어 네트워크",
+    title: "혼자 풀지 않는 설계",
     description:
-      "세계 각지의 페이퍼 엔지니어들과 교류하며 지속적으로 설계 메커니즘을 고도화합니다. PePaKuRa Designer 공식 교육 운영.",
+      "종이를 움직이는 방법은 한 사람 머리로 다 알기 어렵습니다. 세계 곳곳의 페이퍼 엔지니어들과 주고받으며 설계를 다듬고, 입체를 전개도로 펴 주는 페파쿠라(PePaKuRa Designer) 설계 교육도 맡고 있습니다.",
   },
   {
     icon: "education",
-    title: "KAIST 협력 개발",
+    title: "현장에서 다듬은 교육",
     description:
-      "KAIST 출신 개발자 및 교육 프로그램 개발진이 함께합니다. 과학적 원리를 기반으로 한 교육적 페이퍼 모델을 설계합니다.",
+      "박물관과 학교 현장에서 오래 교구를 만들어 왔습니다. 도형의 내각이나 무게중심 같은 원리를, 아이가 종이를 접고 세우는 동안 손으로 먼저 만나도록 설계합니다.",
   },
   {
     icon: "leaf",
-    title: "친환경 업사이클링",
+    title: "가볍게 왔다 가는 종이",
     description:
-      "친환경 재질로 만드는 캐릭터. 단순하게 표현하거나, 의미를 더해 훨씬 가치 있게 표현하는 것도 가능합니다.",
+      "종이는 다 쓰면 종이로 버리면 됩니다. 친환경을 앞세우기보다, 만들고 버리는 일에 덜 미안한 재료를 택했습니다. 업사이클링 소재도 작업에 맞게 함께 씁니다.",
   },
 ];
 
@@ -100,8 +100,8 @@ const services = [
 const timeline = [
   { year: "2013", event: "Paper Engineering Studio 창업 — 지기구조 전문 설계 페이퍼 엔지니어링 스튜디오 출범" },
   { year: "2015", event: "자기 구조 설계 특허 최초 등록, STEAM 교육 키트 출시" },
-  { year: "2017", event: "국내 최대 페이퍼 토이 커뮤니티 '종이천하' 운영 시작" },
-  { year: "2019", event: "누적 특허 11종 달성, KAIST 협력 교육 프로그램 개발" },
+  { year: "2017", event: "페이퍼 토이 커뮤니티 '종이천하' 운영 시작" },
+  { year: "2019", event: "누적 특허 11종 달성, 학교·기관 교육 프로그램 확대" },
   { year: "2021", event: "현대백화점·경주박물관 등 주요 기관 납품 본격화" },
   { year: "2023", event: "누적 납품 650건 돌파, 기업 굿즈 서비스 확장" },
   { year: "2024", event: "온라인 제작 문의 서비스 시작" },
@@ -170,19 +170,17 @@ export default function AboutPage() {
               <div className="space-y-4 text-slate-600 leading-relaxed" style={{ wordBreak: "keep-all" }}>
                 <p>
                   <strong className="text-slate-900">{SITE_NAME}(PE Studio)</strong>는
-                  창의적 발상을 기반으로 디자이너 크루들이 모인 지기구조 전문 설계 스튜디오, 페이퍼 엔지니어링 스튜디오 (P.E Studio)입니다.
+                  2013년부터 종이의 구조와 움직임을 설계해 온 지기구조 전문 설계 스튜디오입니다. 평면 한 장이 스스로 일어서고 움직이게 만드는 일을, 13년째 하고 있습니다.
                 </p>
                 <p>
-                  단순한 심미적 디자인을 넘어, 고객의 실제 니즈를 파악하여
-                  최적화된 결과물을 제안하는 것이 저희의 방식입니다.
+                  보기 좋은 모형을 만드는 데서 그치지 않습니다. 받는 사람이 직접 접고 세우는 동안 오래 곁에 두게 되는 물건을 설계합니다. 그래서 우리는 늘 만들기 전에 먼저 설계하고, 말보다 샘플을 먼저 만들어 보냅니다.
                 </p>
                 <p>
-                  수많은 페이퍼 엔지니어링 설계 경험과 <strong className="text-slate-900">11종의 특허</strong>,
-                  국내 유일의 종이 모델 디자이너 교육 시스템, KAIST 출신 개발 인력을 통해
-                  지기구조 전문 설계 페이퍼 엔지니어링 스튜디오로 자리잡았습니다.
+                  그동안 자기구조 설계 <strong className="text-slate-900">특허 11종</strong>을 쌓았고,
+                  문화체육관광부 장관상을 두 번 받았습니다. 현대백화점과 여러 박물관·학교, 지자체가 우리와 함께 일했습니다.
                 </p>
                 <p>
-                  타업체와 비교해도 뛰어난 서비스와 합리적인 가격, 신속한 납품이 가능합니다.
+                  검증해 둔 구조 위에서 시작하니, 대개 약 4주 안에 정직한 품질로 납품합니다.
                 </p>
               </div>
             </div>
@@ -190,12 +188,12 @@ export default function AboutPage() {
               <h3 className="font-bold text-slate-900 mb-5 tracking-tight">핵심 역량</h3>
               <ul className="space-y-3 text-sm text-slate-700">
                 {[
-                  "자기 구조 설계 관련 11종의 특허 보유",
-                  "국내 최대 페이퍼 토이 커뮤니티 '종이천하' 운영",
-                  "국내 유일 PePaKuRa 설계 교육 프로그램 제공",
-                  "KAIST 출신 개발자 및 교육 프로그램 개발",
-                  "우수한 개발 인적 자원 보유",
-                  "친환경 재질 및 업사이클링 소재 적용",
+                  "자기구조 설계 특허 11종 보유",
+                  "문화체육관광부 장관상 2회 수상",
+                  "페파쿠라(PePaKuRa) 설계 교육 프로그램 운영",
+                  "페이퍼 토이 커뮤니티 '종이천하' 운영",
+                  "박물관·학교 현장 교구 제작",
+                  "친환경·업사이클링 소재 적용",
                 ].map((item) => (
                   <li key={item} className="flex items-start gap-2.5">
                     <CheckIcon size={18} className="text-cyan-600 flex-shrink-0 mt-0.5" />
@@ -217,7 +215,7 @@ export default function AboutPage() {
             </p>
             <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-3 tracking-tight">우리의 강점</h2>
             <p className="text-slate-500" style={{ wordBreak: "keep-all" }}>
-              지기구조 전문 설계 페이퍼 엔지니어링 스튜디오로서의 강점.
+              지기구조 전문 설계 스튜디오가 13년 동안 손에 익힌 것들입니다.
             </p>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">

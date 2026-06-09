@@ -93,7 +93,7 @@ export const PAGE_META = {
   about: {
     title: "회사소개 — 지기구조 전문 설계 페이퍼 엔지니어링 스튜디오",
     description:
-      "PE Studio(Paper Engineering Studio)는 자기 구조 설계 특허 11종을 보유한 지기구조 전문 설계 스튜디오, 페이퍼 엔지니어링 스튜디오 (P.E Studio)입니다. KAIST 출신 개발자, 글로벌 아티스트 네트워크, STEAM 교육 전문성을 갖췄습니다.",
+      "PE Studio(Paper Engineering Studio)는 자기 구조 설계 특허 11종을 보유한 지기구조 전문 설계 스튜디오, 페이퍼 엔지니어링 스튜디오 (P.E Studio)입니다. 글로벌 페이퍼 엔지니어 네트워크와 STEAM 교육 전문성을 갖췄습니다.",
   },
   products: {
     title: "페이퍼 엔지니어링 주문 제작 서비스",
