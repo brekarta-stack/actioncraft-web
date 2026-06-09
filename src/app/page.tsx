@@ -50,20 +50,20 @@ const trustStats: { num: string; label: string; sub?: string; since?: string }[]
 const features: { icon: IconKey; title: string; desc: string; gradient: string }[] = [
   {
     icon: "patent",
-    title: "검증된 페이퍼 엔지니어링 특허",
-    desc: "자기 구조 설계 관련 11종의 특허를 보유한 지기구조 전문 설계 페이퍼 엔지니어링 스튜디오. 체계적이고 정밀한 설계로 다양한 움직임을 구현합니다.",
+    title: "막다른 길마다 남긴 특허",
+    desc: "움직이는 종이는 한 번 길을 찾기까지가 오래 걸립니다. 그렇게 찾은 해법을 자기구조 설계 특허 11종으로 정리해 두었습니다. 새 작업도 검증된 구조 위에서 시작하니, 종이가 무너질 자리가 적습니다.",
     gradient: "from-cyan-400 to-blue-500",
   },
   {
     icon: "globe",
-    title: "세계 엔지니어 네트워크",
-    desc: "세계 각지의 페이퍼 엔지니어들과 지속적으로 교류하며 설계 메커니즘을 고도화합니다. PePaKuRa 설계 프로그램 공식 교육 운영.",
+    title: "혼자 풀지 않는 설계",
+    desc: "종이를 움직이는 방법은 한 사람 머리로 다 알기 어렵습니다. 세계 곳곳의 페이퍼 엔지니어들과 꾸준히 주고받으며 설계를 다듬습니다. 입체를 전개도로 펴 주는 페파쿠라(PePaKuRa) 설계 프로그램의 공식 교육도 맡고 있습니다.",
     gradient: "from-amber-400 to-orange-500",
   },
   {
     icon: "science",
-    title: "STEAM 교육 효과",
-    desc: "수학·도형·과학 원리를 움직이는 캐릭터로 자연스럽게 학습. 박물관과 학교 현장에서 다듬어 온 페이퍼 엔지니어링 교육 콘텐츠.",
+    title: "손으로 먼저 만나는 원리",
+    desc: "도형의 내각이나 무게중심 같은 원리를, 아이는 종이를 접고 세우는 동안 손으로 먼저 만납니다. 시험에 나오는 지식이 되기 전에 감각으로 먼저 닿습니다. 박물관과 학교 현장에서 오래 다듬어 온 방식입니다.",
     gradient: "from-pink-400 to-fuchsia-500",
   },
 ];
@@ -322,7 +322,7 @@ export default function HomePage() {
               만들기 전에, 설계합니다
             </h2>
             <p className="text-slate-500" style={{ wordBreak: "keep-all" }}>
-              특허로 검증한 구조 설계와 오래 쌓아온 경험으로 차이를 만듭니다.
+              도면이 아무리 그럴듯해도, 종이는 세워 봐야 압니다. 13년 동안 그 한 가지를 지켜 왔습니다.
             </p>
           </div>
 
