@@ -63,7 +63,7 @@ const features: { icon: IconKey; title: string; desc: string; gradient: string }
   {
     icon: "science",
     title: "STEAM 교육 효과",
-    desc: "수학·도형·과학 원리를 움직이는 캐릭터로 자연스럽게 학습. KAIST 출신 개발자와 함께 만든 페이퍼 엔지니어링 교육 콘텐츠.",
+    desc: "수학·도형·과학 원리를 움직이는 캐릭터로 자연스럽게 학습. 박물관과 학교 현장에서 다듬어 온 페이퍼 엔지니어링 교육 콘텐츠.",
     gradient: "from-pink-400 to-fuchsia-500",
   },
 ];
@@ -242,6 +242,27 @@ export default function HomePage() {
                 </div>
               );
             })}
+          </div>
+
+          {/* 신뢰 배지 — 기관 납품·수상·특허 */}
+          <div className="mt-8 flex flex-wrap justify-center gap-2.5">
+            {[
+              { icon: "building", text: "국내외 주요 박물관·기관 납품" },
+              { icon: "patent", text: "문화체육관광부 장관상 2회 수상" },
+              { icon: "check", text: "특허청 등록 자기구조 설계 특허 11종" },
+            ].map((b) => (
+              <span
+                key={b.text}
+                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-slate-50 border border-slate-200 text-slate-700 text-xs md:text-sm font-semibold"
+              >
+                <span className="text-[#1E22B2]" aria-hidden>
+                  {b.icon === "building" && <BuildingIcon size={15} />}
+                  {b.icon === "patent" && <PatentIcon size={15} />}
+                  {b.icon === "check" && <CheckIcon size={15} />}
+                </span>
+                {b.text}
+              </span>
+            ))}
           </div>
         </div>
       </section>
