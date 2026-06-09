@@ -155,7 +155,22 @@ export default async function BlogPostPage({
       <div className="border-t border-slate-200 mb-10" />
 
       <div className="prose prose-slate prose-lg max-w-none prose-headings:font-bold prose-a:text-orange-600 prose-img:rounded-xl">
-        <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw]}>
+        <ReactMarkdown
+          remarkPlugins={[remarkGfm]}
+          rehypePlugins={[rehypeRaw]}
+          components={{
+            a: ({ href, children }) => {
+              const isExternal = !!href && /^https?:\/\//.test(href);
+              return isExternal ? (
+                <a href={href} target="_blank" rel="noopener noreferrer">
+                  {children}
+                </a>
+              ) : (
+                <a href={href}>{children}</a>
+              );
+            },
+          }}
+        >
           {post.content}
         </ReactMarkdown>
       </div>
