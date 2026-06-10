@@ -80,6 +80,18 @@ export default async function AnalyticsPage() {
   const s = summarize(rows, TREND_DAYS);
 
   const maxDaily = Math.max(1, ...s.daily.map((d) => d.pageviews));
+  /* 일별 추이 Y축 눈금 — 1·2·5×10ⁿ 라운드 간격으로 ~4개 기준선 */
+  const dailyStep = (() => {
+    const raw = maxDaily / 4;
+    const pow = 10 ** Math.floor(Math.log10(Math.max(raw, 1)));
+    const m = [1, 2, 5, 10].find((k) => raw <= k * pow) ?? 10;
+    return Math.max(1, m * pow);
+  })();
+  const dailyNiceMax = Math.ceil(maxDaily / dailyStep) * dailyStep;
+  const dailyTicks = Array.from(
+    { length: Math.floor(dailyNiceMax / dailyStep) },
+    (_, i) => (i + 1) * dailyStep
+  );
   const maxSource = Math.max(1, ...s.sources.map((x) => x.sessions));
   const maxPage = Math.max(1, ...s.topPages.map((x) => x.count));
   const maxClick = Math.max(1, ...s.topClicks.map((x) => x.count));
@@ -117,23 +129,57 @@ export default async function AnalyticsPage() {
 
           {/* ── 일별 추이 ── */}
           <Section title={`일별 추이 (최근 ${TREND_DAYS}일)`}>
-            <div className="flex items-end gap-1.5 h-40 px-1">
-              {s.daily.map((d) => {
-                const h = Math.round((d.pageviews / maxDaily) * 100);
-                return (
-                  <div key={d.date} className="flex-1 flex flex-col items-center justify-end h-full group">
-                    <div className="text-[10px] text-slate-400 mb-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                      {d.pageviews}
-                    </div>
-                    <div
-                      className="w-full rounded-t-md transition-all"
-                      style={{ height: `${Math.max(h, 2)}%`, background: d.pageviews ? "#1E22B2" : "#E2E8F0" }}
-                      title={`${d.date} · 페이지뷰 ${d.pageviews} · 방문 ${d.sessions}`}
-                    />
-                    <div className="text-[9px] text-slate-400 mt-1 tabular-nums">{d.date.slice(5)}</div>
+            <div className="pl-9 pr-1 pt-2">
+              {/* 차트 영역 — 기준선(눈금) 위에 막대 */}
+              <div className="relative h-40">
+                {/* Y축 기준선 + 눈금 라벨 (0은 바닥 실선) */}
+                {[0, ...dailyTicks].map((v) => (
+                  <div
+                    key={v}
+                    className="absolute inset-x-0"
+                    style={{ bottom: `${(v / dailyNiceMax) * 100}%` }}
+                  >
+                    <div className={v === 0 ? "border-t border-slate-200" : "border-t border-dashed border-slate-200/80"} />
+                    <span className="absolute right-full top-0 -translate-y-1/2 pr-2 text-[10px] text-slate-400 tabular-nums leading-none">
+                      {nf(v)}
+                    </span>
                   </div>
-                );
-              })}
+                ))}
+                {/* 막대 */}
+                <div className="absolute inset-0 flex items-end gap-1.5">
+                  {s.daily.map((d) => {
+                    const h = (d.pageviews / dailyNiceMax) * 100;
+                    return (
+                      <div key={d.date} className="flex-1 h-full flex flex-col justify-end group relative">
+                        {/* hover 툴팁 — 정확한 수치 */}
+                        <div
+                          className="pointer-events-none absolute left-1/2 -translate-x-1/2 hidden group-hover:block z-20"
+                          style={{ bottom: `calc(${Math.max(h, 2)}% + 6px)` }}
+                        >
+                          <div className="bg-slate-900 text-white rounded-lg px-2.5 py-1.5 shadow-lg whitespace-nowrap text-center">
+                            <div className="text-[10px] text-slate-300 tabular-nums">{d.date}</div>
+                            <div className="text-[11px] font-semibold tabular-nums">
+                              페이지뷰 {nf(d.pageviews)} · 방문 {nf(d.sessions)}
+                            </div>
+                          </div>
+                        </div>
+                        <div
+                          className="w-full rounded-t-md transition-all group-hover:opacity-75"
+                          style={{ height: `${Math.max(h, 2)}%`, background: d.pageviews ? "#1E22B2" : "#E2E8F0" }}
+                        />
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+              {/* 날짜 라벨 */}
+              <div className="flex gap-1.5 mt-1.5">
+                {s.daily.map((d) => (
+                  <div key={d.date} className="flex-1 text-center text-[9px] text-slate-400 tabular-nums">
+                    {d.date.slice(5)}
+                  </div>
+                ))}
+              </div>
             </div>
           </Section>
 
