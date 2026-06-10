@@ -845,6 +845,9 @@ export default function QuoteForm() {
                   <p className="text-slate-500 text-sm" style={{ wordBreak: "keep-all" }}>
                     견적서를 보내드릴 연락처를 입력해 주세요.
                   </p>
+                  <p className="text-slate-400 text-sm mt-1" style={{ wordBreak: "keep-all" }}>
+                    즉시 연락은 홈페이지 하단 정보를 참조해 주세요.
+                  </p>
                 </div>
                 <div>
                   <label htmlFor="name" className="block text-sm font-semibold text-slate-700 mb-2">

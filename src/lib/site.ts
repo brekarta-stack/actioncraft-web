@@ -40,6 +40,8 @@ interface CompanyInfo {
   representative: string;
   email: string;
   phone: string;
+  /** 운영 시간 (예: 월 ~ 금, 10:00 ~ 19:00) */
+  businessHours: string;
   kakaoChannel: string;
   address: {
     locality: string;
@@ -63,6 +65,7 @@ export const COMPANY: CompanyInfo = {
   representative: "오세기",
   email: "ask@papercraft.kr",
   phone: "+82-10-4075-2661",
+  businessHours: "월 ~ 금, 10:00 ~ 19:00",
   kakaoChannel: "",
   address: {
     locality: "서울",

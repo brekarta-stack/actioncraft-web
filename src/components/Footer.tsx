@@ -72,14 +72,19 @@ export default function Footer() {
                 </a>
               </li>
               {COMPANY.phone && (
-                <li className="flex items-center gap-2">
+                <li className="flex items-baseline gap-2">
                   <span>📞</span>
-                  <a
-                    href={`tel:${COMPANY.phone.replace(/-/g, "")}`}
-                    className="hover:text-white transition-colors"
-                  >
-                    {COMPANY.phone}
-                  </a>
+                  <span className="flex flex-wrap items-baseline gap-x-1.5">
+                    <a
+                      href={`tel:${COMPANY.phone.replace(/-/g, "")}`}
+                      className="hover:text-white transition-colors"
+                    >
+                      {COMPANY.phone.replace(/^\+/, "")}
+                    </a>
+                    {COMPANY.businessHours && (
+                      <span className="text-xs text-blue-300/80">({COMPANY.businessHours})</span>
+                    )}
+                  </span>
                 </li>
               )}
               {COMPANY.kakaoChannel && (
