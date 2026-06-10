@@ -2,6 +2,68 @@
 
 import { useState } from "react";
 import type { PortfolioItem } from "@/lib/portfolio-types";
+import { parseYearMonth } from "@/lib/portfolio-meta";
+
+/**
+ * 제작 시기 텍스트 입력 — 숫자 직접 입력 가능.
+ * "2021-05" "202105" "2021.5" "2021년 5월" 모두 허용, blur/Enter 시 정규화·저장.
+ * 외부 값 변경(저장 성공/롤백) 시에는 부모의 key 로 리마운트되어 동기화된다.
+ */
+function ProducedAtField({
+  value,
+  disabled,
+  onSave,
+}: {
+  /** 저장된 값 (YYYY-MM-DD | null) */
+  value: string | null;
+  disabled: boolean;
+  /** 정규화된 YYYY-MM (또는 비우기 null) 전달 */
+  onSave: (ym: string | null) => void;
+}) {
+  const committed = (value ?? "").slice(0, 7);
+  const [draft, setDraft] = useState(committed);
+  const [invalid, setInvalid] = useState(false);
+
+  function commit() {
+    const parsed = parseYearMonth(draft);
+    if (parsed === "invalid") {
+      setInvalid(true);
+      return;
+    }
+    setInvalid(false);
+    setDraft(parsed ?? "");
+    if ((parsed ?? "") !== committed) onSave(parsed);
+  }
+
+  return (
+    <input
+      type="text"
+      inputMode="numeric"
+      placeholder="YYYY-MM"
+      maxLength={12}
+      value={draft}
+      disabled={disabled}
+      onChange={(e) => {
+        setDraft(e.target.value);
+        if (invalid) setInvalid(false);
+      }}
+      onBlur={commit}
+      onKeyDown={(e) => {
+        if (e.key === "Enter") (e.target as HTMLInputElement).blur();
+        if (e.key === "Escape") {
+          setDraft(committed);
+          setInvalid(false);
+        }
+      }}
+      title={invalid ? "형식 오류 — 예: 2021-05, 202105, 2021년 5월" : "노출 순서 기준 — 최신이 앞에 노출됩니다"}
+      className={`w-24 px-2 py-1 border rounded-lg text-xs text-slate-700 text-center focus:outline-none focus:ring-2 disabled:opacity-50 ${
+        invalid
+          ? "border-red-400 focus:ring-red-300 bg-red-50"
+          : "border-slate-200 focus:ring-[#1E22B2]/30"
+      }`}
+    />
+  );
+}
 
 const categoryColors: Record<string, string> = {
   "팝업북": "bg-pink-100 text-pink-700",
@@ -27,7 +89,7 @@ export default function AdminPortfolioList({ initialItems }: { initialItems: Por
    * '제작 시기' 인라인 변경 — 즉시 PUT API 호출 (낙관적 업데이트).
    * 사이트 노출 순서는 제작 시기(없으면 등록일) 최신순. 실패 시 롤백 + alert.
    */
-  async function saveProducedAt(id: string, ym: string) {
+  async function saveProducedAt(id: string, ym: string | null) {
     const current = items.find((i) => i.id === id)?.producedAt ?? null;
     const next = ym ? `${ym}-01` : null;
     if ((current ?? null) === next) return;
@@ -141,20 +203,16 @@ export default function AdminPortfolioList({ initialItems }: { initialItems: Por
             </div>
           </div>
 
-          {/* 제작 시기 — 노출 순서 기준 (즉시 저장) */}
-          <label
-            className="flex flex-col items-center gap-1 flex-shrink-0 select-none"
-            title="노출 순서 기준 — 최신이 앞에 노출됩니다"
-          >
-            <input
-              type="month"
-              value={(item.producedAt ?? "").slice(0, 7)}
+          {/* 제작 시기 — 노출 순서 기준 (blur/Enter 시 저장, 숫자 직접 입력) */}
+          <div className="flex flex-col items-center gap-1 flex-shrink-0 select-none">
+            <ProducedAtField
+              key={`${item.id}:${item.producedAt ?? ""}`}
+              value={item.producedAt ?? null}
               disabled={savingId === item.id}
-              onChange={(e) => saveProducedAt(item.id, e.target.value)}
-              className="px-2 py-1 border border-slate-200 rounded-lg text-xs text-slate-700 focus:outline-none focus:ring-2 focus:ring-[#1E22B2]/30 disabled:opacity-50"
+              onSave={(ym) => saveProducedAt(item.id, ym)}
             />
             <span className="text-[10px] text-slate-500 font-medium leading-none">제작 시기</span>
-          </label>
+          </div>
 
           <div className="flex gap-2 flex-shrink-0">
             <a

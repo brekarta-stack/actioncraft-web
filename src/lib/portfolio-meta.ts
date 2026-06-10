@@ -17,6 +17,22 @@ import type { PortfolioItem } from "./portfolio-types";
  * 한국어만 있는 title 은 빈 문자열을 반환 → deriveSlug 에서 case-{id} fallback 적용.
  * 영문 slug 가 필요하면 어드민 폼의 "URL 슬러그" 필드에 직접 입력 권장.
  */
+/**
+ * 제작 시기 자유 입력을 "YYYY-MM" 으로 정규화.
+ * 허용 예: "2021-05" "2021.5" "2021/05" "202105" "2021년 5월" "2021" (→ 2021-01)
+ * 반환: 정규화 문자열 | null(빈 입력 = 비우기) | "invalid"(형식 오류)
+ */
+export function parseYearMonth(raw: string): string | null | "invalid" {
+  const s = raw.trim();
+  if (!s) return null;
+  const m = s.match(/^(\d{4})[\s.\-\/년]*(\d{1,2})?\s*월?$/);
+  if (!m) return "invalid";
+  const year = Number(m[1]);
+  const month = m[2] ? Number(m[2]) : 1;
+  if (year < 1990 || year > 2100 || month < 1 || month > 12) return "invalid";
+  return `${year}-${String(month).padStart(2, "0")}`;
+}
+
 export function slugify(input: string): string {
   return input
     .toLowerCase()

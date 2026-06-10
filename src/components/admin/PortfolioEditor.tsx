@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import type { PortfolioItem } from "@/lib/portfolio-types";
 import { CATEGORIES, CLIENT_TYPES, SUGGESTED_TAGS } from "@/lib/portfolio-types";
 import { prepareImageForUpload, formatResizeNote } from "@/lib/image-resize";
-import { slugify } from "@/lib/portfolio-meta";
+import { slugify, parseYearMonth } from "@/lib/portfolio-meta";
 
 const MAX_IMAGES = 2;
 
@@ -47,10 +47,11 @@ export default function PortfolioEditor({ item }: Props) {
   const [published, setPublished] = useState(item?.published ?? false);
   /** 홈 "이런 걸 만듭니다" 섹션 노출 여부 */
   const [featured, setFeatured] = useState(item?.featured ?? false);
-  /** 제작 시기 (YYYY-MM) — 노출 순서 기준. 새 항목은 이번 달 기본값 */
+  /** 제작 시기 (자유 입력 → YYYY-MM 정규화) — 노출 순서 기준. 새 항목은 이번 달 기본값 */
   const [producedAt, setProducedAt] = useState<string>(() =>
     item ? (item.producedAt ?? "").slice(0, 7) : new Date().toISOString().slice(0, 7)
   );
+  const producedAtInvalid = parseYearMonth(producedAt) === "invalid";
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState<number | null>(null); // slot index
   // "리사이즈 중" / "업로드 중" 같은 진행 단계 표시
@@ -63,6 +64,11 @@ export default function PortfolioEditor({ item }: Props) {
 
   const handleSave = useCallback(
     async (pub?: boolean) => {
+      const parsedProducedAt = parseYearMonth(producedAt);
+      if (parsedProducedAt === "invalid") {
+        alert("제작 시기 형식을 확인해 주세요. 예: 2021-05, 202105, 2021년 5월");
+        return;
+      }
       setSaving(true);
       const isPublished = pub !== undefined ? pub : published;
       // null 제거해서 실제 URL만 저장
@@ -85,7 +91,7 @@ export default function PortfolioEditor({ item }: Props) {
           published: isPublished,
           featured,
           // 제작 시기 — 노출 순서 기준. 비우면 null(등록일 기준으로 정렬)
-          producedAt: producedAt ? `${producedAt}-01` : null,
+          producedAt: parsedProducedAt ? `${parsedProducedAt}-01` : null,
         };
         const res = item
           ? await fetch(`/api/portfolio/${item.id}`, {
@@ -270,12 +276,27 @@ export default function PortfolioEditor({ item }: Props) {
               제작 시기 <span className="text-slate-400 font-normal">(노출 순서 기준 · 최신이 앞)</span>
             </label>
             <input
-              type="month"
+              type="text"
+              inputMode="numeric"
+              placeholder="예: 2021-05 또는 202105"
+              maxLength={12}
               value={producedAt}
               onChange={(e) => setProducedAt(e.target.value)}
-              className="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-300"
+              onBlur={() => {
+                const parsed = parseYearMonth(producedAt);
+                if (parsed !== "invalid") setProducedAt(parsed ?? "");
+              }}
+              className={`w-full px-4 py-2.5 border rounded-xl text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 ${
+                producedAtInvalid
+                  ? "border-red-400 focus:ring-red-300 bg-red-50"
+                  : "border-slate-200 focus:ring-blue-300"
+              }`}
             />
-            <p className="text-[11px] text-slate-400 mt-1">비워두면 등록일 기준으로 정렬됩니다</p>
+            <p className={`text-[11px] mt-1 ${producedAtInvalid ? "text-red-500" : "text-slate-400"}`}>
+              {producedAtInvalid
+                ? "형식 오류 — 예: 2021-05, 202105, 2021년 5월"
+                : "숫자로 직접 입력 (2021-05·202105·2021년 5월) · 비워두면 등록일 기준"}
+            </p>
           </div>
         </div>
 
