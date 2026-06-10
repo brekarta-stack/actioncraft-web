@@ -47,6 +47,10 @@ export default function PortfolioEditor({ item }: Props) {
   const [published, setPublished] = useState(item?.published ?? false);
   /** 홈 "이런 걸 만듭니다" 섹션 노출 여부 */
   const [featured, setFeatured] = useState(item?.featured ?? false);
+  /** 제작 시기 (YYYY-MM) — 노출 순서 기준. 새 항목은 이번 달 기본값 */
+  const [producedAt, setProducedAt] = useState<string>(() =>
+    item ? (item.producedAt ?? "").slice(0, 7) : new Date().toISOString().slice(0, 7)
+  );
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState<number | null>(null); // slot index
   // "리사이즈 중" / "업로드 중" 같은 진행 단계 표시
@@ -80,6 +84,8 @@ export default function PortfolioEditor({ item }: Props) {
           imageAlts: cleanAlts,
           published: isPublished,
           featured,
+          // 제작 시기 — 노출 순서 기준. 비우면 null(등록일 기준으로 정렬)
+          producedAt: producedAt ? `${producedAt}-01` : null,
         };
         const res = item
           ? await fetch(`/api/portfolio/${item.id}`, {
@@ -101,7 +107,7 @@ export default function PortfolioEditor({ item }: Props) {
         setSaving(false);
       }
     },
-    [title, slug, summary, category, client, clientType, tags, keywords, description, images, imageAlts, published, featured, item, router]
+    [title, slug, summary, category, client, clientType, tags, keywords, description, images, imageAlts, published, featured, producedAt, item, router]
   );
 
   function addTag(t: string) {
@@ -258,6 +264,18 @@ export default function PortfolioEditor({ item }: Props) {
               placeholder="예: 현대백화점"
               className="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-300"
             />
+          </div>
+          <div>
+            <label className="text-sm font-medium text-slate-700 block mb-1">
+              제작 시기 <span className="text-slate-400 font-normal">(노출 순서 기준 · 최신이 앞)</span>
+            </label>
+            <input
+              type="month"
+              value={producedAt}
+              onChange={(e) => setProducedAt(e.target.value)}
+              className="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-300"
+            />
+            <p className="text-[11px] text-slate-400 mt-1">비워두면 등록일 기준으로 정렬됩니다</p>
           </div>
         </div>
 

@@ -747,6 +747,9 @@ export default function BlogEditor({ post }: Props) {
   const [contentHtml, setContentHtml] = useState(initialContent);
   /** 미리보기 날짜 — 신규 글은 마운트 시점 한 번 stamp (hydration mismatch 방지) */
   const [previewDate, setPreviewDate] = useState<string>(post?.createdAt ?? "");
+  /** 게시일 (YYYY-MM-DD) — 블로그 목록 노출 순서 기준 (최신이 앞) */
+  const initialPublishDate = (post?.createdAt ?? new Date().toISOString()).slice(0, 10);
+  const [publishDate, setPublishDate] = useState<string>(initialPublishDate);
   useEffect(() => {
     if (!previewDate) setPreviewDate(new Date().toISOString());
   }, [previewDate]);
@@ -857,6 +860,11 @@ export default function BlogEditor({ post }: Props) {
           emoji: "",               // 이모지 대신 커버 이미지 사용
           coverImage: coverImage || undefined,
           published: isPublished,
+          // 게시일 — 노출 순서 기준. 기존 글은 날짜를 바꾼 경우에만 전송해
+          // 원래 게시 시각을 불필요하게 덮어쓰지 않는다.
+          ...(publishDate && (!post || publishDate !== initialPublishDate)
+            ? { createdAt: `${publishDate}T12:00:00.000Z` }
+            : {}),
         };
         const res = post
           ? await fetch(`/api/blog/${post.id}`, {
@@ -878,7 +886,7 @@ export default function BlogEditor({ post }: Props) {
         setSaving(false);
       }
     },
-    [title, excerpt, tag, published, coverImage, editor, post, router]
+    [title, excerpt, tag, published, coverImage, publishDate, initialPublishDate, editor, post, router]
   );
 
   return (
@@ -948,6 +956,21 @@ export default function BlogEditor({ post }: Props) {
             >
               {TAGS.map((t) => <option key={t} value={t}>{t}</option>)}
             </select>
+          </div>
+          <div>
+            <label className="text-sm font-medium text-slate-700 block mb-1">
+              게시일 <span className="text-slate-400 font-normal">(노출 순서 기준)</span>
+            </label>
+            <input
+              type="date"
+              value={publishDate}
+              onChange={(e) => {
+                setPublishDate(e.target.value);
+                if (e.target.value) setPreviewDate(`${e.target.value}T12:00:00.000Z`);
+              }}
+              title="블로그 목록 노출 순서 기준 — 최신 글이 앞에 노출됩니다"
+              className="px-4 py-2.5 border border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-300"
+            />
           </div>
           <label className="flex items-center gap-2 cursor-pointer pb-2.5">
             <div

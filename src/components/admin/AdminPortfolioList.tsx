@@ -24,6 +24,31 @@ export default function AdminPortfolioList({ initialItems }: { initialItems: Por
   }
 
   /**
+   * '제작 시기' 인라인 변경 — 즉시 PUT API 호출 (낙관적 업데이트).
+   * 사이트 노출 순서는 제작 시기(없으면 등록일) 최신순. 실패 시 롤백 + alert.
+   */
+  async function saveProducedAt(id: string, ym: string) {
+    const current = items.find((i) => i.id === id)?.producedAt ?? null;
+    const next = ym ? `${ym}-01` : null;
+    if ((current ?? null) === next) return;
+    setSavingId(id);
+    setItems((prev) => prev.map((i) => (i.id === id ? { ...i, producedAt: next } : i)));
+    try {
+      const res = await fetch(`/api/portfolio/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ producedAt: next }),
+      });
+      if (!res.ok) throw new Error("저장 실패");
+    } catch {
+      setItems((prev) => prev.map((i) => (i.id === id ? { ...i, producedAt: current } : i)));
+      alert("'제작 시기' 저장에 실패했습니다. (DB 마이그레이션 적용 여부를 확인하세요)");
+    } finally {
+      setSavingId(null);
+    }
+  }
+
+  /**
    * '메인 노출' 체크박스 토글 — 즉시 PUT API 호출 (낙관적 업데이트).
    * 실패 시 롤백 + alert.
    */
@@ -64,6 +89,10 @@ export default function AdminPortfolioList({ initialItems }: { initialItems: Por
 
   return (
     <div className="space-y-3">
+      <p className="text-xs text-slate-400">
+        사이트(제작 사례·홈)는 <strong className="text-slate-500">제작 시기(없으면 등록일) 최신순</strong>으로
+        노출됩니다. 행의 제작 시기를 바꾸면 즉시 저장되며, 목록 순서는 새로고침 시 반영됩니다.
+      </p>
       {items.map((item) => (
         <div
           key={item.id}
@@ -111,6 +140,21 @@ export default function AdminPortfolioList({ initialItems }: { initialItems: Por
               <span>이미지 {item.images.length}장</span>
             </div>
           </div>
+
+          {/* 제작 시기 — 노출 순서 기준 (즉시 저장) */}
+          <label
+            className="flex flex-col items-center gap-1 flex-shrink-0 select-none"
+            title="노출 순서 기준 — 최신이 앞에 노출됩니다"
+          >
+            <input
+              type="month"
+              value={(item.producedAt ?? "").slice(0, 7)}
+              disabled={savingId === item.id}
+              onChange={(e) => saveProducedAt(item.id, e.target.value)}
+              className="px-2 py-1 border border-slate-200 rounded-lg text-xs text-slate-700 focus:outline-none focus:ring-2 focus:ring-[#1E22B2]/30 disabled:opacity-50"
+            />
+            <span className="text-[10px] text-slate-500 font-medium leading-none">제작 시기</span>
+          </label>
 
           <div className="flex gap-2 flex-shrink-0">
             <a

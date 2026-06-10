@@ -47,6 +47,8 @@ export async function POST(request: Request) {
     images: body.images ?? [],
     imageAlts: Array.isArray(body.imageAlts) ? body.imageAlts : [],
     published: body.published ?? false,
+    featured: body.featured ?? false,
+    producedAt: typeof body.producedAt === "string" ? body.producedAt : undefined,
     createdAt: now,
     updatedAt: now,
   };

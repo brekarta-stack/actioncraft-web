@@ -21,9 +21,16 @@ function toItem(row: any): PortfolioItem {
     imageAlts: Array.isArray(row.image_alts) ? row.image_alts : [],
     published: row.published,
     featured: row.featured ?? false,
+    producedAt: row.produced_at ?? undefined,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   };
+}
+
+/** 노출 순서 기준 시각 — 제작 시기(produced_at)가 있으면 그것, 없으면 등록일 */
+function effectiveTime(item: PortfolioItem): number {
+  const t = Date.parse(item.producedAt ?? item.createdAt);
+  return Number.isNaN(t) ? 0 : t;
 }
 
 export async function getItems(): Promise<PortfolioItem[]> {
@@ -32,7 +39,9 @@ export async function getItems(): Promise<PortfolioItem[]> {
     .select("*")
     .order("created_at", { ascending: false });
   if (error) throw error;
-  return (data ?? []).map(toItem);
+  // 제작 시기(없으면 등록일) 최신순 — produced_at 컬럼이 아직 없는 DB에서도 안전하도록
+  // SQL 이 아닌 JS 에서 정렬한다.
+  return (data ?? []).map(toItem).sort((a, b) => effectiveTime(b) - effectiveTime(a));
 }
 
 export async function getItemById(id: string): Promise<PortfolioItem | undefined> {
@@ -76,7 +85,7 @@ export async function getItemByAirtableId(airtableId: string): Promise<Portfolio
 }
 
 export async function saveItem(item: PortfolioItem): Promise<void> {
-  const { error } = await supabaseAdmin.from("portfolio_items").upsert({
+  const row: Record<string, unknown> = {
     id: item.id,
     airtable_id: item.airtableId ?? null,
     slug: item.slug ?? null,
@@ -94,7 +103,11 @@ export async function saveItem(item: PortfolioItem): Promise<void> {
     featured: item.featured ?? false,
     created_at: item.createdAt,
     updated_at: item.updatedAt,
-  });
+  };
+  // produced_at 마이그레이션 전 DB 에서도 일반 저장이 깨지지 않도록,
+  // 값이 지정된 경우에만 컬럼을 포함한다 (null = 비우기).
+  if (item.producedAt !== undefined) row.produced_at = item.producedAt;
+  const { error } = await supabaseAdmin.from("portfolio_items").upsert(row);
   if (error) throw error;
 }
 

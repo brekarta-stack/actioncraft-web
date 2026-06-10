@@ -20,6 +20,11 @@ export async function POST(request: Request) {
 
   const body = await request.json();
   const now = new Date().toISOString();
+  // 게시일 지정 가능 (노출 순서 기준) — 유효한 날짜 문자열이 아니면 현재 시각
+  const createdAt =
+    typeof body.createdAt === "string" && !Number.isNaN(Date.parse(body.createdAt))
+      ? body.createdAt
+      : now;
 
   const newPost: Post = {
     id: randomUUID(),
@@ -31,7 +36,7 @@ export async function POST(request: Request) {
     emoji: body.emoji ?? "📝",
     coverImage: body.coverImage,
     published: body.published ?? false,
-    createdAt: now,
+    createdAt,
     updatedAt: now,
   };
 

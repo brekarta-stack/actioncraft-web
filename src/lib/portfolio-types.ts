@@ -61,6 +61,11 @@ export interface PortfolioItem {
   published: boolean;
   /** 홈 "이런 걸 만듭니다" 섹션에 노출할지 — 어드민에서 체크박스 토글 */
   featured?: boolean;
+  /**
+   * 제작 시기 (YYYY-MM-DD). 노출 순서의 기준 — 사이트는 이 값(없으면 createdAt)
+   * 최신순으로 정렬한다. null 로 저장하면 값을 비운다.
+   */
+  producedAt?: string | null;
   createdAt: string;
   updatedAt: string;
 }
