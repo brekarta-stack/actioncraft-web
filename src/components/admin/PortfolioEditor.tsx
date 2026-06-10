@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import type { PortfolioItem } from "@/lib/portfolio-types";
 import { CATEGORIES, CLIENT_TYPES, SUGGESTED_TAGS } from "@/lib/portfolio-types";
 import { prepareImageForUpload, formatResizeNote } from "@/lib/image-resize";
-import { slugify, parseYearMonth } from "@/lib/portfolio-meta";
+import { slugify, parseYearMonth, autoHyphenYearMonth } from "@/lib/portfolio-meta";
 
 const MAX_IMAGES = 2;
 
@@ -281,7 +281,7 @@ export default function PortfolioEditor({ item }: Props) {
               placeholder="예: 2021-05 또는 202105"
               maxLength={12}
               value={producedAt}
-              onChange={(e) => setProducedAt(e.target.value)}
+              onChange={(e) => setProducedAt(autoHyphenYearMonth(e.target.value))}
               onBlur={() => {
                 const parsed = parseYearMonth(producedAt);
                 if (parsed !== "invalid") setProducedAt(parsed ?? "");

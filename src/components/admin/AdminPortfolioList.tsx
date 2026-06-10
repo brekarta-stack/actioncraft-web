@@ -1,42 +1,51 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import type { PortfolioItem } from "@/lib/portfolio-types";
-import { parseYearMonth } from "@/lib/portfolio-meta";
+import { parseYearMonth, autoHyphenYearMonth } from "@/lib/portfolio-meta";
 
 /**
- * 제작 시기 텍스트 입력 — 숫자 직접 입력 가능.
- * "2021-05" "202105" "2021.5" "2021년 5월" 모두 허용, blur/Enter 시 정규화·저장.
- * 외부 값 변경(저장 성공/롤백) 시에는 부모의 key 로 리마운트되어 동기화된다.
+ * 제작 시기 텍스트 입력 — 숫자 직접 입력.
+ * - 타이핑 중 자동 하이픈: 201806 → 2018-06
+ * - 6자리(연+월)가 완성되면 즉시 저장하고 다음 행 입력칸으로 포커스 이동
+ * - Enter = 저장 후 다음 칸, blur = 저장, Esc = 되돌리기
  */
 function ProducedAtField({
   value,
   disabled,
   onSave,
+  onAdvance,
+  inputRef,
 }: {
   /** 저장된 값 (YYYY-MM-DD | null) */
   value: string | null;
   disabled: boolean;
   /** 정규화된 YYYY-MM (또는 비우기 null) 전달 */
   onSave: (ym: string | null) => void;
+  /** 입력 완성 시 다음 행으로 포커스 이동 */
+  onAdvance: () => void;
+  inputRef: (el: HTMLInputElement | null) => void;
 }) {
   const committed = (value ?? "").slice(0, 7);
   const [draft, setDraft] = useState(committed);
   const [invalid, setInvalid] = useState(false);
 
-  function commit() {
-    const parsed = parseYearMonth(draft);
+  /** 정규화된 값으로 확정 + 변경 시 저장. 성공 여부 반환 */
+  function commitDraft(text: string): boolean {
+    const parsed = parseYearMonth(text);
     if (parsed === "invalid") {
       setInvalid(true);
-      return;
+      return false;
     }
     setInvalid(false);
     setDraft(parsed ?? "");
     if ((parsed ?? "") !== committed) onSave(parsed);
+    return true;
   }
 
   return (
     <input
+      ref={inputRef}
       type="text"
       inputMode="numeric"
       placeholder="YYYY-MM"
@@ -44,12 +53,15 @@ function ProducedAtField({
       value={draft}
       disabled={disabled}
       onChange={(e) => {
-        setDraft(e.target.value);
+        const v = autoHyphenYearMonth(e.target.value);
+        setDraft(v);
         if (invalid) setInvalid(false);
+        // 연 4자리 + 월 2자리가 완성되면 자동 저장 후 다음 칸으로
+        if (/^\d{4}-\d{2}$/.test(v) && commitDraft(v)) onAdvance();
       }}
-      onBlur={commit}
+      onBlur={() => commitDraft(draft)}
       onKeyDown={(e) => {
-        if (e.key === "Enter") (e.target as HTMLInputElement).blur();
+        if (e.key === "Enter" && commitDraft(draft)) onAdvance();
         if (e.key === "Escape") {
           setDraft(committed);
           setInvalid(false);
@@ -78,6 +90,19 @@ export default function AdminPortfolioList({ initialItems }: { initialItems: Por
   const [items, setItems] = useState(initialItems);
   /** 현재 토글 저장 중인 항목 id (UI 비활성화용) */
   const [savingId, setSavingId] = useState<string | null>(null);
+  /** 행별 '제작 시기' 입력 ref — 입력 완성 시 다음 행으로 포커스 이동용 */
+  const producedAtRefs = useRef<(HTMLInputElement | null)[]>([]);
+
+  /** idx 다음 행의 제작 시기 칸으로 포커스 이동 (마지막 행이면 포커스 해제) */
+  function advanceProducedAt(idx: number) {
+    const next = producedAtRefs.current[idx + 1];
+    if (next) {
+      next.focus();
+      next.select();
+    } else {
+      producedAtRefs.current[idx]?.blur();
+    }
+  }
 
   async function deleteItem(id: string) {
     if (!confirm("정말 삭제하시겠습니까?")) return;
@@ -155,7 +180,7 @@ export default function AdminPortfolioList({ initialItems }: { initialItems: Por
         사이트(제작 사례·홈)는 <strong className="text-slate-500">제작 시기(없으면 등록일) 최신순</strong>으로
         노출됩니다. 행의 제작 시기를 바꾸면 즉시 저장되며, 목록 순서는 새로고침 시 반영됩니다.
       </p>
-      {items.map((item) => (
+      {items.map((item, idx) => (
         <div
           key={item.id}
           className="bg-white rounded-xl border border-slate-200 p-4 flex items-center gap-4"
@@ -203,13 +228,16 @@ export default function AdminPortfolioList({ initialItems }: { initialItems: Por
             </div>
           </div>
 
-          {/* 제작 시기 — 노출 순서 기준 (blur/Enter 시 저장, 숫자 직접 입력) */}
+          {/* 제작 시기 — 노출 순서 기준 (숫자 직접 입력, 6자리 완성 시 자동 저장+다음 칸) */}
           <div className="flex flex-col items-center gap-1 flex-shrink-0 select-none">
             <ProducedAtField
-              key={`${item.id}:${item.producedAt ?? ""}`}
               value={item.producedAt ?? null}
               disabled={savingId === item.id}
               onSave={(ym) => saveProducedAt(item.id, ym)}
+              onAdvance={() => advanceProducedAt(idx)}
+              inputRef={(el) => {
+                producedAtRefs.current[idx] = el;
+              }}
             />
             <span className="text-[10px] text-slate-500 font-medium leading-none">제작 시기</span>
           </div>

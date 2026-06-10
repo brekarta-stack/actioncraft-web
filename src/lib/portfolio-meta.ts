@@ -22,6 +22,17 @@ import type { PortfolioItem } from "./portfolio-types";
  * 허용 예: "2021-05" "2021.5" "2021/05" "202105" "2021년 5월" "2021" (→ 2021-01)
  * 반환: 정규화 문자열 | null(빈 입력 = 비우기) | "invalid"(형식 오류)
  */
+/**
+ * 제작 시기 타이핑 중 자동 하이픈 — 숫자 위주 입력이면 4자리 연도 뒤에 "-" 를
+ * 끼워 "YYYY-MM" 으로 만들고 6자리(연4+월2)에서 자른다. ("201806" → "2018-06")
+ * "2021년 5월" 같은 비숫자 형식은 손대지 않는다 (blur 시 parseYearMonth 로 정규화).
+ */
+export function autoHyphenYearMonth(v: string): string {
+  if (!/^[\d-]*$/.test(v)) return v;
+  const d = v.replace(/\D/g, "").slice(0, 6);
+  return d.length > 4 ? `${d.slice(0, 4)}-${d.slice(4)}` : d;
+}
+
 export function parseYearMonth(raw: string): string | null | "invalid" {
   const s = raw.trim();
   if (!s) return null;
