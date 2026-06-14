@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { supabaseAdmin } from "@/lib/supabase-admin";
-import { parseAcquisition } from "@/lib/analytics";
+import { parseAcquisition, parseSearchKeyword } from "@/lib/analytics";
 
 /**
  * POST /api/track — 유입·클릭 이벤트 수집 (누구나 / 익명)
@@ -19,6 +19,7 @@ const TrackSchema = z.object({
   utmSource: z.string().max(120).optional().default(""),
   utmMedium: z.string().max(120).optional().default(""),
   utmCampaign: z.string().max(120).optional().default(""),
+  utmTerm: z.string().max(200).optional().default(""),
   gclid: z.string().max(400).optional().default(""),
   adHint: z.enum(["google", "naver", ""]).optional().default(""),
   label: z.string().max(200).optional().default(""),
@@ -88,6 +89,9 @@ export async function POST(request: Request) {
     siteHost: SITE_HOST,
   });
 
+  // 검색어: 광고 키워드(utm_term) 우선, 없으면 referrer 의 검색 쿼리(대개 비어 있음)
+  const keyword = (e.utmTerm.trim() || parseSearchKeyword(e.referrer)).slice(0, 120) || null;
+
   const { error } = await supabaseAdmin.from("analytics_events").insert({
     type: e.type,
     path: e.path || "/",
@@ -97,6 +101,7 @@ export async function POST(request: Request) {
     utm_source: e.utmSource || null,
     utm_medium: e.utmMedium || null,
     utm_campaign: e.utmCampaign || null,
+    keyword,
     label: e.type === "click" ? e.label || null : null,
     href: e.type === "click" ? e.href || null : null,
     duration_ms: e.type === "dwell" ? (e.durationMs ?? null) : null,

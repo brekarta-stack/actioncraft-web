@@ -20,6 +20,8 @@ export interface TrackPayload {
   utmSource?: string;
   utmMedium?: string;
   utmCampaign?: string;
+  /** 광고 검색 키워드 (utm_term) */
+  utmTerm?: string;
   /** Google Ads 클릭 ID (자동 태깅) */
   gclid?: string;
   /** UTM 미설정 광고 클릭 힌트 ('google' | 'naver') */
@@ -42,6 +44,8 @@ export interface AnalyticsRow {
   utm_source: string | null;
   utm_medium: string | null;
   utm_campaign: string | null;
+  /** 방문 검색어 (광고 utm_term 또는 referrer 검색 쿼리) */
+  keyword: string | null;
   label: string | null;
   href: string | null;
   duration_ms: number | null;
@@ -173,6 +177,27 @@ export function parseAcquisition(opts: {
   return { source: bare.slice(0, 60), medium: "referral" };
 }
 
+/**
+ * referrer URL 에서 검색어 추출 시도.
+ * 주의: 구글·네이버 등 대부분의 검색엔진은 개인정보 보호로 검색어를 referrer 에
+ * 더 이상 싣지 않는다 → 대개 빈 문자열. 검색어가 남아 있는 일부 경로만 잡힌다.
+ * (광고 키워드는 utm_term 으로 별도 수집한다.)
+ */
+const SEARCH_QUERY_KEYS = ["q", "query", "keyword", "wd", "text", "kw", "search"];
+export function parseSearchKeyword(referrer?: string | null): string {
+  if (!referrer || !referrer.trim()) return "";
+  try {
+    const sp = new URL(referrer).searchParams;
+    for (const k of SEARCH_QUERY_KEYS) {
+      const v = sp.get(k);
+      if (v && v.trim()) return v.trim().slice(0, 120);
+    }
+  } catch {
+    /* noop */
+  }
+  return "";
+}
+
 /* ─────────────────── 집계 헬퍼 (admin) ─────────────────── */
 
 export interface Counted {
@@ -183,6 +208,12 @@ export interface Counted {
 export interface SourceStat {
   source: string;
   medium: string;
+  sessions: number;
+}
+
+export interface KeywordStat {
+  keyword: string;
+  medium: string; // 'cpc'(광고) | 'organic'(검색) 등
   sessions: number;
 }
 
@@ -223,6 +254,7 @@ export interface AnalyticsSummary {
   avgSessionMs: number; // 평균 세션 체류 시간
   avgPageMs: number; // 평균 페이지 체류 시간
   sources: SourceStat[];
+  keywords: KeywordStat[]; // 검색 키워드별 세션 수 (광고 utm_term + 자연검색)
   topPages: PageStat[];
   topClicks: ClickStat[];
   daily: DailyStat[];
@@ -259,7 +291,10 @@ export function summarize(rows: AnalyticsRow[], days = 14): AnalyticsSummary {
   for (const r of pageviews) if (r.session_id) sessionIds.add(r.session_id);
 
   /* 유입 출처: 세션 단위로 집계 (세션의 대표 source/medium/campaign 1개) */
-  const sessionAcq = new Map<string, { source: string; medium: string; campaign: string }>();
+  const sessionAcq = new Map<
+    string,
+    { source: string; medium: string; campaign: string; keyword: string }
+  >();
   for (const r of pageviews) {
     const sid = r.session_id ?? `anon-${r.created_at}`;
     if (!sessionAcq.has(sid)) {
@@ -267,20 +302,30 @@ export function summarize(rows: AnalyticsRow[], days = 14): AnalyticsSummary {
         source: r.source || "direct",
         medium: r.medium || "direct",
         campaign: (r.utm_campaign || "").trim(),
+        keyword: (r.keyword || "").trim(),
       });
     }
   }
   const sourceMap = new Map<string, SourceStat>();
   const campaignMap = new Map<string, number>();
-  for (const { source, medium, campaign } of sessionAcq.values()) {
+  const keywordMap = new Map<string, KeywordStat>();
+  for (const { source, medium, campaign, keyword } of sessionAcq.values()) {
     const key = `${source}|${medium}`;
     const cur = sourceMap.get(key);
     if (cur) cur.sessions += 1;
     else sourceMap.set(key, { source, medium, sessions: 1 });
     if (campaign) campaignMap.set(campaign, (campaignMap.get(campaign) ?? 0) + 1);
+    if (keyword) {
+      const kc = keywordMap.get(keyword);
+      if (kc) kc.sessions += 1;
+      else keywordMap.set(keyword, { keyword, medium, sessions: 1 });
+    }
   }
   const sources = [...sourceMap.values()].sort((a, b) => b.sessions - a.sessions);
   const campaigns = topN(campaignMap, 12);
+  const keywords = [...keywordMap.values()]
+    .sort((a, b) => b.sessions - a.sessions)
+    .slice(0, 20);
 
   /* 페이지별 체류 시간 (dwell 이벤트 평균) */
   const dwells = rows.filter((r) => r.type === "dwell" && (r.duration_ms ?? 0) > 0);
@@ -392,6 +437,7 @@ export function summarize(rows: AnalyticsRow[], days = 14): AnalyticsSummary {
     avgSessionMs,
     avgPageMs,
     sources,
+    keywords,
     topPages,
     topClicks,
     daily,

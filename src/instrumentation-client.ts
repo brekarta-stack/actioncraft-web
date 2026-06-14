@@ -17,15 +17,43 @@
 const ENDPOINT = "/api/track";
 const SESSION_KEY = "pc_sid";
 const ACQ_KEY = "pc_acq";
+/** 이 브라우저의 방문을 집계에서 제외 (운영자 본인용) */
+const NOTRACK_KEY = "pc_notrack";
 
 type Acq = {
   referrer: string;
   utmSource: string;
   utmMedium: string;
   utmCampaign: string;
+  utmTerm: string;
   gclid: string;
   adHint: string;
 };
+
+/** 집계 제외 여부 (localStorage 플래그) */
+function isOptedOut(): boolean {
+  try {
+    return localStorage.getItem(NOTRACK_KEY) === "1";
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * 집계 제외 플래그 동기화:
+ *  · ?notrack=1 → 제외 설정 / ?notrack=0 → 해제
+ *  · /admin 진입 시 자동 제외 (운영자 브라우저는 본인 방문이므로 카운트 제외)
+ */
+function syncOptOut(path: string): void {
+  try {
+    const q = new URLSearchParams(location.search).get("notrack");
+    if (q === "1") localStorage.setItem(NOTRACK_KEY, "1");
+    else if (q === "0") localStorage.removeItem(NOTRACK_KEY);
+    if (path.startsWith("/admin")) localStorage.setItem(NOTRACK_KEY, "1");
+  } catch {
+    /* noop */
+  }
+}
 
 function uid(): string {
   try {
@@ -81,6 +109,7 @@ function getAcquisition(): Acq {
     utmSource: params.get("utm_source") || "",
     utmMedium: params.get("utm_medium") || "",
     utmCampaign: params.get("utm_campaign") || "",
+    utmTerm: params.get("utm_term") || "",
     gclid,
     adHint,
   };
@@ -95,6 +124,7 @@ function getAcquisition(): Acq {
 const DEVICE = detectDevice();
 
 function send(payload: Record<string, unknown>): void {
+  if (isOptedOut()) return; // 운영자 등 제외 대상 브라우저는 수집 안 함
   try {
     const body = JSON.stringify({
       ...payload,
@@ -186,6 +216,7 @@ function onClick(ev: MouseEvent): void {
 
 /* ── 초기화: 최초 페이지뷰 + 전역 클릭 리스너 + 이탈 시 체류 전송 ── */
 try {
+  syncOptOut(location.pathname); // 첫 전송 전에 제외 플래그 동기화
   trackPageview(location.pathname);
   document.addEventListener("click", onClick, { capture: true, passive: true });
   // 탭 닫기 / 전체 새로고침 / 외부 이동 시 마지막 페이지 체류 전송
@@ -201,6 +232,7 @@ try {
 export function onRouterTransitionStart(url: string): void {
   try {
     const path = new URL(url, location.origin).pathname;
+    syncOptOut(path);
     trackPageview(path);
   } catch {
     /* 무시 */

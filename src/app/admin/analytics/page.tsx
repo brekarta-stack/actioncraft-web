@@ -3,6 +3,7 @@ import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { supabaseAdmin } from "@/lib/supabase-admin";
+import NoTrackToggle from "@/components/admin/NoTrackToggle";
 import {
   summarize,
   sourceLabel,
@@ -34,9 +35,7 @@ export default async function AnalyticsPage() {
 
   const { data, error } = await supabaseAdmin
     .from("analytics_events")
-    .select(
-      "type,path,referrer,source,medium,utm_source,utm_medium,utm_campaign,label,href,duration_ms,session_id,device,created_at"
-    )
+    .select("*")
     .gte("created_at", since)
     .order("created_at", { ascending: false })
     .limit(50000);
@@ -93,6 +92,7 @@ export default async function AnalyticsPage() {
     (_, i) => (i + 1) * dailyStep
   );
   const maxSource = Math.max(1, ...s.sources.map((x) => x.sessions));
+  const maxKeyword = Math.max(1, ...s.keywords.map((x) => x.sessions));
   const maxPage = Math.max(1, ...s.topPages.map((x) => x.count));
   const maxClick = Math.max(1, ...s.topClicks.map((x) => x.count));
   const maxCampaign = Math.max(1, ...s.campaigns.map((x) => x.count));
@@ -102,11 +102,14 @@ export default async function AnalyticsPage() {
   return (
     <div className="p-6 md:p-8 max-w-6xl mx-auto">
       {/* ── 헤더 ── */}
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-slate-900">유입·클릭 분석</h1>
-        <p className="text-sm text-slate-400 mt-0.5">
-          최근 {WINDOW_DAYS}일 · 방문자가 어디서 왔고 무엇을 클릭했는지 (외부 도구 없이 자체 수집)
-        </p>
+      <div className="mb-6 flex items-start justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold text-slate-900">유입·클릭 분석</h1>
+          <p className="text-sm text-slate-400 mt-0.5">
+            최근 {WINDOW_DAYS}일 · 방문자가 어디서 왔고 무엇을 클릭했는지 (외부 도구 없이 자체 수집)
+          </p>
+        </div>
+        <NoTrackToggle />
       </div>
 
       {rows.length === 0 ? (
@@ -181,6 +184,43 @@ export default async function AnalyticsPage() {
                 ))}
               </div>
             </div>
+          </Section>
+
+          {/* ── 검색 키워드 ── */}
+          <Section title="검색 키워드 (어떤 검색어로 왔나)">
+            {s.keywords.length === 0 ? (
+              <p className="text-sm text-slate-400 py-2">아직 수집된 검색어가 없습니다.</p>
+            ) : (
+              <ul className="space-y-2.5">
+                {s.keywords.map((x) => {
+                  const meta = MEDIUM_META[x.medium] ?? { label: x.medium, color: "#64748B" };
+                  const pct = Math.round((x.sessions / maxKeyword) * 100);
+                  return (
+                    <li key={`${x.keyword}|${x.medium}`}>
+                      <div className="flex items-center justify-between text-sm mb-1">
+                        <span className="flex items-center gap-2 min-w-0">
+                          <span className="font-medium text-slate-700 truncate">{x.keyword}</span>
+                          <span
+                            className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full flex-shrink-0"
+                            style={{ background: `${meta.color}1A`, color: meta.color }}
+                          >
+                            {meta.label}
+                          </span>
+                        </span>
+                        <span className="font-bold text-slate-900 tabular-nums flex-shrink-0 ml-2">{nf(x.sessions)}</span>
+                      </div>
+                      <div className="h-2 rounded-full bg-slate-100 overflow-hidden">
+                        <div className="h-full rounded-full" style={{ width: `${pct}%`, background: meta.color }} />
+                      </div>
+                    </li>
+                  );
+                })}
+              </ul>
+            )}
+            <p className="text-[11px] text-slate-400 mt-3 leading-relaxed" style={{ wordBreak: "keep-all" }}>
+              ※ 광고 키워드(<span className="font-mono">utm_term</span>)는 정확히 집계됩니다. 자연검색(구글·네이버)
+              검색어는 개인정보 보호 정책으로 대부분 전달되지 않아, 광고를 집행하면 이 섹션이 본격적으로 채워집니다.
+            </p>
           </Section>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
