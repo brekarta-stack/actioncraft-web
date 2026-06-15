@@ -162,13 +162,6 @@ export default function AboutPage() {
       {/* Story */}
       <section className="py-16 md:py-24 bg-slate-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          {/* 우리의 이야기 위 — 스튜디오 사진 1 */}
-          <StudioPhoto
-            src="/about/studio-1.jpg"
-            alt="페이퍼 엔지니어링 스튜디오 쇼룸 — 건담·캐릭터 종이 모형 전시"
-            caption="13년간 종이로 설계하고 만들어 온 것들 — 스튜디오 쇼룸의 일부입니다."
-            className="mb-12"
-          />
           <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-start">
             <div>
               <p className="text-xs font-semibold uppercase tracking-widest mb-3" style={{ color: "#06C6C8" }}>

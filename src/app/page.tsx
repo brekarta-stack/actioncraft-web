@@ -19,6 +19,7 @@ import {
 import { PaperToyHero, PortfolioPlaceholder, PatentBadge, PaperNetBg } from "@/components/paper-art";
 import PartnersMarquee from "@/components/PartnersMarquee";
 import HomePortfolioGrid from "@/components/HomePortfolioGrid";
+import StudioPhoto from "@/components/StudioPhoto";
 import { PAGE_META } from "@/lib/site";
 
 export const metadata: Metadata = {
@@ -270,6 +271,13 @@ export default function HomePage() {
       {/* ─── Social Proof — Partners Marquee (실제 로고 무한 슬라이드) ─── */}
       <section className="py-16 md:py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          {/* 스튜디오 쇼룸 사진 — '함께 일한 곳들' 위 */}
+          <StudioPhoto
+            src="/home/studio-1.jpg"
+            alt="페이퍼 엔지니어링 스튜디오 쇼룸 — 건담·캐릭터 종이 모형 전시"
+            caption="13년간 직접 설계해 만든 작업물들로 채운 스튜디오 쇼룸입니다."
+            className="mb-12"
+          />
           <div className="text-center mb-10">
             <p className="text-slate-500 text-xs font-semibold tracking-wide mb-2">함께 일한 곳</p>
             <h2 className="text-2xl md:text-3xl font-bold text-slate-900">
