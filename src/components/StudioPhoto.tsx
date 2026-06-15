@@ -27,9 +27,11 @@ export default function StudioPhoto({
       <img
         src={src}
         alt={alt}
+        width={1600}
+        height={1200}
         loading="lazy"
         onError={() => setFailed(true)}
-        className="w-full h-72 md:h-96 object-cover rounded-2xl border border-slate-200 shadow-sm"
+        className="w-full h-auto rounded-2xl border border-slate-200 shadow-sm"
       />
       {caption && (
         <figcaption
