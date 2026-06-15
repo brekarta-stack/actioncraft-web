@@ -67,6 +67,26 @@ const securityHeaders = [
 ];
 
 const nextConfig: NextConfig = {
+  /**
+   * 도메인 통합 — actioncraft.co.kr (+www) → https://www.papercraft.kr 영구(308) 리다이렉트.
+   *
+   * 동일 콘텐츠를 두 도메인으로 서비스하면 검색 신호(링크 권위)가 분산되고 중복 콘텐츠로
+   * 정본 판별이 흐려진다. 정본 도메인(papercraft.kr)으로 301/308 통합하면:
+   *   · actioncraft.co.kr 에 쌓인 권위가 손실 없이 papercraft.kr 로 이전
+   *   · 검색 색인·광고/분석 유입이 한 도메인으로 일원화
+   * permanent:true → 308(검색엔진이 영구 캐시). 경로·쿼리(UTM/gclid)는 자동 보존된다.
+   * (host 매칭이므로 papercraft.kr 요청에는 영향 없음)
+   */
+  async redirects() {
+    return [
+      {
+        source: "/:path*",
+        has: [{ type: "host", value: "^(www\\.)?actioncraft\\.co\\.kr$" }],
+        destination: "https://www.papercraft.kr/:path*",
+        permanent: true,
+      },
+    ];
+  },
   async headers() {
     return [
       {
