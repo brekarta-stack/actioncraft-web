@@ -78,6 +78,7 @@ function ProducedAtField({
 }
 
 const categoryColors: Record<string, string> = {
+  "자체 제작 상품": "bg-emerald-100 text-emerald-700",
   "팝업북": "bg-pink-100 text-pink-700",
   "페이퍼 크래프트": "bg-blue-100 text-blue-700",
   "액션 크래프트": "bg-orange-100 text-orange-700",

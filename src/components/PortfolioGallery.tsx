@@ -7,6 +7,7 @@ import type { PortfolioItem, Category } from "@/lib/portfolio-types";
 import { deriveSlug, getImageAlt } from "@/lib/portfolio-meta";
 
 const categoryColors: Record<string, { bg: string; text: string }> = {
+  "자체 제작 상품":  { bg: "#ECFDF5", text: "#0F766E" },
   "팝업북":         { bg: "#FFF0F6", text: "#E91E8C" },
   "페이퍼 크래프트": { bg: "#EEF0FF", text: "#1E22B2" },
   "액션 크래프트":  { bg: "#FFF3F9", text: "#E91E8C" },
