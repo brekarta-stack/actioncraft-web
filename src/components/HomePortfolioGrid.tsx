@@ -29,6 +29,16 @@ const PLACEHOLDER_CLIENTS: PlaceholderClient[] = [
   { name: "국립기관",    work: "다수 관공서 납품",     variant: "generic" },
 ];
 
+/** 클라이언트명과 제목이 겹칠 때(제목이 이미 클라이언트명으로 시작) 중복 노출 방지 */
+function cardLabel(client: string | undefined, title: string): string {
+  const c = (client ?? "").trim();
+  const t = (title ?? "").trim();
+  if (!c) return t;
+  if (!t) return c;
+  const norm = (s: string) => s.replace(/\s+/g, "");
+  return norm(t).startsWith(norm(c)) ? t : `${c} · ${t}`;
+}
+
 export default async function HomePortfolioGrid() {
   // 빌드 시 Supabase env 없거나 일시 에러면 빈 배열로 fallback
   const published = (await getItems().catch(() => [])).filter((i) => i.published);
@@ -62,9 +72,7 @@ export default async function HomePortfolioGrid() {
       {items.map((item) => {
         const slug = deriveSlug(item);
         const hero = item.images?.[0];
-        const label = item.client
-          ? `${item.client} · ${item.title}`
-          : item.title;
+        const label = cardLabel(item.client, item.title);
         return (
           <Link
             key={item.id}
