@@ -170,18 +170,14 @@ export default function AboutPage() {
               <h2 className="text-3xl font-bold text-slate-900 mb-6 tracking-tight">우리의 이야기</h2>
               <div className="space-y-4 text-slate-600 leading-relaxed" style={{ wordBreak: "keep-all" }}>
                 <p>
-                  <strong className="text-slate-900">{SITE_NAME}(PE Studio)</strong>는
-                  2013년부터 움직이는 종이 구조를 설계해 온 지기구조 전문 설계 스튜디오입니다. 평면을 입체로 세우고 움직이게 만드는 구조 설계가 핵심 역량입니다.
+                  <strong className="text-slate-900">{SITE_NAME} (PE Studio)</strong>는
+                  2013년부터 페이퍼크래프트를 연구·설계해 온 지기구조 전문 스튜디오입니다. 구 액션페이퍼, 액션크래프트, 종이천하의 기술자들이 뭉쳐 만든 스튜디오입니다. 저희는 종이로 되어 있는 오브젝트라면 정교한 모델에서부터 재미있게 움직이는 구조까지, 모든 형태의 크래프트를 전문적으로 설계합니다.
                 </p>
                 <p>
-                  단순한 모형 제작을 넘어, 사용자가 직접 조립하며 경험하는 제품을 설계합니다. 모든 작업은 구조 설계와 샘플 제작을 먼저 거친 뒤 생산에 들어갑니다.
+                  이를 통해 지기구조 설계 <strong className="text-slate-900">특허 11종</strong>을 보유하고 있으며, 문화체육관광부 장관상 2회를 비롯한 다양한 수상 경력과 함께 수백 건의 프로젝트를 설계·제작·납품해 왔습니다.
                 </p>
                 <p>
-                  자기구조 설계 <strong className="text-slate-900">특허 11종</strong>을 보유하고 있으며,
-                  문화체육관광부 장관상을 2회 수상했습니다. 현대백화점을 비롯한 기업과 박물관·학교·지자체 등 650건 이상을 납품했습니다.
-                </p>
-                <p>
-                  검증된 구조를 기반으로 작업해, 대부분의 제품을 약 4주 내에 안정적인 품질로 공급합니다.
+                  또한 다년간의 경험을 바탕으로, 단순한 모형 제작이 아니라 ‘만드는 사람’과 ‘구매자(의뢰자)’의 니즈를 구분하고, 제품을 이용할 때의 ‘경험’을 최적화하여 제공합니다. 손쉬운 페이퍼 토이에서부터 정교한 페이퍼크래프트까지, PE Studio와 함께하세요.
                 </p>
               </div>
             </div>
