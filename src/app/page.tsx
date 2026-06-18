@@ -58,7 +58,7 @@ const features: { icon: IconKey; title: string; desc: string; gradient: string }
   {
     icon: "globe",
     title: "세계 페이퍼 엔지니어 네트워크",
-    desc: "세계 각지의 페이퍼 엔지니어들과 협업하며 구조 설계 노하우를 넓혀 왔습니다. 입체를 전개도로 펴는 페파쿠라(PePaKuRa) 설계 교육도 운영합니다.",
+    desc: "세계 각지의 페이퍼 엔지니어들과 협업하며 구조 설계 노하우를 넓혀 왔습니다. 입체를 전개도로 펴는 종이 구조 설계 교육도 운영합니다.",
     gradient: "from-amber-400 to-orange-500",
   },
   {

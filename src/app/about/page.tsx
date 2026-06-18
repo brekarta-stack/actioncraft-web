@@ -48,7 +48,7 @@ const strengths: { icon: IconKey; title: string; description: string }[] = [
     icon: "globe",
     title: "세계 페이퍼 엔지니어 네트워크",
     description:
-      "세계 각지의 페이퍼 엔지니어들과 협업하며 구조 설계 노하우를 넓혀 왔습니다. 입체를 전개도로 펴는 페파쿠라(PePaKuRa Designer) 설계 교육도 운영합니다.",
+      "세계 각지의 페이퍼 엔지니어들과 협업하며 구조 설계 노하우를 넓혀 왔습니다. 입체를 전개도로 펴는 종이 구조 설계 교육도 운영합니다.",
   },
   {
     icon: "education",
@@ -191,7 +191,7 @@ export default function AboutPage() {
                 {[
                   "자기구조 설계 특허 11종 보유",
                   "문화체육관광부 장관상 2회 수상",
-                  "페파쿠라(PePaKuRa) 설계 교육 프로그램 운영",
+                  "입체 전개도 설계 교육 프로그램 운영",
                   "페이퍼 토이 커뮤니티 '종이천하' 운영",
                   "박물관·학교 현장 교구 제작",
                   "친환경·업사이클링 소재 적용",

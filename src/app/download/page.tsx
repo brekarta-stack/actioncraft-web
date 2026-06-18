@@ -221,7 +221,7 @@ export default function DownloadPage() {
               이런 걸 할 수 있어요
             </h2>
             <p className="text-slate-600 max-w-2xl mx-auto" style={{ wordBreak: "keep-all" }}>
-              시판 프로그램(Pepakura) 수준의 기능을, 초등학생도 따라 만들 수 있게 한글로 담았습니다.
+              전문 전개도 도구 수준의 기능을, 초등학생도 따라 만들 수 있게 한글로 담았습니다.
             </p>
           </div>
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
