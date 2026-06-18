@@ -8,6 +8,7 @@ export type Category = (typeof CATEGORIES)[number];
  * 자유 입력도 가능하지만 가능하면 이 중 하나를 고르면 일관성/검색 효과 ↑
  */
 export const CLIENT_TYPES = [
+  "자체 유통상품",
   "박물관·과학관",
   "지자체·관광",
   "기업·브랜드",
