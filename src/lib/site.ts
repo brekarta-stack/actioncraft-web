@@ -123,4 +123,28 @@ export const PAGE_META = {
     description:
       "최소 수량, 평균 납기, 디자인 보유 여부, 지자체 입찰, 가격대 등 페이퍼 엔지니어링 외주 제작 시 자주 묻는 질문.",
   },
+  download: {
+    title: "무료 다운로드 — 페이퍼크래프트 스튜디오 (종이접기 전개도 프로그램)",
+    description:
+      "PE Studio가 만든 무료 데스크톱 프로그램. 동물·공룡·탈것·건축물 등 내장 디자인이나 내 사진·3D 파일을 자르고 접어 만드는 종이공예 전개도(페이퍼크래프트)로 바꿔, 실측 1:1 인쇄 PDF·커터용 SVG/DXF로 내보냅니다. Windows 무설치.",
+  },
+} as const;
+
+/**
+ * 무료 배포 프로그램 — 페이퍼크래프트 스튜디오 (Papercraft Studio)
+ *
+ * 배포 바이너리는 공개 GitHub 릴리스로 호스팅합니다(무료·트래픽 무제한·2GB 자산 한도).
+ * 저장소: github.com/brekarta-stack/papercraft-studio-app (배포 전용 public, 소스는 별도 private).
+ * 새 버전 배포 시: 새 릴리스(예: v1.1)에 같은 파일명으로 zip을 올리고 아래 url의 태그와
+ * version/fileSize를 갱신하세요.
+ */
+export const DOWNLOAD = {
+  appName: "페이퍼크래프트 스튜디오",
+  appNameEn: "Papercraft Studio",
+  version: "1.0",
+  platform: "Windows 10 / 11 (64-bit)",
+  fileName: "PapercraftStudio-windows-x64.zip",
+  fileSize: "약 91 MB",
+  url: "https://github.com/brekarta-stack/papercraft-studio-app/releases/download/v1.0/PapercraftStudio-windows-x64.zip",
+  price: "무료",
 } as const;

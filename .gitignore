@@ -43,3 +43,6 @@ next-env.d.ts
 # local debug/check screenshots (not for repo)
 vercel-check.png
 *-check.png
+
+# Claude Code local dev config
+.claude/
