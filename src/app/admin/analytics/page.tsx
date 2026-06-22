@@ -6,16 +6,15 @@ import { supabaseAdmin } from "@/lib/supabase-admin";
 import NoTrackToggle from "@/components/admin/NoTrackToggle";
 import {
   summarize,
+  resolvePeriod,
   sourceLabel,
   MEDIUM_META,
   formatDuration,
   type AnalyticsRow,
 } from "@/lib/analytics";
+import AnalyticsPeriodPicker from "@/components/admin/AnalyticsPeriodPicker";
 
 export const dynamic = "force-dynamic";
-
-const WINDOW_DAYS = 30;
-const TREND_DAYS = 14;
 
 /** 테이블이 아직 생성되지 않은 경우(PostgREST relation 없음) 감지 */
 function isMissingTable(message: string, code?: string): boolean {
@@ -27,16 +26,28 @@ function isMissingTable(message: string, code?: string): boolean {
   );
 }
 
-export default async function AnalyticsPage() {
+type SearchParams = Promise<Record<string, string | string[] | undefined>>;
+
+export default async function AnalyticsPage({
+  searchParams,
+}: {
+  searchParams: SearchParams;
+}) {
   const session = await getServerSession(authOptions);
   if (!session) redirect("/admin/login");
 
-  const since = new Date(new Date().getTime() - WINDOW_DAYS * 24 * 60 * 60 * 1000).toISOString();
+  const sp = await searchParams;
+  const one = (v: string | string[] | undefined) => (Array.isArray(v) ? v[0] : v);
+  const period = resolvePeriod(
+    { month: one(sp.month), from: one(sp.from), to: one(sp.to), preset: one(sp.preset) },
+    new Date().getTime(),
+  );
 
   const { data, error } = await supabaseAdmin
     .from("analytics_events")
     .select("*")
-    .gte("created_at", since)
+    .gte("created_at", period.fromISO)
+    .lte("created_at", period.toISO)
     .order("created_at", { ascending: false })
     .limit(50000);
 
@@ -76,7 +87,11 @@ export default async function AnalyticsPage() {
   }
 
   const rows = (data ?? []) as AnalyticsRow[];
-  const s = summarize(rows, TREND_DAYS);
+  const s = summarize(rows, {
+    from: Date.parse(period.fromISO),
+    to: Date.parse(period.toISO),
+    unit: period.unit,
+  });
 
   const maxDaily = Math.max(1, ...s.daily.map((d) => d.pageviews));
   /* 일별 추이 Y축 눈금 — 1·2·5×10ⁿ 라운드 간격으로 ~4개 기준선 */
@@ -96,42 +111,49 @@ export default async function AnalyticsPage() {
   const maxPage = Math.max(1, ...s.topPages.map((x) => x.count));
   const maxClick = Math.max(1, ...s.topClicks.map((x) => x.count));
   const maxCampaign = Math.max(1, ...s.campaigns.map((x) => x.count));
+  // 추이 X축 라벨이 너무 많으면 일부만 표기 (최대 ~16개)
+  const labelEvery = Math.max(1, Math.ceil(s.daily.length / 16));
 
   const nf = (n: number) => n.toLocaleString("ko-KR");
 
   return (
     <div className="p-6 md:p-8 max-w-6xl mx-auto">
       {/* ── 헤더 ── */}
-      <div className="mb-6 flex items-start justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-slate-900">유입·클릭 분석</h1>
-          <p className="text-sm text-slate-400 mt-0.5">
-            최근 {WINDOW_DAYS}일 · 방문자가 어디서 왔고 무엇을 클릭했는지 (외부 도구 없이 자체 수집)
-          </p>
+      <div className="mb-6 flex flex-col gap-4">
+        <div className="flex items-start justify-between gap-4">
+          <div>
+            <h1 className="text-2xl font-bold text-slate-900">유입·클릭 분석</h1>
+            <p className="text-sm text-slate-400 mt-0.5">
+              <span className="font-semibold text-slate-600">{period.label}</span> · 방문자가 어디서 왔고 무엇을 클릭했는지 (외부 도구 없이 자체 수집)
+            </p>
+          </div>
+          <NoTrackToggle />
         </div>
-        <NoTrackToggle />
+        <AnalyticsPeriodPicker />
       </div>
 
       {rows.length === 0 ? (
         <div className="bg-white rounded-2xl border border-slate-200 p-10 text-center">
           <p className="text-3xl mb-2">📭</p>
-          <p className="font-bold text-slate-700 mb-1">아직 수집된 데이터가 없습니다</p>
+          <p className="font-bold text-slate-700 mb-1">
+            {period.label}에 수집된 데이터가 없습니다
+          </p>
           <p className="text-sm text-slate-400">
-            배포 후 방문자가 사이트를 둘러보면 이곳에 유입 경로와 클릭이 집계됩니다.
+            다른 기간을 선택하거나, 방문자가 사이트를 둘러보면 이곳에 유입 경로와 클릭이 집계됩니다.
           </p>
         </div>
       ) : (
         <>
           {/* ── 요약 카드 ── */}
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-            <SummaryCard label="방문 (세션)" value={nf(s.totalSessions)} hint={`최근 ${WINDOW_DAYS}일`} bg="#EEF0FF" fg="#1E22B2" />
+            <SummaryCard label="방문 (세션)" value={nf(s.totalSessions)} hint={period.label} bg="#EEF0FF" fg="#1E22B2" />
             <SummaryCard label="페이지뷰" value={nf(s.totalPageviews)} hint="전체 페이지 조회" bg="#E0F2FE" fg="#0369A1" />
             <SummaryCard label="평균 체류시간" value={formatDuration(s.avgSessionMs)} hint="방문당 평균 머문 시간" bg="#ECFDF5" fg="#0F766E" />
             <SummaryCard label="클릭" value={nf(s.totalClicks)} hint="버튼·링크 클릭" bg="#FFF3F9" fg="#E91E8C" />
           </div>
 
-          {/* ── 일별 추이 ── */}
-          <Section title={`일별 추이 (최근 ${TREND_DAYS}일)`}>
+          {/* ── 추이 (일/월) ── */}
+          <Section title={`${period.unit === "month" ? "월별" : "일별"} 추이 · ${period.label}`}>
             <div className="pl-9 pr-1 pt-2">
               {/* 차트 영역 — 기준선(눈금) 위에 막대 */}
               <div className="relative h-40">
@@ -175,11 +197,11 @@ export default async function AnalyticsPage() {
                   })}
                 </div>
               </div>
-              {/* 날짜 라벨 */}
+              {/* 추이 라벨 (버킷이 많으면 일부만 표기) */}
               <div className="flex gap-1.5 mt-1.5">
-                {s.daily.map((d) => (
-                  <div key={d.date} className="flex-1 text-center text-[9px] text-slate-400 tabular-nums">
-                    {d.date.slice(5)}
+                {s.daily.map((d, i) => (
+                  <div key={d.date} className="flex-1 text-center text-[9px] text-slate-400 tabular-nums overflow-hidden">
+                    {i % labelEvery === 0 ? d.label : ""}
                   </div>
                 ))}
               </div>

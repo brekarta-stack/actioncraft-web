@@ -224,9 +224,17 @@ export interface ClickStat {
 }
 
 export interface DailyStat {
-  date: string; // YYYY-MM-DD
+  date: string; // 버킷 키 (YYYY-MM-DD 또는 YYYY-MM)
+  label: string; // 차트 X축 표시 라벨 (예: "6/15" 또는 "26.6")
   pageviews: number;
   sessions: number;
+}
+
+/** summarize 추이 차트의 구간/단위 */
+export interface TrendWindow {
+  from: number; // UTC ms (포함)
+  to: number; // UTC ms (포함)
+  unit: "day" | "month";
 }
 
 export interface PageStat {
@@ -264,11 +272,138 @@ export interface AnalyticsSummary {
 
 const KST_OFFSET_MS = 9 * 60 * 60 * 1000;
 
-/** UTC ISO 문자열 → KST 기준 YYYY-MM-DD */
-function kstDate(iso: string): string {
-  const t = new Date(iso).getTime();
-  if (Number.isNaN(t)) return "";
-  return new Date(t + KST_OFFSET_MS).toISOString().slice(0, 10);
+/* ── KST 기준 날짜 헬퍼 ── */
+const pad2 = (n: number) => String(n).padStart(2, "0");
+function kstParts(ms: number) {
+  const k = new Date(ms + KST_OFFSET_MS);
+  return { y: k.getUTCFullYear(), m: k.getUTCMonth() + 1, d: k.getUTCDate() };
+}
+function kstYmd(ms: number): string {
+  const { y, m, d } = kstParts(ms);
+  return `${y}-${pad2(m)}-${pad2(d)}`;
+}
+function kstYm(ms: number): string {
+  const { y, m } = kstParts(ms);
+  return `${y}-${pad2(m)}`;
+}
+/** KST 기준 그 날의 자정(UTC ms) */
+function kstDayStartMs(ms: number): number {
+  return Math.floor((ms + KST_OFFSET_MS) / 86400000) * 86400000 - KST_OFFSET_MS;
+}
+
+/** [from,to] 구간을 일/월 버킷으로 나눠 pageview·세션 추이 생성 (KST, 빈 버킷 0 포함) */
+function buildTrend(pageviews: AnalyticsRow[], w: TrendWindow): DailyStat[] {
+  const CAP = 120; // 버킷 과다 방지 (가장 최근 CAP개만)
+  const buckets: { key: string; label: string }[] = [];
+  if (w.unit === "day") {
+    for (let cur = kstDayStartMs(w.from); cur <= w.to; cur += 86400000) {
+      const { m, d } = kstParts(cur);
+      buckets.push({ key: kstYmd(cur), label: `${m}/${d}` });
+    }
+  } else {
+    let { y, m } = kstParts(w.from);
+    const end = kstParts(w.to);
+    while (y < end.y || (y === end.y && m <= end.m)) {
+      buckets.push({ key: `${y}-${pad2(m)}`, label: `${String(y).slice(2)}.${m}` });
+      m++;
+      if (m > 12) {
+        m = 1;
+        y++;
+      }
+    }
+  }
+  const recent = buckets.length > CAP ? buckets.slice(buckets.length - CAP) : buckets;
+
+  const pv = new Map<string, number>();
+  const sess = new Map<string, Set<string>>();
+  for (const r of pageviews) {
+    const t = Date.parse(r.created_at);
+    if (Number.isNaN(t)) continue;
+    const key = w.unit === "day" ? kstYmd(t) : kstYm(t);
+    pv.set(key, (pv.get(key) ?? 0) + 1);
+    if (r.session_id) {
+      if (!sess.has(key)) sess.set(key, new Set());
+      sess.get(key)!.add(r.session_id);
+    }
+  }
+  return recent.map((b) => ({
+    date: b.key,
+    label: b.label,
+    pageviews: pv.get(b.key) ?? 0,
+    sessions: sess.get(b.key)?.size ?? 0,
+  }));
+}
+
+/** 기간 조회 결과 (Supabase 쿼리 범위 + 추이 단위 + 표시 라벨) */
+export interface ResolvedPeriod {
+  fromISO: string;
+  toISO: string;
+  unit: "day" | "month";
+  label: string;
+  kind: "default" | "month" | "preset" | "custom";
+}
+
+/**
+ * searchParams → 조회 구간/단위/표시 라벨 (KST 기준).
+ * 우선순위: 사용자지정(from+to) > 특정 월(month) > 프리셋(preset) > 기본(이번 달).
+ */
+export function resolvePeriod(
+  p: { month?: string; from?: string; to?: string; preset?: string },
+  nowMs: number,
+): ResolvedPeriod {
+  const DAY = 86400000;
+  const iso = (ms: number) => new Date(ms).toISOString();
+  const monthStartMs = (y: number, m: number) => Date.UTC(y, m - 1, 1) - KST_OFFSET_MS; // m: 1-12
+  const dayStartMs = (ymd: string) => {
+    const [y, m, d] = ymd.split("-").map(Number);
+    return Date.UTC(y, m - 1, d) - KST_OFFSET_MS;
+  };
+  const now = kstParts(nowMs);
+
+  // 1) 사용자 지정 기간
+  if (
+    p.from &&
+    p.to &&
+    /^\d{4}-\d{2}-\d{2}$/.test(p.from) &&
+    /^\d{4}-\d{2}-\d{2}$/.test(p.to)
+  ) {
+    const [lo, hi] = p.from <= p.to ? [p.from, p.to] : [p.to, p.from]; // YYYY-MM-DD 문자열 비교=시간순
+    const fromMs = dayStartMs(lo);
+    const toMs = Math.min(dayStartMs(hi) + DAY - 1, nowMs);
+    const span = (toMs - fromMs) / DAY;
+    return {
+      fromISO: iso(fromMs),
+      toISO: iso(toMs),
+      unit: span > 92 ? "month" : "day",
+      label: `${lo} ~ ${hi}`,
+      kind: "custom",
+    };
+  }
+
+  // 2) 특정 월
+  if (p.month && /^\d{4}-\d{2}$/.test(p.month)) {
+    const [y, m] = p.month.split("-").map(Number);
+    const fromMs = monthStartMs(y, m);
+    const toMs = Math.min(monthStartMs(y, m + 1) - 1, nowMs);
+    return { fromISO: iso(fromMs), toISO: iso(toMs), unit: "day", label: `${y}년 ${m}월`, kind: "month" };
+  }
+
+  // 3) 프리셋
+  switch (p.preset) {
+    case "7d":
+      return { fromISO: iso(nowMs - 7 * DAY), toISO: iso(nowMs), unit: "day", label: "최근 7일", kind: "preset" };
+    case "30d":
+      return { fromISO: iso(nowMs - 30 * DAY), toISO: iso(nowMs), unit: "day", label: "최근 30일", kind: "preset" };
+    case "90d":
+      return { fromISO: iso(nowMs - 90 * DAY), toISO: iso(nowMs), unit: "day", label: "최근 90일", kind: "preset" };
+    case "year":
+      return { fromISO: iso(monthStartMs(now.y, 1)), toISO: iso(nowMs), unit: "month", label: `${now.y}년 전체`, kind: "preset" };
+    case "all":
+      return { fromISO: iso(Date.UTC(2020, 0, 1) - KST_OFFSET_MS), toISO: iso(nowMs), unit: "month", label: "전체 기간", kind: "preset" };
+  }
+
+  // 4) 기본 = 이번 달 (월별)
+  return { fromISO: iso(monthStartMs(now.y, now.m)), toISO: iso(nowMs), unit: "day", label: `${now.y}년 ${now.m}월`, kind: "default" };
 }
 
 function topN(map: Map<string, number>, n: number): Counted[] {
@@ -281,9 +416,9 @@ function topN(map: Map<string, number>, n: number): Counted[] {
 /**
  * analytics_events 행 배열 → 대시보드 집계.
  * @param rows  조회된 행 (기간 필터는 호출 측에서 적용)
- * @param days  일별 추이를 만들 일 수 (기본 14)
+ * @param trend 추이 차트 구간/단위 (일·월 버킷)
  */
-export function summarize(rows: AnalyticsRow[], days = 14): AnalyticsSummary {
+export function summarize(rows: AnalyticsRow[], trend: TrendWindow): AnalyticsSummary {
   const pageviews = rows.filter((r) => r.type === "pageview");
   const clicks = rows.filter((r) => r.type === "click");
 
@@ -363,31 +498,8 @@ export function summarize(rows: AnalyticsRow[], days = 14): AnalyticsSummary {
     count: c.count,
   }));
 
-  /* 일별 추이 (최근 days 일, KST) */
-  const dayPV = new Map<string, number>();
-  const daySessions = new Map<string, Set<string>>();
-  for (const r of pageviews) {
-    const d = kstDate(r.created_at);
-    if (!d) continue;
-    dayPV.set(d, (dayPV.get(d) ?? 0) + 1);
-    if (r.session_id) {
-      if (!daySessions.has(d)) daySessions.set(d, new Set());
-      daySessions.get(d)!.add(r.session_id);
-    }
-  }
-  // 최근 days 일의 날짜 축을 빈 날 포함해 생성 (KST 기준)
-  const daily: DailyStat[] = [];
-  const todayKst = new Date(Date.now() + KST_OFFSET_MS);
-  for (let i = days - 1; i >= 0; i--) {
-    const d = new Date(todayKst.getTime() - i * 24 * 60 * 60 * 1000)
-      .toISOString()
-      .slice(0, 10);
-    daily.push({
-      date: d,
-      pageviews: dayPV.get(d) ?? 0,
-      sessions: daySessions.get(d)?.size ?? 0,
-    });
-  }
+  /* 추이 (선택 구간을 일/월 버킷으로 집계, KST 기준, 빈 버킷 0 포함) */
+  const daily = buildTrend(pageviews, trend);
 
   /* 방문자 여정 (세션별 페이지 이동 흐름) + 평균 체류 시간 */
   const bySession = new Map<string, AnalyticsRow[]>();
