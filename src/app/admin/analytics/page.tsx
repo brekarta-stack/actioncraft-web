@@ -3,6 +3,7 @@ import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { supabaseAdmin } from "@/lib/supabase-admin";
+import { unstable_cache } from "next/cache";
 import NoTrackToggle from "@/components/admin/NoTrackToggle";
 import {
   summarize,
@@ -26,6 +27,36 @@ function isMissingTable(message: string, code?: string): boolean {
   );
 }
 
+/**
+ * 기간 집계 결과를 캐싱 (Supabase 재쿼리 + JS 재집계 비용 제거).
+ * - 키 = (fromISO, toISO, unit) → 같은 기간 재조회/재방문 시 즉시 응답.
+ * - revalidate 60초: 분석 지표는 실시간일 필요가 없어 ≤60초 신선도 허용.
+ * - 호출 측에서 현재시각을 1분 단위로 양자화하므로 '이번 달' 등 now-종료 구간도 키가 안정 → 캐시 적중.
+ * - 에러는 throw (캐시에 저장되지 않음) → 일시 오류가 60초 고착되지 않음.
+ * - select 는 집계에 쓰는 컬럼만 (id 등 미사용 컬럼 제외).
+ */
+const getCachedSummary = unstable_cache(
+  async (fromISO: string, toISO: string, unit: "day" | "month") => {
+    const { data, error } = await supabaseAdmin
+      .from("analytics_events")
+      .select(
+        "type,path,referrer,source,medium,utm_source,utm_medium,utm_campaign,keyword,label,href,duration_ms,session_id,device,created_at",
+      )
+      .gte("created_at", fromISO)
+      .lte("created_at", toISO)
+      .order("created_at", { ascending: false })
+      .limit(50000);
+    if (error) throw Object.assign(new Error(error.message), { code: error.code });
+    const rows = (data ?? []) as AnalyticsRow[];
+    return {
+      summary: summarize(rows, { from: Date.parse(fromISO), to: Date.parse(toISO), unit }),
+      rowCount: rows.length,
+    };
+  },
+  ["analytics-summary-v1"],
+  { revalidate: 60, tags: ["analytics"] },
+);
+
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;
 
 export default async function AnalyticsPage({
@@ -38,21 +69,19 @@ export default async function AnalyticsPage({
 
   const sp = await searchParams;
   const one = (v: string | string[] | undefined) => (Array.isArray(v) ? v[0] : v);
+  // 현재 시각을 1분 단위로 양자화 → 같은 기간 재조회 시 캐시 적중률↑
+  const nowMs = Math.floor(new Date().getTime() / 60000) * 60000;
   const period = resolvePeriod(
     { month: one(sp.month), from: one(sp.from), to: one(sp.to), preset: one(sp.preset) },
-    new Date().getTime(),
+    nowMs,
   );
 
-  const { data, error } = await supabaseAdmin
-    .from("analytics_events")
-    .select("*")
-    .gte("created_at", period.fromISO)
-    .lte("created_at", period.toISO)
-    .order("created_at", { ascending: false })
-    .limit(50000);
+  const cached = await getCachedSummary(period.fromISO, period.toISO, period.unit).catch(
+    (e: unknown) => ({ error: (e ?? {}) as { message?: string; code?: string } }),
+  );
 
   /* ── 테이블 미생성 안내 ── */
-  if (error && isMissingTable(error.message, error.code)) {
+  if ("error" in cached && isMissingTable(cached.error.message ?? "", cached.error.code)) {
     return (
       <div className="p-6 md:p-8 max-w-3xl mx-auto">
         <h1 className="text-2xl font-bold text-slate-900 mb-2">유입·클릭 분석</h1>
@@ -75,23 +104,19 @@ export default async function AnalyticsPage({
     );
   }
 
-  if (error) {
+  if ("error" in cached) {
     return (
       <div className="p-6 md:p-8 max-w-3xl mx-auto">
         <h1 className="text-2xl font-bold text-slate-900 mb-2">유입·클릭 분석</h1>
         <div className="bg-red-50 border border-red-200 rounded-2xl p-6 mt-4 text-sm text-red-700">
-          데이터를 불러오지 못했습니다: {error.message}
+          데이터를 불러오지 못했습니다: {cached.error.message}
         </div>
       </div>
     );
   }
 
-  const rows = (data ?? []) as AnalyticsRow[];
-  const s = summarize(rows, {
-    from: Date.parse(period.fromISO),
-    to: Date.parse(period.toISO),
-    unit: period.unit,
-  });
+  const s = cached.summary;
+  const rowCount = cached.rowCount;
 
   const maxDaily = Math.max(1, ...s.daily.map((d) => d.pageviews));
   /* 일별 추이 Y축 눈금 — 1·2·5×10ⁿ 라운드 간격으로 ~4개 기준선 */
@@ -132,7 +157,7 @@ export default async function AnalyticsPage({
         <AnalyticsPeriodPicker />
       </div>
 
-      {rows.length === 0 ? (
+      {rowCount === 0 ? (
         <div className="bg-white rounded-2xl border border-slate-200 p-10 text-center">
           <p className="text-3xl mb-2">📭</p>
           <p className="font-bold text-slate-700 mb-1">
@@ -147,9 +172,9 @@ export default async function AnalyticsPage({
           {/* ── 요약 카드 ── */}
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
             <SummaryCard label="방문 (세션)" value={nf(s.totalSessions)} hint={period.label} bg="#EEF0FF" fg="#1E22B2" />
-            <SummaryCard label="페이지뷰" value={nf(s.totalPageviews)} hint="전체 페이지 조회" bg="#E0F2FE" fg="#0369A1" />
-            <SummaryCard label="평균 체류시간" value={formatDuration(s.avgSessionMs)} hint="방문당 평균 머문 시간" bg="#ECFDF5" fg="#0F766E" />
-            <SummaryCard label="클릭" value={nf(s.totalClicks)} hint="버튼·링크 클릭" bg="#FFF3F9" fg="#E91E8C" />
+            <SummaryCard label="페이지뷰" value={nf(s.totalPageviews)} hint={period.label} bg="#E0F2FE" fg="#0369A1" />
+            <SummaryCard label="평균 체류시간" value={formatDuration(s.avgSessionMs)} hint={period.label} bg="#ECFDF5" fg="#0F766E" />
+            <SummaryCard label="클릭" value={nf(s.totalClicks)} hint={period.label} bg="#FFF3F9" fg="#E91E8C" />
           </div>
 
           {/* ── 추이 (일/월) ── */}
