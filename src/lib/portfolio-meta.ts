@@ -78,7 +78,7 @@ export function getImageAlt(item: PortfolioItem, index: number): string {
   if (custom && custom.trim()) return custom.trim();
 
   const parts: string[] = [];
-  parts.push(item.title || "제작 사례");
+  parts.push(item.title || "납품 사례");
   if (item.client) parts.push(item.client);
   if (item.category) parts.push(item.category);
   const t1 = item.tags?.[0];
@@ -118,7 +118,7 @@ export function deriveSummary(item: PortfolioItem, maxLen = 160): string {
   if (!text) {
     // fallback: 카테고리 + 클라이언트
     const parts = [item.client, item.category, item.title].filter(Boolean).join(" · ");
-    return `${parts} 제작 사례 — Paper Engineering Studio`;
+    return `${parts} 납품 사례 — Paper Engineering Studio`;
   }
   // 첫 두 문장 (마침표 기준)
   const sentences = text.split(/(?<=[.!?。！？])\s+/);

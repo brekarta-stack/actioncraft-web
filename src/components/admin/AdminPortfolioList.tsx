@@ -178,7 +178,7 @@ export default function AdminPortfolioList({ initialItems }: { initialItems: Por
   return (
     <div className="space-y-3">
       <p className="text-xs text-slate-400">
-        사이트(제작 사례·홈)는 <strong className="text-slate-500">제작 시기(없으면 등록일) 최신순</strong>으로
+        사이트(납품 사례·홈)는 <strong className="text-slate-500">제작 시기(없으면 등록일) 최신순</strong>으로
         노출됩니다. 행의 제작 시기를 바꾸면 즉시 저장되며, 목록 순서는 새로고침 시 반영됩니다.
       </p>
       {items.map((item, idx) => (

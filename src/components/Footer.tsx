@@ -44,7 +44,7 @@ export default function Footer() {
               {[
                 { href: "/about", label: "회사소개" },
                 { href: "/products", label: "제품 종류" },
-                { href: "/portfolio", label: "제작 사례" },
+                { href: "/portfolio", label: "납품 사례" },
                 { href: "/quote", label: "제작 문의" },
                 { href: "/blog", label: "블로그" },
                 { href: "/faq", label: "자주 묻는 질문" },

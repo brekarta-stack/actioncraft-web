@@ -39,7 +39,7 @@ function PortfolioJsonLd({
   const data = {
     "@context": "https://schema.org",
     "@type": "ItemList",
-    name: "Paper Engineering Studio 제작 사례",
+    name: "Paper Engineering Studio 납품 사례",
     url: `${SITE_URL}/portfolio`,
     numberOfItems: items.length,
     itemListElement: items.slice(0, 50).map((item, idx) => ({
@@ -95,10 +95,10 @@ export default async function PortfolioPage() {
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <span className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-full mb-6 bg-white/10 text-white border border-white/15">
             <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
-            제작 사례
+            납품 사례
           </span>
           <h1 className="text-4xl md:text-5xl font-extrabold text-white mb-6 tracking-tight leading-[1.1]">
-            <span className="pe-gradient-text">제작 사례</span>
+            <span className="pe-gradient-text">납품 사례</span>
           </h1>
           <p className="text-blue-200 text-lg max-w-2xl mx-auto" style={{ wordBreak: "keep-all" }}>
             2013년부터 우리가 만들어 온 대표 작업들입니다.
