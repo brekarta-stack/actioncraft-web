@@ -29,16 +29,21 @@ export async function generateMetadata({
   const post = await getPostBySlug(slug);
   if (!post) return {};
   const canonical = `/blog/${post.slug}`;
+  // 글 커버 이미지를 OG/트위터 카드 이미지로 사용 (없으면 사이트 기본 OG)
+  const ogImage = post.coverImage || `${SITE_URL}/opengraph-image`;
   return {
     // template 가 자동으로 ` | CES` 를 붙이므로 여기서 다시 붙이지 않음
     title: post.title,
     description: post.excerpt,
+    ...(post.tag ? { keywords: [post.tag, "페이퍼 엔지니어링", "페이퍼크래프트"] } : {}),
+    authors: [{ name: SITE_NAME, url: SITE_URL }],
     alternates: { canonical },
     openGraph: {
       type: "article",
       title: post.title,
       description: post.excerpt,
       url: canonical,
+      images: [ogImage],
       publishedTime: post.createdAt,
       modifiedTime: post.updatedAt,
       ...(post.tag ? { tags: [post.tag] } : {}),
@@ -47,6 +52,7 @@ export async function generateMetadata({
       card: "summary_large_image",
       title: post.title,
       description: post.excerpt,
+      images: [ogImage],
     },
   };
 }
@@ -75,6 +81,7 @@ export default async function BlogPostPage({
     "@type": "BlogPosting",
     headline: post.title,
     description: post.excerpt,
+    image: [post.coverImage || `${SITE_URL}/opengraph-image`],
     datePublished: post.createdAt,
     dateModified: post.updatedAt,
     inLanguage: "ko-KR",
@@ -91,12 +98,28 @@ export default async function BlogPostPage({
     ...(post.tag ? { articleSection: post.tag } : {}),
   };
 
+  // 빵부스러기(BreadcrumbList) — 홈 > 블로그 > 글
+  const breadcrumbLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "홈", item: SITE_URL },
+      { "@type": "ListItem", position: 2, name: "블로그", item: `${SITE_URL}/blog` },
+      { "@type": "ListItem", position: 3, name: post.title, item: `${SITE_URL}/blog/${post.slug}` },
+    ],
+  };
+
   return (
     <article className="max-w-3xl mx-auto px-4 py-16">
       <script
         type="application/ld+json"
         // eslint-disable-next-line react/no-danger
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        // eslint-disable-next-line react/no-danger
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }}
       />
 
       <Link

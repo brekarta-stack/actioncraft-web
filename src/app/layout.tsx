@@ -4,7 +4,7 @@ import localFont from "next/font/local";
 import "./globals.css";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import { SITE_URL, SITE_NAME, SITE_DESCRIPTION, COMPANY, PAGE_META } from "@/lib/site";
+import { SITE_URL, SITE_NAME, SITE_DESCRIPTION, COMPANY, PAGE_META, BRAND_TAGLINE_KR } from "@/lib/site";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -102,7 +102,14 @@ function OrganizationJsonLd() {
     url: SITE_URL,
     logo: `${SITE_URL}/opengraph-image`,
     description: SITE_DESCRIPTION,
+    slogan: BRAND_TAGLINE_KR,
     foundingDate: COMPANY.foundingYear,
+    founder: { "@type": "Person", name: COMPANY.representative },
+    foundingLocation: {
+      "@type": "Place",
+      name: `${COMPANY.address.region} ${COMPANY.address.locality}`,
+    },
+    award: "문화체육관광부 장관상 2회 수상",
     email: COMPANY.email,
     ...(COMPANY.phone ? { telephone: COMPANY.phone } : {}),
     address: {
