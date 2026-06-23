@@ -1,4 +1,5 @@
 import { supabaseAdmin } from "./supabase-admin";
+import { randomUUID } from "crypto";
 export type { Category, ClientType, PortfolioItem } from "./portfolio-types";
 export { CATEGORIES, CLIENT_TYPES, SUGGESTED_TAGS } from "./portfolio-types";
 import type { PortfolioItem } from "./portfolio-types";
@@ -82,6 +83,27 @@ export async function getItemByAirtableId(airtableId: string): Promise<Portfolio
     .eq("airtable_id", airtableId)
     .maybeSingle();
   return data ? toItem(data) : undefined;
+}
+
+/**
+ * slug 유니크 보장 — 다른 항목이 같은 slug 를 쓰고 있으면 -2, -3… 접미사를 붙인다.
+ * portfolio_items_slug_unique 인덱스 위반으로 신규 저장이 통째로 실패하는 것을 방지.
+ * selfId 가 같은(=자기 자신) 행이면 그대로 사용한다.
+ */
+export async function ensureUniqueSlug(base: string, selfId?: string): Promise<string> {
+  const root = (base && base.trim()) || "case";
+  let candidate = root;
+  for (let n = 2; n <= 50; n++) {
+    const { data } = await supabaseAdmin
+      .from("portfolio_items")
+      .select("id")
+      .eq("slug", candidate)
+      .maybeSingle();
+    if (!data || data.id === selfId) return candidate;
+    candidate = `${root}-${n}`;
+  }
+  // 극단적 충돌 시 무작위 접미사로 보장
+  return `${root}-${randomUUID().slice(0, 6)}`;
 }
 
 export async function saveItem(item: PortfolioItem): Promise<void> {

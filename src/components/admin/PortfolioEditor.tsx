@@ -104,11 +104,14 @@ export default function PortfolioEditor({ item }: Props) {
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify(body),
             });
-        if (!res.ok) throw new Error("저장 실패");
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({}));
+          throw new Error((err as { error?: string }).error || "저장 실패");
+        }
         router.push("/admin/portfolio");
         router.refresh();
-      } catch {
-        alert("저장 중 오류가 발생했습니다.");
+      } catch (e) {
+        alert(e instanceof Error ? e.message : "저장 중 오류가 발생했습니다.");
       } finally {
         setSaving(false);
       }

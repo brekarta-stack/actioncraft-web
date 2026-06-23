@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
-import { getItemById, saveItem, deleteItem } from "@/lib/portfolio";
+import { getItemById, saveItem, deleteItem, ensureUniqueSlug } from "@/lib/portfolio";
 import { slugify } from "@/lib/portfolio-meta";
 
 export async function GET(
@@ -32,13 +32,20 @@ export async function PUT(
   if (!item) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
   const body = await request.json();
-  // slug 가 들어오면 slugify, 빈 문자열이면 기존 slug 유지
-  const slug =
-    typeof body.slug === "string" && body.slug.trim()
-      ? slugify(body.slug)
-      : item.slug;
+  // slug 가 들어오면 slugify, 빈 문자열이면 기존 slug 유지. 다른 항목과 겹치면 접미사로 유니크 보장.
+  const slugBase =
+    typeof body.slug === "string" && body.slug.trim() ? slugify(body.slug) : (item.slug ?? "");
+  const slug = slugBase ? await ensureUniqueSlug(slugBase, id) : item.slug;
   const updated = { ...item, ...body, id, slug, updatedAt: new Date().toISOString() };
-  await saveItem(updated);
+  try {
+    await saveItem(updated);
+  } catch (e) {
+    console.error("[api/portfolio PUT] save error:", e);
+    return NextResponse.json(
+      { error: e instanceof Error ? e.message : "저장 실패" },
+      { status: 500 },
+    );
+  }
 
   // 변경 즉시 메인·포트폴리오·상세 페이지 갱신
   revalidatePath("/");

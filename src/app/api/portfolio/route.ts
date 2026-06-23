@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
-import { getItems, saveItem } from "@/lib/portfolio";
+import { getItems, saveItem, ensureUniqueSlug } from "@/lib/portfolio";
 import type { PortfolioItem } from "@/lib/portfolio";
 import { deriveSlug, slugify } from "@/lib/portfolio-meta";
 import { randomUUID } from "crypto";
@@ -22,11 +22,12 @@ export async function POST(request: Request) {
   const now = new Date().toISOString();
   const id = randomUUID();
 
-  // slug 자동 생성 (명시된 값 우선)
+  // slug 자동 생성 (명시된 값 우선) + 유니크 보장 (기존 항목과 겹치면 접미사)
   const requestedSlug = typeof body.slug === "string" ? slugify(body.slug) : "";
-  const slug =
+  const baseSlug =
     requestedSlug ||
     deriveSlug({ id, slug: "", client: body.client ?? "", title: body.title ?? "" });
+  const slug = await ensureUniqueSlug(baseSlug, id);
 
   const newItem: PortfolioItem = {
     id,
@@ -53,7 +54,15 @@ export async function POST(request: Request) {
     updatedAt: now,
   };
 
-  await saveItem(newItem);
+  try {
+    await saveItem(newItem);
+  } catch (e) {
+    console.error("[api/portfolio POST] save error:", e);
+    return NextResponse.json(
+      { error: e instanceof Error ? e.message : "저장 실패" },
+      { status: 500 },
+    );
+  }
 
   // 발행된 사례면 메인·포트폴리오·상세 페이지 즉시 갱신
   if (newItem.published) {

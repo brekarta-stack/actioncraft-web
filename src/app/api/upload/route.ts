@@ -91,7 +91,10 @@ export async function POST(request: Request) {
 
   if (error) {
     console.error("[api/upload] storage error:", error);
-    return NextResponse.json({ error: "파일 업로드 중 오류가 발생했습니다." }, { status: 500 });
+    return NextResponse.json(
+      { error: `파일 업로드 실패: ${error.message}` },
+      { status: 500 },
+    );
   }
 
   const {
