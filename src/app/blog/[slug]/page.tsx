@@ -7,7 +7,7 @@ import remarkGfm from "remark-gfm";
 import rehypeRaw from "rehype-raw";
 import Link from "next/link";
 import type { Metadata } from "next";
-import { SITE_NAME, SITE_URL } from "@/lib/site";
+import { SITE_NAME, SITE_URL, AUTHOR } from "@/lib/site";
 import { BlogThumbnail, blogVariantFromTag } from "@/components/paper-art";
 import { BlogCoverImage } from "@/components/BlogCoverImage";
 
@@ -36,7 +36,7 @@ export async function generateMetadata({
     title: post.title,
     description: post.excerpt,
     ...(post.tag ? { keywords: [post.tag, "페이퍼 엔지니어링", "페이퍼크래프트"] } : {}),
-    authors: [{ name: SITE_NAME, url: SITE_URL }],
+    authors: [{ name: AUTHOR.name, url: AUTHOR.url }],
     alternates: { canonical },
     openGraph: {
       type: "article",
@@ -85,7 +85,14 @@ export default async function BlogPostPage({
     datePublished: post.createdAt,
     dateModified: post.updatedAt,
     inLanguage: "ko-KR",
-    author: { "@type": "Organization", name: SITE_NAME, url: SITE_URL },
+    author: {
+      "@type": "Person",
+      name: AUTHOR.name,
+      jobTitle: AUTHOR.title,
+      description: AUTHOR.bio,
+      url: AUTHOR.url,
+      worksFor: { "@type": "Organization", name: SITE_NAME, url: SITE_URL },
+    },
     publisher: {
       "@type": "Organization",
       name: SITE_NAME,
@@ -166,6 +173,10 @@ export default async function BlogPostPage({
               day: "numeric",
             })}
           </span>
+          <span className="text-xs text-slate-300" aria-hidden>·</span>
+          <span className="text-xs text-slate-500">
+            글쓴이 <span className="font-medium text-slate-700">{AUTHOR.name}</span> · {AUTHOR.title}
+          </span>
         </div>
         <h1 className="text-3xl md:text-4xl font-bold text-slate-900 mb-4 leading-tight">
           {post.title}
@@ -198,7 +209,31 @@ export default async function BlogPostPage({
         </ReactMarkdown>
       </div>
 
-      <div className="mt-16 pt-8 border-t border-slate-200">
+      {/* 저자 소개 — E-E-A-T(전문성·신뢰) 강화 */}
+      <div className="mt-14 flex items-start gap-4 rounded-2xl border border-slate-200 bg-slate-50 p-5">
+        <div
+          className="w-11 h-11 rounded-full flex items-center justify-center text-white font-bold flex-shrink-0"
+          style={{ background: "#1E22B2" }}
+          aria-hidden
+        >
+          {AUTHOR.name.slice(0, 1)}
+        </div>
+        <div>
+          <p className="font-semibold text-slate-900">
+            {AUTHOR.name}{" "}
+            <span className="text-slate-400 font-normal text-sm">· {AUTHOR.title}</span>
+          </p>
+          <p className="text-sm text-slate-500 mt-1 leading-relaxed">{AUTHOR.bio}</p>
+          <Link
+            href="/about"
+            className="text-sm text-orange-600 hover:underline mt-2 inline-block"
+          >
+            회사·설계자 소개 →
+          </Link>
+        </div>
+      </div>
+
+      <div className="mt-12 pt-8 border-t border-slate-200">
         <Link
           href="/blog"
           className="inline-flex items-center gap-2 px-5 py-2.5 bg-orange-500 hover:bg-orange-600 text-white font-semibold rounded-xl transition-colors text-sm"

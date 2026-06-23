@@ -83,6 +83,18 @@ export const COMPANY: CompanyInfo = {
 };
 
 /**
+ * 콘텐츠 대표 저자 — 검색·AI 의 E-E-A-T(경험·전문성·권위·신뢰) 신호용.
+ * 스튜디오 성격상 대표(오세기)를 블로그 글의 전문 저자로 명시한다.
+ * (JSON-LD Person / 메타 authors / 글 하단 저자 소개에서 공통 사용)
+ */
+export const AUTHOR = {
+  name: COMPANY.representative, // 오세기
+  title: `${SITE_SHORT} 대표`, // PE Studio 대표
+  bio: "2013년 Paper Engineering Studio(구 액션크래프트)를 설립해 지기구조 설계 특허 11종을 보유하고 문화체육관광부 장관상을 2회 수상했습니다. 페이퍼토이·팝업북·오토마타 등 움직이는 종이 구조를 직접 설계합니다.",
+  url: `${SITE_URL}/about`,
+} as const;
+
+/**
  * 페이지별 메타데이터 사전 정의
  * - title 은 layout.tsx 의 template "%s | PE Studio" 가 자동으로 붙이므로 suffix 없이 작성
  * - "페이퍼 엔지니어링" 키워드를 핵심 페이지에 반복 노출
