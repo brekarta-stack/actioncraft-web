@@ -153,10 +153,10 @@ export const PAGE_META = {
 export const DOWNLOAD = {
   appName: "페이퍼크래프트 스튜디오",
   appNameEn: "Papercraft Studio",
-  version: "1.2",
+  version: "1.3",
   platform: "Windows 10 / 11 (64-bit)",
   fileName: "PapercraftStudio-windows-x64.zip",
   fileSize: "약 126 MB",
-  url: "https://github.com/brekarta-stack/papercraft-studio-app/releases/download/v1.2/PapercraftStudio-windows-x64.zip",
+  url: "https://github.com/brekarta-stack/papercraft-studio-app/releases/download/v1.3/PapercraftStudio-windows-x64.zip",
   price: "무료",
 } as const;
