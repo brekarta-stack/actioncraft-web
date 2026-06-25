@@ -29,14 +29,15 @@ export default function PageHero({
         </div>
       </div>
 
-      {/* 종이 로봇 캐릭터 — 우측 (lg+에서만, 텍스트와 겹치지 않게) */}
-      <div className="hidden lg:block absolute right-2 xl:right-12 top-0 bottom-0 w-[260px] xl:w-[320px] pointer-events-none">
-        <PaperToyHero className="w-full h-full" />
-      </div>
-
-      {/* 콘텐츠 — 통일 높이(min-h) + 세로 중앙 정렬 */}
+      {/* 콘텐츠 — 통일 높이(min-h) + 세로 중앙 정렬.
+          로봇도 이 컨테이너(max-w-7xl) 기준으로 배치해, 뷰포트 끝이 아니라
+          본문(타이틀·하단 카드들)의 오른쪽 끝선에 맞춰 전체 균형을 맞춘다. */}
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 min-h-[300px] md:min-h-[360px] flex items-center">
-        <div className="max-w-xl lg:max-w-2xl py-16">
+        {/* 종이 로봇 캐릭터 — 본문 영역 오른쪽 끝선 (lg+, 텍스트와 안 겹침) */}
+        <div className="hidden lg:block absolute right-4 lg:right-8 top-0 bottom-0 w-[260px] xl:w-[300px] pointer-events-none">
+          <PaperToyHero className="w-full h-full" />
+        </div>
+        <div className="relative z-10 max-w-xl lg:max-w-2xl py-16">
           {eyebrow && (
             <span className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-full mb-6 bg-white/10 text-white border border-white/15">
               <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
