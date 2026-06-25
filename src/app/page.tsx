@@ -16,7 +16,8 @@ import {
   BuildingIcon,
   type IconKey,
 } from "@/components/icons";
-import { PaperToyHero, PortfolioPlaceholder, PatentBadge, PaperNetBg } from "@/components/paper-art";
+import { PortfolioPlaceholder, PatentBadge, PaperNetBg } from "@/components/paper-art";
+import HeroShowcase from "@/components/HeroShowcase";
 import PartnersMarquee from "@/components/PartnersMarquee";
 import HomePortfolioGrid from "@/components/HomePortfolioGrid";
 import StudioPhoto from "@/components/StudioPhoto";
@@ -204,9 +205,9 @@ export default function HomePage() {
               </div>
             </div>
 
-            {/* Right — Hero illustration */}
+            {/* Right — Hero showcase (브랜드 일러스트 ↔ 스튜디오 쇼룸 사진 cross-fade) */}
             <div className="hidden lg:block h-[520px]">
-              <PaperToyHero className="w-full h-full" />
+              <HeroShowcase className="w-full h-full" />
             </div>
           </div>
         </div>
