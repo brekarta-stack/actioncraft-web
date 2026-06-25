@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import PageHero from "@/components/PageHero";
 import { PAGE_META, DOWNLOAD, SITE_URL } from "@/lib/site";
 import {
   ArrowRightIcon,
@@ -189,24 +190,24 @@ export default function DownloadPage() {
       <JsonLd />
 
       {/* Hero */}
-      <section className="relative py-20 md:py-28 overflow-hidden" style={{ background: "#1E22B2" }}>
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <span className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-full mb-6 bg-white/10 text-white border border-white/15">
-            <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
-            무료 데스크톱 프로그램
-          </span>
-          <h1 className="text-4xl md:text-5xl font-extrabold text-white mb-5 tracking-tight leading-[1.1]">
-            <span className="pe-gradient-text">페이퍼크래프트 스튜디오</span>
-          </h1>
-          <p className="text-blue-200 text-lg max-w-2xl mx-auto mb-9" style={{ wordBreak: "keep-all" }}>
+      <PageHero
+        eyebrow="다운로드"
+        title={<span className="pe-gradient-text">페이퍼크래프트 스튜디오</span>}
+        subtitle={
+          <>
             내장 디자인·사진·3D 모델을 자르고 접어 만드는
             <br className="hidden sm:block" />
             종이공예 전개도로 바꿔 주는 무료 프로그램입니다.
-          </p>
+          </>
+        }
+      />
 
-          <div className="flex flex-col items-center gap-4">
+      {/* Hero 다운로드 버튼 */}
+      <section className="py-10 md:py-12 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex flex-col items-center gap-4 text-center">
             <DownloadButton large />
-            <p className="text-blue-300 text-sm">
+            <p className="text-slate-500 text-sm">
               {DOWNLOAD.version} 버전 · {DOWNLOAD.platform} · {DOWNLOAD.fileSize} · 설치 불필요
             </p>
           </div>

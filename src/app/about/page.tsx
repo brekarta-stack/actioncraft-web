@@ -12,6 +12,7 @@ import {
 } from "@/components/icons";
 import { PatentBadge, PaperNetBg } from "@/components/paper-art";
 import StudioPhoto from "@/components/StudioPhoto";
+import PageHero from "@/components/PageHero";
 
 export const metadata: Metadata = {
   title: PAGE_META.about.title,
@@ -112,30 +113,16 @@ export default function AboutPage() {
   return (
     <>
       {/* Hero */}
-      <section className="relative py-20 md:py-28 overflow-hidden" style={{ background: "#1E22B2" }}>
-        <div className="absolute inset-0 pointer-events-none opacity-25">
-          <div className="absolute -right-32 top-1/4 w-[70%] max-w-3xl rotate-6">
-            <PaperNetBg className="w-full h-auto" />
-          </div>
-        </div>
-
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="max-w-3xl">
-            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-full mb-6 bg-white/10 text-white border border-white/15">
-              <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
-              회사소개
-            </span>
-            <h1 className="text-4xl md:text-5xl font-extrabold text-white mb-6 leading-[1.1] tracking-tight" style={{ wordBreak: "keep-all" }}>
-              {BRAND_TAGLINE_KR}<br />
-              <span className="pe-gradient-text">PE Studio</span>입니다
-            </h1>
-            <p className="text-blue-200 text-lg leading-relaxed" style={{ wordBreak: "keep-all" }}>
-              디자인 사고를 바탕으로 페이퍼 엔지니어링, 교육 프로그램,
-              편집 디자인을 제공합니다.
-            </p>
-          </div>
-        </div>
-      </section>
+      <PageHero
+        eyebrow="회사소개"
+        title={
+          <>
+            {BRAND_TAGLINE_KR}<br />
+            <span className="pe-gradient-text">PE Studio</span>입니다
+          </>
+        }
+        subtitle="디자인 사고를 바탕으로 페이퍼 엔지니어링, 교육 프로그램, 편집 디자인을 제공합니다."
+      />
 
       {/* Stats */}
       <section className="bg-white border-b border-slate-100">

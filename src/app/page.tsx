@@ -206,7 +206,7 @@ export default function HomePage() {
             </div>
 
             {/* Right — Hero showcase (브랜드 일러스트 ↔ 스튜디오 쇼룸 사진 cross-fade) */}
-            <div className="hidden lg:block h-[520px]">
+            <div className="hidden lg:block h-[580px]">
               <HeroShowcase className="w-full h-full" />
             </div>
           </div>

@@ -7,6 +7,7 @@ import {
 } from "@/components/icons";
 import { PaperNetBg } from "@/components/paper-art";
 import ProductCatalogTabs from "@/components/ProductCatalogTabs";
+import PageHero from "@/components/PageHero";
 
 export const metadata: Metadata = {
   title: PAGE_META.products.title,
@@ -89,27 +90,17 @@ export default function ProductsPage() {
       <ProductsServiceJsonLd />
 
       {/* Hero */}
-      <section className="relative py-20 md:py-28 overflow-hidden" style={{ background: "#1E22B2" }}>
-        <div className="absolute inset-0 pointer-events-none opacity-25">
-          <div className="absolute -right-32 top-1/4 w-[70%] max-w-3xl rotate-6">
-            <PaperNetBg className="w-full h-auto" />
-          </div>
-        </div>
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <span className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-full mb-6 bg-white/10 text-white border border-white/15">
-            <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
-            {BRAND_TAGLINE_KR}
-          </span>
-          <h1 className="text-4xl md:text-5xl font-extrabold text-white mb-6 tracking-tight leading-[1.1]" style={{ wordBreak: "keep-all" }}>
-            <span className="pe-gradient-text">주문 제작</span>
-          </h1>
-          <p className="text-blue-200 text-lg max-w-2xl mx-auto" style={{ wordBreak: "keep-all" }}>
+      <PageHero
+        eyebrow={BRAND_TAGLINE_KR}
+        title={<span className="pe-gradient-text">주문 제작</span>}
+        subtitle={
+          <>
             페이퍼 엔지니어링 · 교육 프로그램 · 편집 디자인
             <br />
             <span className="text-blue-300 text-base">특허 기술 기반, 기획부터 납품까지 원스톱 제작.</span>
-          </p>
-        </div>
-      </section>
+          </>
+        }
+      />
 
       {/* Catalog — 제품 종류별 / 용도별 토글 */}
       <ProductCatalogTabs />

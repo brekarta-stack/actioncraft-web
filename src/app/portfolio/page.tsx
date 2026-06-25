@@ -2,6 +2,7 @@
 import { getItems, CATEGORIES } from "@/lib/portfolio";
 import { deriveSlug, deriveSummary } from "@/lib/portfolio-meta";
 import PortfolioGallery from "@/components/PortfolioGallery";
+import PageHero from "@/components/PageHero";
 import { PAGE_META, SITE_NAME, SITE_URL } from "@/lib/site";
 import { PaperNetBg } from "@/components/paper-art";
 import { ArrowRightIcon } from "@/components/icons";
@@ -86,25 +87,11 @@ export default async function PortfolioPage() {
     <>
       <PortfolioJsonLd items={jsonLdItems} />
       {/* Hero */}
-      <section className="relative py-20 md:py-28 overflow-hidden" style={{ background: "#1E22B2" }}>
-        <div className="absolute inset-0 pointer-events-none opacity-25">
-          <div className="absolute -right-32 top-1/4 w-[70%] max-w-3xl rotate-6">
-            <PaperNetBg className="w-full h-auto" />
-          </div>
-        </div>
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <span className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-full mb-6 bg-white/10 text-white border border-white/15">
-            <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
-            납품 사례
-          </span>
-          <h1 className="text-4xl md:text-5xl font-extrabold text-white mb-6 tracking-tight leading-[1.1]">
-            <span className="pe-gradient-text">납품 사례</span>
-          </h1>
-          <p className="text-blue-200 text-lg max-w-2xl mx-auto" style={{ wordBreak: "keep-all" }}>
-            2013년부터 우리가 만들어 온 대표 작업들입니다.
-          </p>
-        </div>
-      </section>
+      <PageHero
+        eyebrow="납품 사례"
+        title={<span className="pe-gradient-text">납품 사례</span>}
+        subtitle="2013년부터 우리가 만들어 온 대표 작업들입니다."
+      />
 
       {/* Gallery with filter */}
       <section className="py-16 md:py-24 bg-slate-50">

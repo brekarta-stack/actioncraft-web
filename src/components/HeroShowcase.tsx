@@ -15,7 +15,7 @@ import { PaperToyHero } from "@/components/paper-art";
 
 type Slide =
   | { kind: "illustration" }
-  | { kind: "photo"; src: string; alt: string; caption: string };
+  | { kind: "photo"; src: string; alt: string };
 
 const SLIDES: Slide[] = [
   { kind: "illustration" },
@@ -23,13 +23,11 @@ const SLIDES: Slide[] = [
     kind: "photo",
     src: "/home/studio-1.jpg",
     alt: "PE Studio 쇼룸 — 직접 설계해 만든 페이퍼 모형 전시 진열장",
-    caption: "스튜디오 쇼룸 · 직접 설계한 작업물",
   },
   {
     kind: "photo",
     src: "/about/studio-2.jpg",
     alt: "PE Studio 쇼룸 — 13년간 축적한 페이퍼 모형 아카이브",
-    caption: "스튜디오 쇼룸 · 13년의 아카이브",
   },
 ];
 
@@ -96,13 +94,6 @@ export default function HeroShowcase({ className = "" }: { className?: string })
                     "linear-gradient(to top, rgba(30,34,178,0.72) 0%, rgba(30,34,178,0.08) 36%, rgba(30,34,178,0) 58%)",
                 }}
               />
-              {/* 캡션 칩 — 좌상단 (전문성 메시지) */}
-              <figcaption className="absolute left-4 top-4 right-4">
-                <span className="inline-flex items-center gap-1.5 rounded-full bg-white/15 backdrop-blur px-3 py-1.5 text-[13px] font-semibold text-white ring-1 ring-white/20 shadow-sm">
-                  <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
-                  {slide.caption}
-                </span>
-              </figcaption>
             </figure>
           )}
         </div>
