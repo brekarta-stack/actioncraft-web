@@ -1,31 +1,22 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { PaperToyHero } from "@/components/paper-art";
 
 /**
- * 히어로 우측 쇼케이스 — 종이 로봇 일러스트(브랜드 앵커)와 실제 스튜디오 쇼룸
- * 사진을 부드러운 cross-fade 로 번갈아 보여준다.
- * "장식 일러스트 + 실제 전문성"을 동시에 전달하는 것이 목적.
+ * 히어로 우측 쇼케이스 — 실제 스튜디오 쇼룸 사진을 부드러운 cross-fade 로 순환.
  *
- * - 첫 슬라이드는 브랜드 일러스트, 이후 쇼룸 사진으로 순환
  * - 자동 전환(5s) · 마우스 올리면 일시정지 · prefers-reduced-motion 존중
  * - 사진은 라운드 프레임 + 미세 링/그림자로 '쇼케이스 윈도우'처럼 프레이밍
  */
 
-type Slide =
-  | { kind: "illustration" }
-  | { kind: "photo"; src: string; alt: string };
+type Slide = { src: string; alt: string };
 
 const SLIDES: Slide[] = [
-  { kind: "illustration" },
   {
-    kind: "photo",
     src: "/home/studio-1.jpg",
     alt: "PE Studio 쇼룸 — 직접 설계해 만든 페이퍼 모형 전시 진열장",
   },
   {
-    kind: "photo",
     src: "/about/studio-2.jpg",
     alt: "PE Studio 쇼룸 — 13년간 축적한 페이퍼 모형 아카이브",
   },
@@ -75,27 +66,23 @@ export default function HeroShowcase({ className = "" }: { className?: string })
           }`}
           aria-hidden={i !== active}
         >
-          {slide.kind === "illustration" ? (
-            <PaperToyHero className="w-full h-full" />
-          ) : (
-            <figure className="relative w-full h-full rounded-[28px] overflow-hidden ring-1 ring-white/15 shadow-2xl">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={slide.src}
-                alt={slide.alt}
-                className="w-full h-full object-cover"
-                draggable={false}
-              />
-              {/* 인디고 히어로 톤과 어울리는 하단 그라데이션 (깊이 + 인디케이터 가독성) */}
-              <div
-                className="absolute inset-0 pointer-events-none"
-                style={{
-                  background:
-                    "linear-gradient(to top, rgba(30,34,178,0.72) 0%, rgba(30,34,178,0.08) 36%, rgba(30,34,178,0) 58%)",
-                }}
-              />
-            </figure>
-          )}
+          <figure className="relative w-full h-full rounded-[28px] overflow-hidden ring-1 ring-white/15 shadow-2xl">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={slide.src}
+              alt={slide.alt}
+              className="w-full h-full object-cover"
+              draggable={false}
+            />
+            {/* 인디고 히어로 톤과 어울리는 하단 그라데이션 (깊이 + 인디케이터 가독성) */}
+            <div
+              className="absolute inset-0 pointer-events-none"
+              style={{
+                background:
+                  "linear-gradient(to top, rgba(30,34,178,0.72) 0%, rgba(30,34,178,0.08) 36%, rgba(30,34,178,0) 58%)",
+              }}
+            />
+          </figure>
         </div>
       ))}
 
