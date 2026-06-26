@@ -32,7 +32,7 @@ export const metadata: Metadata = {
 };
 
 const stats: { num: string; sub?: string; label: string }[] = [
-  { num: "11", sub: "종", label: "자기구조 설계 특허" },
+  { num: "11", sub: "종", label: "지기구조 설계 특허" },
   { num: "650+", label: "누적 납품 프로젝트" },
   { num: "2", sub: "회", label: "문화체육관광부 장관상" },
   { num: "지기구조", label: "전문 설계 스튜디오" },
@@ -41,7 +41,7 @@ const stats: { num: string; sub?: string; label: string }[] = [
 const strengths: { icon: IconKey; title: string; description: string }[] = [
   {
     icon: "patent",
-    title: "자기구조 설계 특허 11종",
+    title: "지기구조 설계 특허 11종",
     description:
       "움직이는 종이 구조를 직접 설계해 특허 11종으로 확보했습니다. 검증된 구조에서 시작해 완성도와 납기를 안정적으로 맞춥니다.",
   },
@@ -101,7 +101,7 @@ const services = [
 
 const timeline = [
   { year: "2013", event: "Paper Engineering Studio 창업 — 지기구조 전문 설계 페이퍼 엔지니어링 스튜디오 출범" },
-  { year: "2015", event: "자기 구조 설계 특허 최초 등록, STEAM 교육 키트 출시" },
+  { year: "2015", event: "지기구조 설계 특허 최초 등록, STEAM 교육 키트 출시" },
   { year: "2017", event: "페이퍼 토이 커뮤니티 '종이천하' 운영 시작" },
   { year: "2019", event: "누적 특허 11종 달성, 학교·기관 교육 프로그램 확대" },
   { year: "2021", event: "현대백화점·경주박물관 등 주요 기관 납품 본격화" },
@@ -172,7 +172,7 @@ export default function AboutPage() {
               <h3 className="font-bold text-slate-900 mb-5 tracking-tight">핵심 역량</h3>
               <ul className="space-y-3 text-sm text-slate-700">
                 {[
-                  "자기구조 설계 특허 11종 보유",
+                  "지기구조 설계 특허 11종 보유",
                   "문화체육관광부 장관상 2회 수상",
                   "입체 전개도 설계 교육 프로그램 운영",
                   "페이퍼 토이 커뮤니티 '종이천하' 운영",
@@ -230,12 +230,12 @@ export default function AboutPage() {
           {/* Patent badges */}
           <div className="mt-12 pt-8 border-t border-slate-100">
             <p className="text-center text-xs font-semibold uppercase tracking-widest text-slate-400 mb-5">
-자기 구조 설계 특허 11종 보유 (특허청 등록)
+지기구조 설계 특허 11종 보유 (특허청 등록)
             </p>
             <div className="flex flex-wrap justify-center gap-3">
-              <PatentBadge number="설계 특허" title="자기구조 페이퍼토이 설계 방법" />
+              <PatentBadge number="설계 특허" title="지기구조 페이퍼토이 설계 방법" />
               <PatentBadge number="구조 특허" title="탄성 메커니즘 종이 모형 구조" />
-              <PatentBadge number="외 9종" title="자기 구조 설계 특허군" />
+              <PatentBadge number="외 9종" title="지기구조 설계 특허군" />
             </div>
           </div>
         </div>

@@ -43,7 +43,7 @@ export const metadata: Metadata = {
 /* ────────────── 데이터 ────────────── */
 
 const trustStats: { num: string; label: string; sub?: string; since?: string }[] = [
-  { num: "11",     label: "자기구조 설계 특허",        sub: "종" },
+  { num: "11",     label: "지기구조 설계 특허",        sub: "종" },
   { num: "650+",   label: "누적 납품 프로젝트",         sub: "건", since: "2013년부터" },
   { num: "약 4주 내", label: "평균 납기" },
   { num: "지기구조", label: "전문 설계 스튜디오" },
@@ -52,7 +52,7 @@ const trustStats: { num: string; label: string; sub?: string; since?: string }[]
 const features: { icon: IconKey; title: string; desc: string; gradient: string }[] = [
   {
     icon: "patent",
-    title: "자기구조 설계 특허 11종",
+    title: "지기구조 설계 특허 11종",
     desc: "움직이는 종이 구조를 직접 설계해 특허 11종으로 확보했습니다. 검증된 구조에서 시작해 완성도와 납기를 안정적으로 맞춥니다.",
     gradient: "from-cyan-400 to-blue-500",
   },
@@ -173,7 +173,7 @@ export default function HomePage() {
                 <span className="pe-gradient-text">P.E. 스튜디오</span>로 통합니다.
               </h1>
               <p className="text-lg md:text-xl text-blue-200 mb-4 leading-relaxed" style={{ wordBreak: "keep-all" }}>
-                <strong className="text-white">자기 구조 설계 특허 11종</strong>을 보유한
+                <strong className="text-white">지기구조 설계 특허 11종</strong>을 보유한
                 {" "}<strong className="text-white">지기구조 전문 설계 스튜디오, 페이퍼 엔지니어링 스튜디오 (P.E Studio)</strong>입니다.
               </p>
               <blockquote
@@ -251,7 +251,7 @@ export default function HomePage() {
             {[
               { icon: "building", text: "국내외 주요 박물관·기관 납품" },
               { icon: "patent", text: "문화체육관광부 장관상 2회 수상" },
-              { icon: "check", text: "특허청 등록 자기구조 설계 특허 11종" },
+              { icon: "check", text: "특허청 등록 지기구조 설계 특허 11종" },
             ].map((b) => (
               <span
                 key={b.text}
@@ -355,12 +355,12 @@ export default function HomePage() {
           {/* Patent badges row */}
           <div className="mt-12 pt-10 border-t border-slate-100">
             <p className="text-center text-xs font-semibold uppercase tracking-widest text-slate-400 mb-5">
-              자기 구조 설계 특허 11종 보유 (특허청 등록)
+              지기구조 설계 특허 11종 보유 (특허청 등록)
             </p>
             <div className="flex flex-wrap justify-center gap-3">
-              <PatentBadge number="설계 특허" title="자기구조 페이퍼토이 설계 방법" />
+              <PatentBadge number="설계 특허" title="지기구조 페이퍼토이 설계 방법" />
               <PatentBadge number="구조 특허" title="탄성 메커니즘 종이 모형 구조" />
-              <PatentBadge number="외 9종" title="자기 구조 설계 특허군" />
+              <PatentBadge number="외 9종" title="지기구조 설계 특허군" />
             </div>
             <p className="text-center text-[11px] text-slate-400 mt-3">
               특허 등록증은 견적 상담 시 제공해 드립니다.

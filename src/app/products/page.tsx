@@ -33,7 +33,7 @@ function ProductsServiceJsonLd() {
   const services = [
     {
       name: "페이퍼 크래프트 주문 제작",
-      description: "특허 기반 도형·내각 원리 자기 구조 설계 페이퍼 크래프트 외주 제작",
+      description: "특허 기반 도형·내각 원리 지기구조 설계 페이퍼 크래프트 외주 제작",
     },
     {
       name: "액션 페이퍼 토이 주문 제작",
