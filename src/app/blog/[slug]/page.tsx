@@ -1,7 +1,8 @@
 import { notFound } from "next/navigation";
 import { getPostBySlug, getPosts } from "@/lib/blog";
 
-export const dynamic = "force-dynamic";
+// ISR — 블로그 글은 요청별 데이터가 없어 정적 캐시 가능. 새 글/수정 5분 내 반영(TTFB·크롤 효율↑).
+export const revalidate = 300;
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import rehypeRaw from "rehype-raw";
@@ -66,6 +67,17 @@ export default async function BlogPostPage({
   const post = await getPostBySlug(slug);
   if (!post) notFound();
 
+  // 관련 글(같은 태그 우선, 부족하면 최신글로 보충) — 내부링크로 크롤 깊이·체류 동선 강화
+  const otherPosts = (await getPosts()).filter(
+    (p) => p.published && p.slug !== post.slug,
+  );
+  const sameTag = otherPosts.filter((p) => p.tag === post.tag);
+  const related = (
+    sameTag.length >= 3
+      ? sameTag
+      : [...sameTag, ...otherPosts.filter((p) => p.tag !== post.tag)]
+  ).slice(0, 3);
+
   const tagColors: Record<string, string> = {
     "제작 과정": "bg-orange-100 text-orange-700",
     "교육": "bg-blue-100 text-blue-700",
@@ -95,6 +107,7 @@ export default async function BlogPostPage({
     },
     publisher: {
       "@type": "Organization",
+      "@id": `${SITE_URL}/#organization`,
       name: SITE_NAME,
       logo: { "@type": "ImageObject", url: `${SITE_URL}/opengraph-image` },
     },
@@ -142,6 +155,8 @@ export default async function BlogPostPage({
           <BlogCoverImage
             src={post.coverImage}
             alt={post.title}
+            priority
+            sizes="(min-width: 768px) 768px, 100vw"
             className="w-full aspect-[16/7] object-cover rounded-2xl mb-6 pe-paper-shadow"
             fallback={
               post.emoji
@@ -231,6 +246,53 @@ export default async function BlogPostPage({
             회사·설계자 소개 →
           </Link>
         </div>
+      </div>
+
+      {/* 관련 글 — 내부링크(블로그 ↔ 블로그) */}
+      {related.length > 0 && (
+        <section className="mt-14 pt-10 border-t border-slate-200">
+          <h2 className="text-lg font-bold text-slate-900 mb-5">함께 읽으면 좋은 글</h2>
+          <div className="grid gap-4 sm:grid-cols-3">
+            {related.map((r) => (
+              <Link
+                key={r.slug}
+                href={`/blog/${r.slug}`}
+                className="group block rounded-xl border border-slate-200 p-4 hover:border-slate-300 hover:shadow-sm transition"
+              >
+                {r.tag && (
+                  <span className="text-xs font-semibold text-orange-600">{r.tag}</span>
+                )}
+                <p
+                  className="mt-1 font-semibold text-slate-900 leading-snug line-clamp-2 group-hover:text-[#1E22B2] transition-colors"
+                  style={{ wordBreak: "keep-all" }}
+                >
+                  {r.title}
+                </p>
+              </Link>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* 전환 CTA — 블로그 → 제품/견적 내부링크 */}
+      <div className="mt-12 rounded-2xl border border-slate-200 bg-[#F0F2FF] p-6 text-center">
+        <p className="font-semibold text-slate-900" style={{ wordBreak: "keep-all" }}>
+          이런 작업을 직접 의뢰하고 싶으신가요?
+        </p>
+        <p className="text-sm text-slate-500 mt-1" style={{ wordBreak: "keep-all" }}>
+          페이퍼 엔지니어링{" "}
+          <Link href="/products" className="text-[#1E22B2] underline underline-offset-2">
+            주문 제작 서비스
+          </Link>
+          를 살펴보거나, 바로 견적을 받아 보세요.
+        </p>
+        <Link
+          href="/quote"
+          className="mt-4 inline-flex items-center gap-2 px-6 py-3 rounded-xl text-white font-bold text-sm shadow-lg shadow-pink-500/20 hover:-translate-y-0.5 transition-transform"
+          style={{ background: "linear-gradient(135deg, #06C6C8, #E91E8C)" }}
+        >
+          무료 견적 받기
+        </Link>
       </div>
 
       <div className="mt-12 pt-8 border-t border-slate-200">

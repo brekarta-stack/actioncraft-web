@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import Image from "next/image";
 
 /**
  * 히어로 우측 쇼케이스 — 실제 스튜디오 쇼룸 사진을 부드러운 cross-fade 로 순환.
@@ -67,12 +68,14 @@ export default function HeroShowcase({ className = "" }: { className?: string })
           aria-hidden={i !== active}
         >
           <figure className="relative w-full h-full rounded-[28px] overflow-hidden ring-1 ring-white/15 shadow-2xl">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
+            <Image
               src={slide.src}
               alt={slide.alt}
-              className="w-full h-full object-cover"
+              fill
+              sizes="(min-width: 1024px) 600px, 100vw"
+              className="object-cover"
               draggable={false}
+              priority={i === 0}
             />
             {/* 인디고 히어로 톤과 어울리는 하단 그라데이션 (깊이 + 인디케이터 가독성) */}
             <div

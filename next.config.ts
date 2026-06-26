@@ -68,6 +68,20 @@ const securityHeaders = [
 
 const nextConfig: NextConfig = {
   /**
+   * 이미지 최적화 — next/image 가 원본(Supabase Storage·Unsplash·Pollinations)을
+   * AVIF/WebP 로 자동 변환·리사이즈해 LCP/총 전송 바이트를 줄인다.
+   * (Wikimedia 파트너 로고는 SVG 라 next/image 미적용 → 여기 미등록)
+   */
+  images: {
+    formats: ["image/avif", "image/webp"],
+    remotePatterns: [
+      { protocol: "https", hostname: SUPABASE_HOST },
+      { protocol: "https", hostname: "images.unsplash.com" },
+      { protocol: "https", hostname: "image.pollinations.ai" },
+    ],
+  },
+
+  /**
    * 도메인 통합 — actioncraft.co.kr (+www) → https://www.papercraft.kr 영구(308) 리다이렉트.
    *
    * 동일 콘텐츠를 두 도메인으로 서비스하면 검색 신호(링크 권위)가 분산되고 중복 콘텐츠로

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import Image from "next/image";
 import { notFound } from "next/navigation";
 import { getItemBySlug, getItems } from "@/lib/portfolio";
 import { deriveSlug, deriveSummary, getAllKeywords, getImageAlt } from "@/lib/portfolio-meta";
@@ -196,13 +197,13 @@ export default async function PortfolioDetailPage({ params }: Props) {
         <section className="bg-slate-50 py-10 md:py-14">
           <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="rounded-2xl overflow-hidden border border-slate-200 bg-white shadow-sm">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
+              <Image
                 src={heroImage}
                 alt={getImageAlt(item, 0)}
-                loading="eager"
                 width={1600}
                 height={1067}
+                priority
+                sizes="(min-width: 1024px) 960px, 100vw"
                 className="w-full h-auto object-cover"
               />
             </div>
@@ -300,13 +301,12 @@ export default async function PortfolioDetailPage({ params }: Props) {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
               {otherImages.map((url, i) => (
                 <div key={url} className="rounded-2xl overflow-hidden border border-slate-200 bg-white">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
+                  <Image
                     src={url}
                     alt={getImageAlt(item, i + 1)}
-                    loading="lazy"
                     width={1200}
                     height={800}
+                    sizes="(min-width: 640px) 50vw, 100vw"
                     className="w-full h-auto object-cover"
                   />
                 </div>

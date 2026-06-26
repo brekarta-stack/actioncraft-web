@@ -6,15 +6,20 @@ import { SITE_URL } from "@/lib/site";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const base = SITE_URL;
+  // 정적 페이지 신선도 신호 — 배포 시각 기준(크롤러 재방문 효율).
+  const now = new Date();
 
   const staticPages: MetadataRoute.Sitemap = [
-    { url: base, priority: 1.0, changeFrequency: "weekly" },
-    { url: `${base}/about`, priority: 0.8, changeFrequency: "monthly" },
-    { url: `${base}/products`, priority: 0.9, changeFrequency: "monthly" },
-    { url: `${base}/portfolio`, priority: 0.9, changeFrequency: "weekly" },
-    { url: `${base}/blog`, priority: 0.9, changeFrequency: "weekly" },
-    { url: `${base}/quote`, priority: 0.8, changeFrequency: "monthly" },
-    { url: `${base}/faq`, priority: 0.7, changeFrequency: "monthly" },
+    { url: base, lastModified: now, priority: 1.0, changeFrequency: "weekly" },
+    { url: `${base}/about`, lastModified: now, priority: 0.8, changeFrequency: "monthly" },
+    { url: `${base}/products`, lastModified: now, priority: 0.9, changeFrequency: "monthly" },
+    { url: `${base}/portfolio`, lastModified: now, priority: 0.9, changeFrequency: "weekly" },
+    { url: `${base}/blog`, lastModified: now, priority: 0.9, changeFrequency: "weekly" },
+    { url: `${base}/quote`, lastModified: now, priority: 0.8, changeFrequency: "monthly" },
+    { url: `${base}/faq`, lastModified: now, priority: 0.7, changeFrequency: "monthly" },
+    { url: `${base}/download`, lastModified: now, priority: 0.7, changeFrequency: "monthly" },
+    { url: `${base}/legal/privacy`, lastModified: now, priority: 0.3, changeFrequency: "yearly" },
+    { url: `${base}/legal/terms`, lastModified: now, priority: 0.3, changeFrequency: "yearly" },
   ];
 
   const allPosts = await getPosts().catch(() => []);

@@ -96,6 +96,7 @@ function OrganizationJsonLd() {
   const data = {
     "@context": "https://schema.org",
     "@type": "Organization",
+    "@id": `${SITE_URL}/#organization`,
     name: COMPANY.name,
     legalName: COMPANY.legalName,
     alternateName: COMPANY.shortName,
@@ -156,6 +157,7 @@ function WebSiteJsonLd() {
     name: SITE_NAME,
     url: SITE_URL,
     inLanguage: "ko-KR",
+    publisher: { "@id": `${SITE_URL}/#organization` },
   };
   return (
     <script
@@ -177,6 +179,7 @@ function LocalBusinessJsonLd() {
     "@context": "https://schema.org",
     "@type": "ProfessionalService",
     "@id": `${SITE_URL}/#localbusiness`,
+    parentOrganization: { "@id": `${SITE_URL}/#organization` },
     name: COMPANY.name,
     alternateName: COMPANY.shortName,
     description: SITE_DESCRIPTION,

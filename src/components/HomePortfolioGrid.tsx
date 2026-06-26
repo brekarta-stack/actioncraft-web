@@ -7,6 +7,7 @@
  */
 
 import Link from "next/link";
+import Image from "next/image";
 import { getItems } from "@/lib/portfolio";
 import { deriveSlug, getImageAlt } from "@/lib/portfolio-meta";
 import { PortfolioPlaceholder } from "@/components/paper-art";
@@ -81,14 +82,12 @@ export default async function HomePortfolioGrid() {
             aria-label={`${label} — 상세 보기`}
           >
             {hero ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
+              <Image
                 src={hero}
                 alt={getImageAlt(item, 0)}
-                loading="lazy"
-                width={800}
-                height={600}
-                className="absolute inset-0 w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-500"
+                fill
+                sizes="(min-width: 768px) 33vw, 50vw"
+                className="object-cover group-hover:scale-[1.02] transition-transform duration-500"
               />
             ) : (
               <PortfolioPlaceholder

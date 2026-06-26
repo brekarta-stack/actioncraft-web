@@ -7,7 +7,8 @@ import { PaperNetBg } from "@/components/paper-art";
 import BlogList from "@/components/BlogList";
 import PageHero from "@/components/PageHero";
 
-export const dynamic = "force-dynamic";
+// ISR — 새 글 발행 시 5분 내 반영. 정적 캐시로 TTFB·크롤 효율 개선(요청별 데이터 없음).
+export const revalidate = 300;
 
 export const metadata: Metadata = {
   title: PAGE_META.blog.title,
