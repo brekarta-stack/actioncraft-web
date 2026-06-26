@@ -76,15 +76,19 @@ export const metadata: Metadata = {
     googleBot: { index: true, follow: true },
   },
   verification: {
-    // 인증 코드는 Vercel 환경변수로 주입 → 코드 수정·재배포 없이 등록 가능.
-    //   GOOGLE_SITE_VERIFICATION : Google Search Console > 'HTML 태그' 방식의 content 값
-    //   NAVER_SITE_VERIFICATION  : 네이버 서치어드바이저 > '메타 태그' 방식의 content 값
+    // 인증 코드: 환경변수가 있으면 우선, 없으면 등록된 기본값 사용.
+    //   GOOGLE_SITE_VERIFICATION : Google Search Console 'HTML 태그' content
+    //     (구글은 이미 다른 방식으로 소유확인됨 → env 없으면 메타 미출력)
+    //   NAVER_SITE_VERIFICATION  : 네이버 서치어드바이저 'HTML 태그' content
+    //     (아래 기본값으로 커밋 — 공개 토큰이라 비밀 아님. 추후 env 로 옮겨 override 가능)
     ...(process.env.GOOGLE_SITE_VERIFICATION
       ? { google: process.env.GOOGLE_SITE_VERIFICATION }
       : {}),
-    ...(process.env.NAVER_SITE_VERIFICATION
-      ? { other: { "naver-site-verification": process.env.NAVER_SITE_VERIFICATION } }
-      : {}),
+    other: {
+      "naver-site-verification":
+        process.env.NAVER_SITE_VERIFICATION ??
+        "3e4a169f69936bf3c12d2d335644d309d8306b3f",
+    },
   },
 };
 
