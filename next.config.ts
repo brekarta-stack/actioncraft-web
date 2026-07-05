@@ -74,6 +74,8 @@ const nextConfig: NextConfig = {
    */
   outputFileTracingIncludes: {
     "/api/studio/pdf/[key]": ["./content-private/studio/**/*"],
+    "/api/studio/sheet/[key]/[n]": ["./content-private/studio/**/*"],
+    "/api/studio/net/[key]": ["./content-private/studio/**/*"],
   },
 
   /**

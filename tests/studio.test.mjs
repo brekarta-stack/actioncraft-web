@@ -55,3 +55,18 @@ test("PDF 는 비공개 폴더에만 (public 유출 금지)", () => {
       `${it.skey}: PDF 가 public 에 유출됨!`);
   }
 });
+
+test("꾸미기 자산(클린 시트·net.json)은 비공개에만, 시트는 워터마크 없음", () => {
+  for (const it of idx.items) {
+    assert.ok(existsSync(prv(it.skey, "net.json")), `${it.skey}: net.json 없음`);
+    for (let n = 1; n <= it.svg_sheets; n++) {
+      assert.ok(existsSync(prv(it.skey, `sheet_p${n}.svg`)),
+        `${it.skey}/sheet_p${n}.svg 없음`);
+      assert.ok(!existsSync(pub(it.skey, `sheet_p${n}.svg`)),
+        `${it.skey}: 클린 시트가 public 에 유출됨!`);
+    }
+    const clean = readFileSync(prv(it.skey, "sheet_p1.svg"), "utf-8");
+    assert.ok(!clean.includes("papercraft.kr 미리보기"),
+      `${it.skey}: 클린 시트에 워터마크가 있음(잘못 복사)`);
+  }
+});

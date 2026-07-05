@@ -102,7 +102,7 @@ export default async function StudioDetailPage({ params }: Props) {
             </div>
           </dl>
 
-          <div className="mt-7">
+          <div className="mt-7 flex flex-wrap gap-3">
             <a
               href={`/api/studio/pdf/${item.skey}`}
               data-track={`studio_pdf:${item.skey}`}
@@ -110,11 +110,18 @@ export default async function StudioDetailPage({ params }: Props) {
             >
               인쇄용 PDF 내려받기
             </a>
-            <p className="mt-2 text-xs text-slate-500" style={{ wordBreak: "keep-all" }}>
-              베타 기간 무료 · 실제 크기(100%)로 인쇄하세요. 실선은 자르고, 점선은 접고,
-              같은 번호끼리 풀로 붙입니다.
-            </p>
+            <Link
+              href={`/studio/${item.skey}/custom`}
+              data-track={`studio_custom:${item.skey}`}
+              className="inline-flex items-center justify-center rounded-xl border-2 border-[var(--pe-blue,#1a73e8)] px-6 py-3 text-[var(--pe-blue,#1a73e8)] font-semibold hover:bg-blue-50 transition-colors"
+            >
+              웹에서 꾸미기 (베타)
+            </Link>
           </div>
+          <p className="mt-2 text-xs text-slate-500" style={{ wordBreak: "keep-all" }}>
+            베타 기간 무료 · 실제 크기(100%)로 인쇄하세요. 실선은 자르고, 점선은 접고,
+            같은 번호끼리 풀로 붙입니다. 꾸미기에서는 색칠·글자·로고를 얹어 바로 인쇄할 수 있어요.
+          </p>
 
           <div className="mt-6 rounded-xl bg-slate-50 border border-slate-200 p-4 text-sm text-slate-600"
                style={{ wordBreak: "keep-all" }}>
