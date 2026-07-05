@@ -1,14 +1,14 @@
 /**
- * /studio — 종이모형 스튜디오 카탈로그 (조용한 베타, 로드맵 M1)
+ * /studio — 종이모형 스튜디오 카탈로그 (조용한 베타, 로드맵 M1→M2 트랙A)
  *
  * 사전 생성 산출물(index.json)만 읽는 완전 정적 페이지 — 서버 계산 0.
- * 카드 → /studio/[key] 상세 (3D 미리보기 · 도면 · PDF 다운로드).
+ * 검색·분류·난이도 필터는 클라이언트(StudioCatalog)에서 즉시 처리(요청 없음).
  */
 
 import type { Metadata } from "next";
 import Link from "next/link";
-import Image from "next/image";
-import { itemsByCategory, starsLabel, studioAsset, STUDIO_ITEMS } from "@/lib/studio";
+import StudioCatalog from "@/components/StudioCatalog";
+import { STUDIO_ITEMS } from "@/lib/studio";
 import { SITE_NAME } from "@/lib/site";
 
 export const metadata: Metadata = {
@@ -26,10 +26,9 @@ export const metadata: Metadata = {
 };
 
 export default function StudioPage() {
-  const groups = itemsByCategory();
   return (
     <main className="mx-auto max-w-5xl px-4 py-10">
-      <header className="mb-10">
+      <header className="mb-8">
         <div className="flex items-center gap-2">
           <h1 className="text-3xl font-bold" style={{ wordBreak: "keep-all" }}>
             종이모형 스튜디오
@@ -52,46 +51,9 @@ export default function StudioPage() {
         </p>
       </header>
 
-      {groups.map(({ category, items }) => (
-        <section key={category} className="mb-12">
-          <h2 className="text-xl font-bold mb-4" style={{ wordBreak: "keep-all" }}>
-            {category}
-          </h2>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {items.map((it) => (
-              <Link
-                key={it.skey}
-                href={`/studio/${it.skey}`}
-                className="pe-paper-lift group block rounded-2xl overflow-hidden border border-slate-200 bg-white hover:shadow-xl transition-shadow"
-                aria-label={`${it.name_ko} 종이모형 — 상세 보기`}
-              >
-                <div className="relative aspect-square bg-[#26282c]">
-                  <Image
-                    src={studioAsset(it.skey, "thumb.png")}
-                    alt={`${it.name_ko} 종이모형 3D 미리보기`}
-                    fill
-                    sizes="(min-width: 768px) 25vw, 50vw"
-                    className="object-cover group-hover:scale-[1.04] transition-transform duration-500"
-                  />
-                </div>
-                <div className="p-3">
-                  <div className="font-semibold" style={{ wordBreak: "keep-all" }}>
-                    {it.name_ko}
-                  </div>
-                  <div className="mt-1 text-xs text-slate-500 tabular-nums">
-                    조각 {it.pieces} · A4 {it.pages}장 ·{" "}
-                    <span className="text-amber-500" aria-label={`난이도 ${it.stars}단계`}>
-                      {starsLabel(it.stars)}
-                    </span>
-                  </div>
-                </div>
-              </Link>
-            ))}
-          </div>
-        </section>
-      ))}
+      <StudioCatalog items={STUDIO_ITEMS} />
 
-      <footer className="mt-4 text-xs text-slate-400" style={{ wordBreak: "keep-all" }}>
+      <footer className="mt-10 text-xs text-slate-400" style={{ wordBreak: "keep-all" }}>
         도안은 Papercraft Studio 2 엔진이 생성했습니다. 미리보기 도면에는 papercraft.kr
         워터마크가 표시되며, 내려받은 PDF에는 표시되지 않습니다.
       </footer>

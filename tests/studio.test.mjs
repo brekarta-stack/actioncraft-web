@@ -18,8 +18,8 @@ const VER = idx.engine;
 const pub = (skey, f) => path.join(ROOT, "public", "studio", VER, skey, f);
 const prv = (skey, f) => path.join(ROOT, "content-private", "studio", VER, skey, f);
 
-test("index.json: 큐레이션 20종, 필수 필드", () => {
-  assert.equal(idx.items.length, 20);
+test("index.json: 항목 수(큐레이션 20 이상)와 필수 필드", () => {
+  assert.ok(idx.items.length >= 20, `items ${idx.items.length} < 20`);
   for (const it of idx.items) {
     for (const field of ["key", "skey", "name_ko", "category", "pieces", "pages",
                          "finished_mm", "stars", "est_minutes", "svg_sheets"]) {
