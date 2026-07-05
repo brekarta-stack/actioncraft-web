@@ -7,6 +7,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { preload } from "react-dom";
 import StudioViewer from "@/components/StudioViewer";
 import StudioSheets from "@/components/StudioSheets";
 import { getStudioItem, starsLabel, studioAsset, STUDIO_ITEMS, STUDIO_PAPER } from "@/lib/studio";
@@ -48,6 +49,10 @@ export default async function StudioDetailPage({ params }: Props) {
   const { key } = await params;
   const item = getStudioItem(key);
   if (!item) notFound();
+
+  // LCP = 도면 1쪽 SVG — HTML 파싱 시점에 페치가 시작되게 서버에서 preload 힌트
+  // (클라이언트 컴포넌트 마운트를 기다리면 콜드 엣지에서 로드가 늦는다)
+  preload(studioAsset(item.skey, "preview_p1.svg"), { as: "image", fetchPriority: "high" });
 
   const assetBase = studioAsset(item.skey, "").replace(/\/$/, "");
 
