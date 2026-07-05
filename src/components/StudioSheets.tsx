@@ -23,14 +23,18 @@ export default function StudioSheets({
   return (
     <div>
       <div className="rounded-2xl border border-slate-200 bg-white p-2">
-        {/* SVG 는 A4 비율 — 통짜 <img> 로 또렷하게 (벡터라 확대 무손실) */}
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src={`${base}/preview_p${n}.svg`}
-          alt={`${name} 도면 ${n}쪽 미리보기 (papercraft.kr 워터마크)`}
-          className="w-full h-auto"
-          loading="lazy"
-        />
+        {/* A4 비율(210:297)을 미리 예약해 로드 시 레이아웃 밀림(CLS) 방지.
+            첫 장은 LCP 요소라 eager + 높은 fetch 우선순위 (Lighthouse 게이트). */}
+        <div className="relative w-full" style={{ aspectRatio: "210 / 297" }}>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={`${base}/preview_p${n}.svg`}
+            alt={`${name} 도면 ${n}쪽 미리보기 (papercraft.kr 워터마크)`}
+            className="absolute inset-0 w-full h-full"
+            loading={n === 1 ? "eager" : "lazy"}
+            fetchPriority={n === 1 ? "high" : undefined}
+          />
+        </div>
       </div>
       <div className="mt-3 flex items-center justify-center gap-3 text-sm">
         <button
