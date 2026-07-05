@@ -96,12 +96,15 @@ export default function StudioCatalog({ items }: { items: StudioItem[] }) {
               aria-label={`${it.name_ko} 종이모형 — 상세 보기`}
             >
               <div className="relative aspect-square bg-[#26282c]">
+                {/* 썸네일은 이미 480px·~7KB PNG — next/image 변환(콜드 수백 ms)이
+                    LCP 를 늦춰 unoptimized 로 CDN 정적 직접 서빙 (Lighthouse 게이트) */}
                 <Image
                   src={studioAsset(it.skey, "thumb.png")}
                   alt={`${it.name_ko} 종이모형 3D 미리보기`}
                   fill
                   sizes="(min-width: 768px) 25vw, 50vw"
                   priority={idx < 8}
+                  unoptimized
                   className="object-cover group-hover:scale-[1.04] transition-transform duration-500"
                 />
               </div>
