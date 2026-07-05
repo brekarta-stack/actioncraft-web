@@ -68,6 +68,15 @@ const securityHeaders = [
 
 const nextConfig: NextConfig = {
   /**
+   * 종이모형 스튜디오(/studio) — 인쇄용 PDF 는 유료 대상이라 public/ 이 아닌
+   * content-private/ 에 두고 /api/studio/pdf/[key] 라우트가 서빙한다.
+   * Vercel 서버리스 번들에 그 폴더가 포함되도록 라우트 글롭으로 명시.
+   */
+  outputFileTracingIncludes: {
+    "/api/studio/pdf/[key]": ["./content-private/studio/**/*"],
+  },
+
+  /**
    * 이미지 최적화 — next/image 가 원본(Supabase Storage·Unsplash·Pollinations)을
    * AVIF/WebP 로 자동 변환·리사이즈해 LCP/총 전송 바이트를 줄인다.
    * (Wikimedia 파트너 로고는 SVG 라 next/image 미적용 → 여기 미등록)
