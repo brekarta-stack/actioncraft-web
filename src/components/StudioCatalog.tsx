@@ -48,16 +48,48 @@ export default function StudioCatalog({ items }: { items: StudioItem[] }) {
 
   return (
     <div>
-      {/* 검색 + 필터 */}
-      <div className="mb-6 space-y-3">
+      {/* 부제 + 검색 (같은 라인, 검색은 우측 상단) */}
+      <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <p className="text-slate-600" style={{ wordBreak: "keep-all" }}>
+          3D로 미리 돌려 보고, 도면을 확인하고, 인쇄해서 바로 만들어 보세요.
+        </p>
         <input
           type="search"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder="모델 이름 검색 (예: 코끼리, 에펠탑)"
           aria-label="종이모형 검색"
-          className="w-full md:w-96 rounded-xl border border-slate-300 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-slate-400"
+          className="w-full shrink-0 rounded-xl border border-slate-300 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-slate-400 sm:w-72"
         />
+      </div>
+
+      {/* 진입 버튼 3개 (같은 라인) */}
+      <div className="mb-5 flex flex-wrap gap-2">
+        <Link
+          href="/studio/upload"
+          data-track="studio_to_upload"
+          className="inline-flex items-center gap-1.5 rounded-xl border-2 border-[var(--pe-blue,#1a73e8)] px-4 py-2 text-sm font-semibold text-[var(--pe-blue,#1a73e8)] hover:bg-blue-50"
+        >
+          ⬆ 내 3D 모델 올려서 전개하기 (베타)
+        </Link>
+        <Link
+          href="/studio/class"
+          data-track="studio_to_class"
+          className="inline-flex items-center gap-1.5 rounded-xl border-2 border-emerald-600 px-4 py-2 text-sm font-semibold text-emerald-700 hover:bg-emerald-50"
+        >
+          🏫 학급 세트 만들기 — 선생님용 (베타)
+        </Link>
+        <Link
+          href="/download"
+          data-track="studio_to_download"
+          className="inline-flex items-center gap-1.5 rounded-xl border-2 border-slate-400 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+        >
+          💻 데스크톱 앱 다운받기
+        </Link>
+      </div>
+
+      {/* 필터 */}
+      <div className="mb-6 space-y-3">
         <div className="flex flex-wrap gap-2">
           <button type="button" className={chip(category === "전체")}
                   onClick={() => setCategory("전체")} data-track="studio_filter_cat:전체">

@@ -29,8 +29,9 @@ export default function StudioViewer({ src, alt }: { src: string; alt: string })
           loading="eager"
           camera-controls
           auto-rotate
-          auto-rotate-delay="800"
-          rotation-per-second="24deg"
+          auto-rotate-delay="1200"
+          rotation-per-second="20deg"
+          camera-orbit="-52deg 76deg auto"
           shadow-intensity="0.6"
           exposure="1.05"
           touch-action="pan-y"
