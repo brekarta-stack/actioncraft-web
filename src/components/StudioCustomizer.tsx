@@ -36,6 +36,14 @@ interface SavedState {
 const SVGNS = "http://www.w3.org/2000/svg";
 const PALETTE = ["#e5484d", "#f76b15", "#ffc53d", "#46a758", "#00a2c7",
                  "#3e63dd", "#8e4ec6", "#e93d82", "#8d6e63", "#607d8b"];
+// 스티커 = 이모지 글리프 텍스트 데코 — 끌기·두 번 콕 삭제를 글자와 똑같이 상속한다
+const STICKERS = ["⭐", "❤️", "😊", "🌈", "🌸", "🦋", "🚀", "👑", "⚡", "🍀", "🎵", "🐾"];
+const HINTS: Record<string, string> = {
+  color: "색을 고르고, 도면 조각을 콕! 누르면 색칠돼요",
+  erase: "지우고 싶은 조각을 콕! 누르면 색이 지워져요",
+  text: "글자를 쓰고, 넣고 싶은 곳을 콕! 눌러요",
+  sticker: "스티커를 고르고, 붙일 곳을 콕! 눌러요",
+};
 
 /**
  * 데이터 소스는 전부 URL 로 주입한다 — 카탈로그(/api/studio/sheet·net)와
@@ -55,8 +63,9 @@ export default function StudioCustomizer({ name, sheets, netUrl, sheetUrlTemplat
   const dragRef = useRef<{ el: SVGGraphicsElement; dx: number; dy: number } | null>(null);
   const [ready, setReady] = useState(false);
   const [error, setError] = useState("");
-  const [mode, setMode] = useState<"color" | "erase" | "text" | null>("color");
+  const [mode, setMode] = useState<"color" | "erase" | "text" | "sticker" | null>("color");
   const [color, setColor] = useState(PALETTE[0]);
+  const [sticker, setSticker] = useState(STICKERS[0]);
   const [text, setText] = useState("");
   const [textSize, setTextSize] = useState(8);
   const [scale, setScale] = useState(100);
@@ -248,6 +257,13 @@ export default function StudioCustomizer({ name, sheets, netUrl, sheetUrlTemplat
       const mm = toMM(svg, e.clientX, e.clientY);
       if (!mm) return;
       addText(svg, sheet, { sheet, x: mm.x, y: mm.y, size: textSize, str: text.trim(), color });
+      return;
+    }
+    // 스티커 붙이기 (이모지 텍스트 데코 — 이동·삭제는 글자와 동일)
+    if (mode === "sticker") {
+      const mm = toMM(svg, e.clientX, e.clientY);
+      if (!mm) return;
+      addText(svg, sheet, { sheet, x: mm.x, y: mm.y, size: 12, str: sticker, color });
     }
   };
 
@@ -295,67 +311,91 @@ export default function StudioCustomizer({ name, sheets, netUrl, sheetUrlTemplat
     location.reload();
   };
 
-  const chip = (active: boolean) =>
-    `px-3 py-1.5 rounded-full text-sm border transition-colors ${
-      active ? "bg-slate-900 text-white border-slate-900"
-             : "bg-white text-slate-600 border-slate-300 hover:bg-slate-50"}`;
+  // 아동 친화 도구 버튼 — 이모지 아이콘+큰 터치 목표(44px+), 선택 시 파란 배경
+  const tool = (active: boolean) =>
+    `inline-flex items-center gap-1.5 rounded-2xl border-2 px-4 py-2.5 text-base font-semibold transition-colors ${
+      active ? "bg-[var(--pe-blue,#1a73e8)] text-white border-[var(--pe-blue,#1a73e8)]"
+             : "bg-white text-slate-700 border-slate-200 hover:border-slate-400"}`;
 
   return (
     <div>
       {/* ── 도구막대 (인쇄 시 숨김) ── */}
-      <div className="pc-toolbar sticky top-2 z-10 rounded-2xl border border-slate-200 bg-white/95 backdrop-blur p-3 space-y-2 shadow-sm">
+      <div className="pc-toolbar sticky top-2 z-10 rounded-2xl border border-slate-200 bg-white/95 backdrop-blur p-3 space-y-2.5 shadow-sm">
         <div className="flex flex-wrap items-center gap-2">
-          <button type="button" className={chip(mode === "color")} data-track="studio_custom_mode_color"
-                  onClick={() => setMode("color")}>색칠</button>
-          <button type="button" className={chip(mode === "erase")} data-track="studio_custom_mode_erase"
-                  onClick={() => setMode("erase")}>색 지우기</button>
-          <button type="button" className={chip(mode === "text")} data-track="studio_custom_mode_text"
-                  onClick={() => setMode("text")}>글자</button>
-          <label className={chip(false) + " cursor-pointer"} data-track="studio_custom_logo">
-            로고/그림<input type="file" accept="image/png,image/jpeg" className="hidden" onChange={onLogoFile}/>
+          <button type="button" className={tool(mode === "color")} data-track="studio_custom_mode_color"
+                  onClick={() => setMode("color")}>🎨 색칠</button>
+          <button type="button" className={tool(mode === "erase")} data-track="studio_custom_mode_erase"
+                  onClick={() => setMode("erase")}>🧽 지우개</button>
+          <button type="button" className={tool(mode === "sticker")} data-track="studio_custom_mode_sticker"
+                  onClick={() => setMode("sticker")}>⭐ 스티커</button>
+          <button type="button" className={tool(mode === "text")} data-track="studio_custom_mode_text"
+                  onClick={() => setMode("text")}>✏️ 글자</button>
+          <label className={tool(false) + " cursor-pointer"} data-track="studio_custom_logo">
+            🖼️ 사진<input type="file" accept="image/png,image/jpeg" className="hidden" onChange={onLogoFile}/>
           </label>
-          <span className="mx-1 h-5 w-px bg-slate-200" />
-          {PALETTE.map((c) => (
-            <button key={c} type="button" aria-label={`색 ${c}`}
-                    onClick={() => { setColor(c); setMode("color"); }}
-                    className="h-6 w-6 rounded-full border"
-                    style={{ background: c, outline: color === c ? "2px solid #0f172a" : "none", outlineOffset: 1 }} />
-          ))}
         </div>
+
+        {/* 모드별 재료 선택 줄 */}
+        {(mode === "color" || mode === "erase" || mode === "text") && (
+          <div className="flex flex-wrap items-center gap-2">
+            {PALETTE.map((c) => (
+              <button key={c} type="button" aria-label={`색 ${c}`}
+                      onClick={() => { setColor(c); if (mode === "erase") setMode("color"); }}
+                      className="h-9 w-9 rounded-full border-2 border-white shadow"
+                      style={{ background: c, outline: color === c ? "3px solid #0f172a" : "none", outlineOffset: 1 }} />
+            ))}
+          </div>
+        )}
+        {mode === "sticker" && (
+          <div className="flex flex-wrap items-center gap-1.5">
+            {STICKERS.map((s) => (
+              <button key={s} type="button" aria-label={`스티커 ${s}`}
+                      onClick={() => setSticker(s)}
+                      className={`h-11 w-11 rounded-xl text-2xl leading-none transition-transform ${
+                        sticker === s ? "bg-blue-50 ring-2 ring-[var(--pe-blue,#1a73e8)] scale-110" : "hover:bg-slate-50"}`}>
+                {s}
+              </button>
+            ))}
+          </div>
+        )}
+        {mode === "text" && (
+          <div className="flex flex-wrap items-center gap-3 text-sm">
+            <input value={text} onChange={(e) => setText(e.target.value)}
+                   placeholder="넣을 글자를 여기에 써요"
+                   className="rounded-xl border-2 border-slate-200 px-3 py-2 w-56 text-base" />
+            <label className="flex items-center gap-1.5 text-slate-600">
+              글자 크기 <input type="range" min={4} max={20} value={textSize}
+                          onChange={(e) => setTextSize(Number(e.target.value))} /> {textSize}mm
+            </label>
+          </div>
+        )}
+
+        {/* 지금 할 일 안내 — 아동용 단계 문구 */}
+        <p className="rounded-xl bg-amber-50 border border-amber-200 px-3 py-2 text-sm text-amber-900 font-medium"
+           style={{ wordBreak: "keep-all" }}>
+          👉 {mode ? HINTS[mode] : "위에서 도구를 골라요"} · 붙인 것은 손으로 끌어 옮기고,
+          두 번 콕콕! 누르면 사라져요.
+        </p>
+
         <div className="flex flex-wrap items-center gap-3 text-sm">
-          {mode === "text" && (
-            <>
-              <input value={text} onChange={(e) => setText(e.target.value)}
-                     placeholder="넣을 글자 입력 후 도면 클릭"
-                     className="rounded-lg border border-slate-300 px-3 py-1.5 w-52" />
-              <label className="flex items-center gap-1 text-slate-600">
-                크기 <input type="range" min={4} max={20} value={textSize}
-                            onChange={(e) => setTextSize(Number(e.target.value))} /> {textSize}mm
-              </label>
-            </>
-          )}
-          <label className="flex items-center gap-1 text-slate-600">
-            크기 <input type="range" min={50} max={100} value={scale} data-track="studio_custom_scale"
+          <button type="button" data-track={`studio_custom_print:${trackId}`}
+                  onClick={() => window.print()}
+                  className="rounded-2xl bg-emerald-600 px-6 py-2.5 text-base text-white font-bold hover:opacity-90">
+            🖨️ 인쇄하기
+          </button>
+          <label className="flex items-center gap-1.5 text-slate-600">
+            인쇄 크기 <input type="range" min={50} max={100} value={scale} data-track="studio_custom_scale"
                         onChange={(e) => { const v = Number(e.target.value); setScale(v); applyScale(v); persist(); }} />
             {scale}%
           </label>
-          <button type="button" data-track={`studio_custom_print:${trackId}`}
-                  onClick={() => window.print()}
-                  className="rounded-xl bg-[var(--pe-blue,#1a73e8)] px-4 py-2 text-white font-semibold hover:opacity-90">
-            인쇄하기
-          </button>
           <button type="button" onClick={resetAll} data-track="studio_custom_reset"
                   className="rounded-xl border border-slate-300 px-3 py-2 text-slate-600 hover:bg-slate-50">
             처음부터
           </button>
           <span className="text-xs text-slate-400">
-            {savedAt ? `자동 저장됨 ${savedAt} (이 브라우저)` : "변경하면 자동 저장돼요"}
+            {savedAt ? `자동 저장됨 ${savedAt} (이 브라우저)` : "바꾸면 저절로 저장돼요"}
           </span>
         </div>
-        <p className="text-xs text-slate-500" style={{ wordBreak: "keep-all" }}>
-          부품을 클릭해 칠하고, 글자·로고는 끌어서 옮기고 두 번 클릭하면 지워져요.
-          크기를 줄이면(50~100%) 배치는 그대로 축소 인쇄됩니다 — 더 크게는 데스크톱 앱에서.
-        </p>
       </div>
 
       {/* ── 시트 캔버스 ── */}

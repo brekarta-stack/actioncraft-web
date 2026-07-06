@@ -38,6 +38,7 @@ export default function StudioClassBuilder({ items }: { items: ClassItem[] }) {
   const [rows, setRows] = useState<Row[]>([]);
   const [pdfBusy, setPdfBusy] = useState(false);
   const [notice, setNotice] = useState("");
+  const [catSel, setCatSel] = useState("");
   const [addSel, setAddSel] = useState("");
   const loaded = useRef(false);
 
@@ -154,25 +155,40 @@ export default function StudioClassBuilder({ items }: { items: ClassItem[] }) {
     <div className="grid gap-6 lg:grid-cols-[1fr_320px] items-start">
       <div>
         <div className="rounded-2xl border border-slate-200 bg-white p-4">
-          <div className="flex flex-wrap items-end gap-3">
-            <label className="grow">
-              <span className="block text-sm font-semibold text-slate-700 mb-1.5">
-                모형 추가
-              </span>
+          {/* 탐색 동선: 분류 먼저 고르면 모형 목록이 그 분류로 좁혀진다 (124종 한 줄 셀렉트는 못 찾음) */}
+          <div className="grid gap-3 sm:grid-cols-[minmax(9rem,auto)_1fr_auto] sm:items-end">
+            <label>
+              <span className="block text-sm font-semibold text-slate-700 mb-1.5">분류</span>
+              <select
+                value={catSel}
+                onChange={(e) => {
+                  setCatSel(e.target.value);
+                  setAddSel("");
+                }}
+                data-track="studio_class_cat"
+                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+              >
+                <option value="">— 분류 —</option>
+                {categories.map(([cat, list]) => (
+                  <option key={cat} value={cat}>
+                    {cat} ({list.length})
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label>
+              <span className="block text-sm font-semibold text-slate-700 mb-1.5">모형</span>
               <select
                 value={addSel}
                 onChange={(e) => setAddSel(e.target.value)}
-                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+                disabled={!catSel}
+                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm disabled:bg-slate-50 disabled:text-slate-400"
               >
-                <option value="">— 모형을 고르세요 —</option>
-                {categories.map(([cat, list]) => (
-                  <optgroup key={cat} label={cat}>
-                    {list.map((it) => (
-                      <option key={it.skey} value={it.skey} disabled={rows.some((r) => r.skey === it.skey)}>
-                        {it.name_ko} · {starsLabel(it.stars)} · A4 {it.pdf_pages}장
-                      </option>
-                    ))}
-                  </optgroup>
+                <option value="">{catSel ? "— 모형을 고르세요 —" : "분류를 먼저 고르세요"}</option>
+                {(categories.find(([c]) => c === catSel)?.[1] ?? []).map((it) => (
+                  <option key={it.skey} value={it.skey} disabled={rows.some((r) => r.skey === it.skey)}>
+                    {it.name_ko} · {starsLabel(it.stars)} · A4 {it.pdf_pages}장
+                  </option>
                 ))}
               </select>
             </label>
@@ -219,6 +235,13 @@ export default function StudioClassBuilder({ items }: { items: ClassItem[] }) {
                       {starsLabel(it.stars)} · A4 {it.pdf_pages}장/명 · 약 {it.est_minutes}분
                     </div>
                   </div>
+                  <Link
+                    href={`/studio/${it.skey}/custom`}
+                    data-track={`studio_class_custom:${it.skey}`}
+                    className="inline-flex items-center gap-1 rounded-xl border-2 border-[var(--pe-blue,#1a73e8)] px-3 py-1.5 text-sm font-semibold text-[var(--pe-blue,#1a73e8)] hover:bg-blue-50 whitespace-nowrap"
+                  >
+                    🎨 꾸미기
+                  </Link>
                   <label className="flex items-center gap-1.5 text-sm">
                     <span className="text-slate-500">수량</span>
                     <input
