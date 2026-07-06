@@ -243,6 +243,14 @@ function UploadResult({ job, meta }: { job: string; meta: DoneMeta }) {
             실제 크기(100%)로 인쇄하세요. 실선은 자르고, 점선은 접고, 같은
             번호끼리 풀로 붙입니다. 결과는 7일 동안 보관돼요.
           </p>
+          {meta.buildable === false && (
+            <p className="mt-2 rounded-lg bg-amber-50 border border-amber-200 px-3 py-2 text-xs text-amber-800"
+               style={{ wordBreak: "keep-all" }}>
+            이 모델은 일부 이음에 붙임 날개가 들어가지 않았어요. 그 자리는
+            두 조각의 모서리를 맞대어 붙여 주세요. 난이도를 낮추면 줄어들
+            수 있어요.
+            </p>
+          )}
         </div>
       </div>
       <section className="mt-10">
