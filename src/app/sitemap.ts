@@ -3,6 +3,7 @@ import { getPosts } from "@/lib/blog";
 import { getItems } from "@/lib/portfolio";
 import { deriveSlug } from "@/lib/portfolio-meta";
 import { SITE_URL } from "@/lib/site";
+import { STUDIO_ITEMS } from "@/lib/studio";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const base = SITE_URL;
@@ -32,6 +33,19 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: "monthly" as const,
     }));
 
+  // 종이모형 스튜디오 — 목록+상세 125페이지는 색인 허용(도구 페이지
+  // upload/class/custom 은 noindex 라 제외). 네이버는 사이트맵 등록 URL 만
+  // 성실히 수집하므로 여기 빠지면 발견이 크게 늦는다.
+  const studioPages: MetadataRoute.Sitemap = [
+    { url: `${base}/studio`, lastModified: now, priority: 0.9, changeFrequency: "weekly" as const },
+    ...STUDIO_ITEMS.map((i) => ({
+      url: `${base}/studio/${i.skey}`,
+      lastModified: now,
+      priority: 0.7,
+      changeFrequency: "monthly" as const,
+    })),
+  ];
+
   const allCases = await getItems().catch(() => []);
   const portfolioPages: MetadataRoute.Sitemap = allCases
     .filter((c) => c.published)
@@ -42,5 +56,5 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: "monthly" as const,
     }));
 
-  return [...staticPages, ...blogPages, ...portfolioPages];
+  return [...staticPages, ...studioPages, ...blogPages, ...portfolioPages];
 }
