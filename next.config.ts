@@ -76,6 +76,7 @@ const nextConfig: NextConfig = {
     "/api/studio/pdf/[key]": ["./content-private/studio/**/*"],
     "/api/studio/sheet/[key]/[n]": ["./content-private/studio/**/*"],
     "/api/studio/net/[key]": ["./content-private/studio/**/*"],
+    "/api/studio/class/pdf": ["./content-private/studio/**/*"],
   },
 
   /**

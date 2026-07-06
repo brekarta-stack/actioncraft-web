@@ -25,15 +25,19 @@ export function paidGateResponse(): NextResponse | null {
   return null;
 }
 
+export function privateFilePath(item: StudioItem, filename: string): string {
+  return path.join(
+    process.cwd(), "content-private", "studio", STUDIO_VER, item.skey, filename,
+  );
+}
+
 export async function servePrivateFile(
   item: StudioItem,
   filename: string,
   contentType: string,
   disposition?: string,
 ): Promise<NextResponse> {
-  const file = path.join(
-    process.cwd(), "content-private", "studio", STUDIO_VER, item.skey, filename,
-  );
+  const file = privateFilePath(item, filename);
   let buf: Buffer;
   try {
     buf = await fs.readFile(file);

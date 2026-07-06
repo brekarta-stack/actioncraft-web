@@ -10,6 +10,7 @@ import { notFound } from "next/navigation";
 import { preload } from "react-dom";
 import StudioViewer from "@/components/StudioViewer";
 import StudioSheets from "@/components/StudioSheets";
+import StudioClassAdd from "@/components/StudioClassAdd";
 import { getStudioItem, starsLabel, studioAsset, STUDIO_ITEMS, STUDIO_PAPER } from "@/lib/studio";
 import { SITE_NAME } from "@/lib/site";
 
@@ -85,7 +86,8 @@ export default async function StudioDetailPage({ params }: Props) {
             <div>
               <dt className="text-slate-500">인쇄 장수</dt>
               <dd className="font-semibold tabular-nums">
-                {STUDIO_PAPER} {item.pages}장
+                {STUDIO_PAPER} {item.pdf_pages}장
+                <span className="ml-1 text-xs font-normal text-slate-400">조립 안내 포함</span>
               </dd>
             </div>
             <div>
@@ -117,6 +119,7 @@ export default async function StudioDetailPage({ params }: Props) {
             >
               웹에서 꾸미기 (베타)
             </Link>
+            <StudioClassAdd skey={item.skey} />
           </div>
           <p className="mt-2 text-xs text-slate-500" style={{ wordBreak: "keep-all" }}>
             베타 기간 무료 · 실제 크기(100%)로 인쇄하세요. 실선은 자르고, 점선은 접고,

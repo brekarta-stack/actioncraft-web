@@ -18,6 +18,7 @@ interface DoneMeta {
   name_ko?: string;
   pieces?: number;
   pages?: number;
+  pdf_pages?: number;
   finished_mm?: number;
   stars?: number;
   est_minutes?: number;
@@ -217,7 +218,9 @@ function UploadResult({ job, meta }: { job: string; meta: DoneMeta }) {
             </div>
             <div>
               <dt className="text-slate-500">인쇄 장수</dt>
-              <dd className="font-semibold tabular-nums">A4 {meta.pages ?? "-"}장</dd>
+              <dd className="font-semibold tabular-nums">
+                A4 {meta.pdf_pages || meta.pages || "-"}장
+              </dd>
             </div>
             <div>
               <dt className="text-slate-500">완성 크기</dt>

@@ -19,7 +19,8 @@ export interface StudioItem {
   name_ko: string;
   category: string;
   pieces: number;
-  pages: number;
+  pages: number;      // 도면 시트 수 (미리보기 페이저와 일치)
+  pdf_pages: number;  // 실제 인쇄 장수 = PDF 페이지 수 (도면 + 조립 안내)
   finished_mm: number;
   stars: number;      // 난이도 1~5
   est_minutes: number;

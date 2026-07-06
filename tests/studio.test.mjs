@@ -22,7 +22,7 @@ test("index.json: 항목 수(큐레이션 20 이상)와 필수 필드", () => {
   assert.ok(idx.items.length >= 20, `items ${idx.items.length} < 20`);
   for (const it of idx.items) {
     for (const field of ["key", "skey", "name_ko", "category", "pieces", "pages",
-                         "finished_mm", "stars", "est_minutes", "svg_sheets"]) {
+                         "pdf_pages", "finished_mm", "stars", "est_minutes", "svg_sheets"]) {
       assert.ok(field in it, `${it.key ?? "?"}: ${field} 누락`);
     }
     assert.match(it.skey, /^[a-z0-9_]+$/, `skey 형식: ${it.skey}`);

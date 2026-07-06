@@ -113,7 +113,7 @@ export default function StudioCatalog({ items }: { items: StudioItem[] }) {
                   {it.name_ko}
                 </div>
                 <div className="mt-1 text-xs text-slate-500 tabular-nums">
-                  조각 {it.pieces} · A4 {it.pages}장 ·{" "}
+                  조각 {it.pieces} · A4 {it.pdf_pages}장 ·{" "}
                   <span className="text-amber-500" aria-label={`난이도 ${it.stars}단계`}>
                     {starsLabel(it.stars)}
                   </span>
