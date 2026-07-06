@@ -37,8 +37,18 @@ const SVGNS = "http://www.w3.org/2000/svg";
 const PALETTE = ["#e5484d", "#f76b15", "#ffc53d", "#46a758", "#00a2c7",
                  "#3e63dd", "#8e4ec6", "#e93d82", "#8d6e63", "#607d8b"];
 
-export default function StudioCustomizer({ skey, name, sheets }: {
-  skey: string; name: string; sheets: number;
+/**
+ * 데이터 소스는 전부 URL 로 주입한다 — 카탈로그(/api/studio/sheet·net)와
+ * 업로드 결과(/api/studio/job/<id>/file/…)가 같은 에디터를 쓴다.
+ * sheetUrlTemplate 의 "{n}" 이 시트 번호(1..sheets)로 치환된다.
+ */
+export default function StudioCustomizer({ name, sheets, netUrl, sheetUrlTemplate, storageKey, trackId }: {
+  name: string;
+  sheets: number;
+  netUrl: string;
+  sheetUrlTemplate: string;
+  storageKey: string;
+  trackId: string;
 }) {
   const hostRef = useRef<HTMLDivElement>(null);
   const stateRef = useRef<SavedState>({ fills: {}, texts: [], images: [], scale: 100 });
@@ -51,7 +61,6 @@ export default function StudioCustomizer({ skey, name, sheets }: {
   const [textSize, setTextSize] = useState(8);
   const [scale, setScale] = useState(100);
   const [savedAt, setSavedAt] = useState("");
-  const storageKey = `studio_custom_${skey}`;
 
   /* mm 좌표 변환: 클릭 지점 → 해당 시트 SVG 의 사용자 좌표(mm) */
   const toMM = (svg: SVGSVGElement, clientX: number, clientY: number) => {
@@ -133,13 +142,13 @@ export default function StudioCustomizer({ skey, name, sheets }: {
     let alive = true;
     (async () => {
       try {
-        const netRes = await fetch(`/api/studio/net/${skey}`);
+        const netRes = await fetch(netUrl);
         if (!netRes.ok) throw new Error("도면 데이터를 불러오지 못했습니다.");
         const net: NetJson = await netRes.json();
         const [mlx, mty] = net.metadata?.margin_mm ?? [11.3, 25.4];
         const svgs: string[] = [];
         for (let n = 1; n <= sheets; n++) {
-          const r = await fetch(`/api/studio/sheet/${skey}/${n}`);
+          const r = await fetch(sheetUrlTemplate.replace("{n}", String(n)));
           if (!r.ok) throw new Error(`시트 ${n}을 불러오지 못했습니다.`);
           svgs.push(await r.text());
         }
@@ -206,7 +215,7 @@ export default function StudioCustomizer({ skey, name, sheets }: {
       }
     })();
     return () => { alive = false; };
-  }, [skey, sheets, storageKey, applyFill, addText, addImage, applyScale]);
+  }, [netUrl, sheetUrlTemplate, sheets, storageKey, applyFill, addText, addImage, applyScale]);
 
   /* ── 시트 클릭/드래그 (색칠·글자 배치·장식 이동/삭제) ── */
   const onPointerDown = (e: React.PointerEvent) => {
@@ -330,7 +339,7 @@ export default function StudioCustomizer({ skey, name, sheets }: {
                         onChange={(e) => { const v = Number(e.target.value); setScale(v); applyScale(v); persist(); }} />
             {scale}%
           </label>
-          <button type="button" data-track={`studio_custom_print:${skey}`}
+          <button type="button" data-track={`studio_custom_print:${trackId}`}
                   onClick={() => window.print()}
                   className="rounded-xl bg-[var(--pe-blue,#1a73e8)] px-4 py-2 text-white font-semibold hover:opacity-90">
             인쇄하기

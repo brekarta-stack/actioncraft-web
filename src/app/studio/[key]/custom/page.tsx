@@ -45,7 +45,14 @@ export default async function StudioCustomPage({ params }: Props) {
       <h1 className="pc-hide-print text-2xl font-bold mb-4" style={{ wordBreak: "keep-all" }}>
         {item.name_ko} 꾸미기
       </h1>
-      <StudioCustomizer skey={item.skey} name={item.name_ko} sheets={item.svg_sheets} />
+      <StudioCustomizer
+        name={item.name_ko}
+        sheets={item.svg_sheets}
+        netUrl={`/api/studio/net/${item.skey}`}
+        sheetUrlTemplate={`/api/studio/sheet/${item.skey}/{n}`}
+        storageKey={`studio_custom_${item.skey}`}
+        trackId={item.skey}
+      />
     </main>
   );
 }

@@ -233,13 +233,20 @@ function UploadResult({ job, meta }: { job: string; meta: DoneMeta }) {
               <dd className="font-semibold tabular-nums">약 {meta.est_minutes ?? "-"}분</dd>
             </div>
           </dl>
-          <div className="mt-6">
+          <div className="mt-6 flex flex-wrap gap-3">
             <a
               href={`${base}/print.pdf`}
               data-track="studio_upload_pdf"
               className="inline-flex items-center justify-center rounded-xl bg-[var(--pe-blue,#1a73e8)] px-6 py-3 text-white font-semibold hover:opacity-90"
             >
               인쇄용 PDF 내려받기
+            </a>
+            <a
+              href={`/studio/upload/custom?job=${job}`}
+              data-track="studio_upload_custom"
+              className="inline-flex items-center justify-center rounded-xl border-2 border-[var(--pe-blue,#1a73e8)] px-6 py-3 text-[var(--pe-blue,#1a73e8)] font-semibold hover:bg-blue-50"
+            >
+              웹에서 꾸미기 (베타)
             </a>
           </div>
           <p className="mt-2 text-xs text-slate-500" style={{ wordBreak: "keep-all" }}>
