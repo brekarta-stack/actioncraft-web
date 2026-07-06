@@ -11,6 +11,7 @@ import { COMPANY, SITE_NAME, SITE_URL, BRAND_TAGLINE_KR } from "@/lib/site";
 import { getPosts } from "@/lib/blog";
 import { getItems } from "@/lib/portfolio";
 import { deriveSlug } from "@/lib/portfolio-meta";
+import { STUDIO_ITEMS } from "@/lib/studio";
 
 // 1시간 캐시 (콘텐츠가 자주 바뀌지 않음)
 export const revalidate = 3600;
@@ -61,10 +62,12 @@ export async function GET() {
 - 디자인 미보유 의뢰 가능: 컨셉만 있어도 캐릭터·구조 기획부터 원스톱 진행
 - 친환경 소재 가능: FSC 인증지, 재생지, 콩기름 잉크
 - 무료 배포 프로그램: '페이퍼크래프트 스튜디오'(사진/3D를 종이 전개도로 변환, Windows 무설치) — ${SITE_URL}/download
+- 무료 웹 종이모형 카탈로그: 브라우저에서 바로 3D로 미리 보고 인쇄용 PDF 도안을 내려받는 '종이모형 스튜디오' ${STUDIO_ITEMS.length}종(탈것·공룡·육지동물·바다생물·곤충·식물·인기 캐릭터·세계/한국 건축물) — 무료·회원가입 불필요 — ${SITE_URL}/studio
 
 ## 주요 페이지
 - 회사 소개: ${SITE_URL}/about
 - 주문 제작 서비스: ${SITE_URL}/products
+- 종이모형 스튜디오(무료 3D 미리보기 + 인쇄 PDF 도안 ${STUDIO_ITEMS.length}종): ${SITE_URL}/studio
 - 납품 사례: ${SITE_URL}/portfolio
 - 블로그(페이퍼 엔지니어링 지식): ${SITE_URL}/blog
 - 자주 묻는 질문: ${SITE_URL}/faq

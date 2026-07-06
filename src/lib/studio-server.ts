@@ -42,14 +42,19 @@ export async function servePrivateFile(
   try {
     buf = await fs.readFile(file);
   } catch {
-    console.error(`[studio] missing private file: ${file}`);
-    return NextResponse.json({ error: "파일을 찾지 못했습니다." }, { status: 500 });
+    // 화이트리스트 통과 key 인데 파일이 없으면 404(부재/500 구분으로 열거 힌트 방지).
+    // 로그엔 절대경로 대신 skey/파일명만 — 서버 파일시스템 구조 노출 방지.
+    console.error(`[studio] missing private file: ${item.skey}/${filename}`);
+    return NextResponse.json({ error: "파일을 찾지 못했습니다." }, { status: 404 });
   }
+  // SVG 는 스크립트를 품을 수 있어(same-origin 렌더 시 XSS 경로) 엄격 CSP 를 개별 부여.
+  const isSvg = contentType.includes("svg");
   return new NextResponse(new Uint8Array(buf), {
     headers: {
       "Content-Type": contentType,
       "Content-Length": String(buf.byteLength),
       ...(disposition ? { "Content-Disposition": disposition } : {}),
+      ...(isSvg ? { "Content-Security-Policy": "default-src 'none'; style-src 'unsafe-inline'; img-src data:" } : {}),
       "Cache-Control": "private, max-age=0",
       "X-Robots-Tag": "noindex",
     },

@@ -8,6 +8,7 @@ const navLinks = [
   { href: "/", label: "홈" },
   { href: "/about", label: "회사소개" },
   { href: "/products", label: "주문 제작" },
+  { href: "/studio", label: "종이모형" },
   { href: "/portfolio", label: "납품 사례" },
   { href: "/download", label: "다운로드" },
   { href: "/blog", label: "블로그" },

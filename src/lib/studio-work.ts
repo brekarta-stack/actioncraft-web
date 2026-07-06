@@ -74,13 +74,30 @@ export function workerSecretOk(header: string | null): boolean {
   return timingSafeEqual(a, b);
 }
 
-/** 개인정보를 남기지 않도록 IP 는 시크릿 솔트로 해시한 앞 16자만 저장. */
+/**
+ * 신뢰 가능한 클라이언트 IP — Vercel 이 직접 채우는 헤더만 신뢰한다.
+ * `x-forwarded-for` 의 맨 앞 값은 클라이언트가 임의로 덧붙일 수 있어(스푸핑),
+ * rate-limit 키로 쓰면 IP당 한도를 무력화한다. Vercel 은 실제 접속 IP 를
+ * `x-vercel-forwarded-for` / `x-real-ip` 에 단일 값으로 넣어 주므로 그것을 쓰고,
+ * x-forwarded-for 는 최후의 폴백으로 '마지막'(프록시가 덧붙인) 값만 취한다.
+ */
+function clientIp(req: Request): string {
+  const vercel = req.headers.get("x-vercel-forwarded-for");
+  if (vercel) return vercel.split(",")[0].trim();
+  const real = req.headers.get("x-real-ip");
+  if (real) return real.trim();
+  const xff = (req.headers.get("x-forwarded-for") ?? "").split(",").map((s) => s.trim()).filter(Boolean);
+  return xff.length ? xff[xff.length - 1] : "0.0.0.0"; // 클라이언트가 덧붙일 수 없는 '마지막' 값
+}
+
+/**
+ * 개인정보를 남기지 않도록 IP 는 솔트로 해시한 앞 16자만 저장.
+ * 솔트는 인증 시크릿과 분리(전용 STUDIO_IP_SALT) — 인증 시크릿이 새더라도
+ * IP 익명화(해시 역추적 방어)가 함께 무너지지 않도록.
+ */
 export function ipHash(req: Request): string {
-  const ip =
-    (req.headers.get("x-forwarded-for") ?? "").split(",")[0].trim() ||
-    req.headers.get("x-real-ip") ||
-    "0.0.0.0";
-  const salt = process.env.STUDIO_WORKER_SECRET || process.env.BLOG_PUBLISH_SECRET || "pc";
+  const ip = clientIp(req);
+  const salt = process.env.STUDIO_IP_SALT || "papercraft-studio-ip-salt-v1";
   return createHash("sha256").update(`${salt}:${ip}`).digest("hex").slice(0, 16);
 }
 

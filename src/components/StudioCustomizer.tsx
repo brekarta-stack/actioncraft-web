@@ -345,6 +345,9 @@ export default function StudioCustomizer({ name, sheets, netUrl, sheetUrlTemplat
       const y = Number(decoEl.getAttribute("y") || 0);
       dragRef.current = { id, dx: mm.x - x, dy: mm.y - y, moved: false };
       pushHistory();                         // 이동/삭제 전 상태 기록
+      // 포인터를 데코에 고정 — 세로 드래그가 시트의 pan-y 스크롤로 새지 않게 한다
+      // (.pc-deco 는 touch-action:none). 캡처는 pointerup 에서 자동 해제.
+      try { decoEl.setPointerCapture(e.pointerId); } catch {}
       e.preventDefault();
       return;
     }
@@ -602,7 +605,9 @@ export default function StudioCustomizer({ name, sheets, netUrl, sheetUrlTemplat
       <style>{`
         .pc-sheets .pc-sheet { box-shadow: 0 2px 14px rgba(15,23,42,.12); border-radius: 8px; overflow: hidden; }
         .pc-sheets svg.pc-sheet-svg { display: block; width: 100%; height: auto; touch-action: pan-y; }
-        .pc-deco.pc-sel { outline: none; filter: drop-shadow(0 0 1.4px #1a73e8) drop-shadow(0 0 1.4px #1a73e8); }
+        /* 데코 위에서 시작한 터치는 스크롤이 아니라 드래그 — 세로 이동이 스크롤로 새지 않게 */
+        .pc-sheets svg.pc-sheet-svg .pc-deco { touch-action: none; }
+        .pc-deco.pc-sel { outline: none; filter: drop-shadow(0 0 1.4px #1E22B2) drop-shadow(0 0 1.4px #1E22B2); }
         @media print {
           header, footer, nav, .pc-toolbar, .pc-hide-print { display: none !important; }
           .pc-sheets { margin: 0 !important; }

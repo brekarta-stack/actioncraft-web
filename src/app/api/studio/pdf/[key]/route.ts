@@ -10,9 +10,31 @@
 
 import { NextResponse } from "next/server";
 import { paidGateResponse, resolveStudioItem, servePrivateFile } from "@/lib/studio-server";
+import { ensureBucket, getJson, ipHash, putJson } from "@/lib/studio-work";
+
+export const runtime = "nodejs";
+
+// 유료 자산(PDF 원본) 대량 수집 방지 — 넉넉한 상한이라 정상 사용(개별 몇 건)에는 무영향.
+const PDF_RATE_LIMIT_PER_DAY = 60;
+
+/** 최선노력 rate-limit(fail-open) — index.json 이 전 skey 를 공개하므로 순차 스크래핑 억제용. */
+async function pdfRateLimited(request: Request): Promise<boolean> {
+  try {
+    await ensureBucket();
+    const ip = ipHash(request);
+    const day = new Date().toISOString().slice(0, 10).replaceAll("-", "");
+    const ratePath = `ratelimit/pdf/${day}/${ip}.json`;
+    const rate = (await getJson<{ n: number }>(ratePath)) ?? { n: 0 };
+    if (rate.n >= PDF_RATE_LIMIT_PER_DAY) return true;
+    await putJson(ratePath, { n: rate.n + 1 });
+    return false;
+  } catch {
+    return false;
+  }
+}
 
 export async function GET(
-  _request: Request,
+  request: Request,
   { params }: { params: Promise<{ key: string }> },
 ) {
   const { key } = await params;
@@ -22,6 +44,13 @@ export async function GET(
   }
   const gate = paidGateResponse();
   if (gate) return gate;
+
+  if (await pdfRateLimited(request)) {
+    return NextResponse.json(
+      { error: `오늘은 여기까지예요. 도안 다운로드는 하루 ${PDF_RATE_LIMIT_PER_DAY}건까지입니다.` },
+      { status: 429 },
+    );
+  }
 
   const filename = encodeURIComponent(`${item.name_ko} 종이모형 (papercraft.kr).pdf`);
   return servePrivateFile(item, "print.pdf", "application/pdf",

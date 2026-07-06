@@ -33,9 +33,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: "monthly" as const,
     }));
 
-  // 종이모형 스튜디오 — 목록+상세 125페이지는 색인 허용(도구 페이지
+  // 종이모형 스튜디오 — 목록 + 상세 STUDIO_ITEMS.length 종(도구 페이지
   // upload/class/custom 은 noindex 라 제외). 네이버는 사이트맵 등록 URL 만
-  // 성실히 수집하므로 여기 빠지면 발견이 크게 늦는다.
+  // 성실히 수집하므로 여기 빠지면 발견이 크게 늦는다. 카탈로그 증감은
+  // STUDIO_ITEMS 순회로 자동 반영된다(하드코딩 개수 없음).
   const studioPages: MetadataRoute.Sitemap = [
     { url: `${base}/studio`, lastModified: now, priority: 0.9, changeFrequency: "weekly" as const },
     ...STUDIO_ITEMS.map((i) => ({

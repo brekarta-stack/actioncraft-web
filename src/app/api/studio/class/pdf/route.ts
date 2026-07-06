@@ -15,13 +15,40 @@ import {
   CLASS_MAX_SHEETS,
 } from "@/lib/studio-class-shared.mjs";
 import { paidGateResponse, privateFilePath, resolveStudioItem } from "@/lib/studio-server";
+import { ensureBucket, getJson, ipHash, putJson } from "@/lib/studio-work";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
 
+// 미인증 라우트라 IP(해시)당 일일 상한으로 대량 병합 호출(메모리 DoS)을 막는다.
+const CLASS_PDF_RATE_LIMIT_PER_DAY = 30;
+
+/** 최선노력 rate-limit — 인프라 오류 시엔 통과(fail-open, 데이터 경계가 아닌 남용 방지용). */
+async function classPdfRateLimited(request: Request): Promise<boolean> {
+  try {
+    await ensureBucket();
+    const ip = ipHash(request);
+    const day = new Date().toISOString().slice(0, 10).replaceAll("-", "");
+    const ratePath = `ratelimit/classpdf/${day}/${ip}.json`;
+    const rate = (await getJson<{ n: number }>(ratePath)) ?? { n: 0 };
+    if (rate.n >= CLASS_PDF_RATE_LIMIT_PER_DAY) return true;
+    await putJson(ratePath, { n: rate.n + 1 });
+    return false;
+  } catch {
+    return false;
+  }
+}
+
 export async function POST(request: Request) {
   const gate = paidGateResponse();
   if (gate) return gate;
+
+  if (await classPdfRateLimited(request)) {
+    return NextResponse.json(
+      { error: `오늘은 여기까지예요. 묶음 인쇄는 하루 ${CLASS_PDF_RATE_LIMIT_PER_DAY}번까지 만들 수 있습니다.` },
+      { status: 429 },
+    );
+  }
 
   let body: { items?: Array<{ skey?: string; qty?: number }> };
   try {

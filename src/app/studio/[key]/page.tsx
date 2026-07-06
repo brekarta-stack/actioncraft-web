@@ -11,8 +11,63 @@ import { preload } from "react-dom";
 import StudioViewer from "@/components/StudioViewer";
 import StudioSheets from "@/components/StudioSheets";
 import StudioClassAdd from "@/components/StudioClassAdd";
+import type { StudioItem } from "@/lib/studio";
 import { getStudioItem, starsLabel, studioAsset, STUDIO_ITEMS, STUDIO_PAPER } from "@/lib/studio";
-import { SITE_NAME } from "@/lib/site";
+import { SITE_NAME, SITE_URL } from "@/lib/site";
+
+/** 상세 구조화 데이터 — CreativeWork(제품 속성) + BreadcrumbList(카테고리 경로). GEO/리치결과용. */
+function StudioJsonLd({ item }: { item: StudioItem }) {
+  const url = `${SITE_URL}/studio/${item.skey}`;
+  const creativeWork = {
+    "@context": "https://schema.org",
+    "@type": "CreativeWork",
+    "@id": url,
+    name: `${item.name_ko} 종이모형 도안`,
+    description:
+      `${item.name_ko} 종이모형 — 조각 ${item.pieces}개, ${STUDIO_PAPER} ${item.pages}장, ` +
+      `완성 약 ${Math.round(item.finished_mm)}mm. 3D 미리보기와 무료 인쇄 PDF 제공.`,
+    url,
+    image: `${SITE_URL}${studioAsset(item.skey, "thumb.png")}`,
+    inLanguage: "ko-KR",
+    genre: "종이공예 도안",
+    keywords: `${item.name_ko}, 종이공예, 페이퍼크래프트, 전개도, 도안, ${item.category}`,
+    isFamilyFriendly: true,
+    creator: { "@type": "Organization", name: SITE_NAME, url: SITE_URL },
+    about: item.category,
+    offers: { "@type": "Offer", price: "0", priceCurrency: "KRW", availability: "https://schema.org/InStock" },
+    additionalProperty: [
+      { "@type": "PropertyValue", name: "조각 수", value: item.pieces },
+      { "@type": "PropertyValue", name: "인쇄 장수", value: item.pdf_pages, unitText: "장" },
+      { "@type": "PropertyValue", name: "완성 크기", value: Math.round(item.finished_mm), unitText: "mm" },
+      { "@type": "PropertyValue", name: "난이도", value: `${Math.max(1, Math.min(5, item.stars))}/5` },
+    ],
+    totalTime: `PT${Math.max(1, item.est_minutes)}M`,
+    isPartOf: {
+      "@type": "CollectionPage",
+      name: "종이모형 스튜디오",
+      url: `${SITE_URL}/studio`,
+    },
+  };
+  const breadcrumb = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "홈", item: SITE_URL },
+      { "@type": "ListItem", position: 2, name: "종이모형 스튜디오", item: `${SITE_URL}/studio` },
+      { "@type": "ListItem", position: 3, name: item.name_ko, item: url },
+    ],
+  };
+  return (
+    <>
+      <script type="application/ld+json"
+        // eslint-disable-next-line react/no-danger
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(creativeWork) }} />
+      <script type="application/ld+json"
+        // eslint-disable-next-line react/no-danger
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumb) }} />
+    </>
+  );
+}
 
 interface Props {
   params: Promise<{ key: string }>;
@@ -59,6 +114,7 @@ export default async function StudioDetailPage({ params }: Props) {
 
   return (
     <main className="mx-auto max-w-5xl px-4 py-10">
+      <StudioJsonLd item={item} />
       <nav className="mb-6 text-sm text-slate-500">
         <Link href="/studio" className="hover:underline" data-track="studio_back_to_list">
           ← 종이모형 스튜디오

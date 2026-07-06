@@ -31,15 +31,35 @@ export const STUDIO_VER: string = catalog.engine;      // "v2.15.0"
 export const STUDIO_PAPER: string = catalog.paper;     // "A4"
 export const STUDIO_ITEMS: StudioItem[] = catalog.items as StudioItem[];
 
-/** 카테고리 표시 순서 (카탈로그에 있는 것만 노출) */
-const CATEGORY_ORDER = ["탈것", "동물", "공룡", "세계 건축물", "한국 건축물", "캐릭터·오브젝트"];
+/**
+ * 카테고리 표시 순서 — 카탈로그·상세·학급세트 전 화면의 단일 소스.
+ * 아동·학부모가 선호하는 순(탈것·공룡·동물류)을 앞에, 추상 도형을 맨 뒤에.
+ * 2026-07 동물 세분화(바다생물·육지동물·곤충·식물) + 인기 캐릭터 신설 반영.
+ */
+export const CATEGORY_ORDER = [
+  "탈것",
+  "공룡",
+  "인기 캐릭터",
+  "육지동물",
+  "바다생물",
+  "곤충",
+  "식물",
+  "세계 건축물",
+  "한국 건축물",
+  "캐릭터·오브젝트",
+  "도형",
+];
+
+/** items 에 실제 존재하는 카테고리를 CATEGORY_ORDER 순으로(모르는 건 뒤에) 반환 */
+export function orderedCategories(items: StudioItem[]): string[] {
+  const present = new Set(items.map((i) => i.category));
+  const known = CATEGORY_ORDER.filter((c) => present.has(c));
+  const rest = Array.from(present).filter((c) => !CATEGORY_ORDER.includes(c));
+  return [...known, ...rest];
+}
 
 export function itemsByCategory(): Array<{ category: string; items: StudioItem[] }> {
-  const known = CATEGORY_ORDER.filter((c) => STUDIO_ITEMS.some((i) => i.category === c));
-  const rest = Array.from(new Set(STUDIO_ITEMS.map((i) => i.category))).filter(
-    (c) => !CATEGORY_ORDER.includes(c),
-  );
-  return [...known, ...rest].map((category) => ({
+  return orderedCategories(STUDIO_ITEMS).map((category) => ({
     category,
     items: STUDIO_ITEMS.filter((i) => i.category === category),
   }));

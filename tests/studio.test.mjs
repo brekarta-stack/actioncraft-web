@@ -29,6 +29,19 @@ test("index.json: 항목 수(큐레이션 20 이상)와 필수 필드", () => {
   }
 });
 
+test("카테고리 택소노미: 동물 세분화 + 인기 캐릭터, '동물' 단일 카테고리 소멸", () => {
+  const counts = {};
+  for (const it of idx.items) counts[it.category] = (counts[it.category] ?? 0) + 1;
+  // 세분화 이전의 뭉뚱그린 '동물'은 남아 있으면 안 된다
+  assert.ok(!("동물" in counts), "'동물' 카테고리가 아직 남아 있음(세분화 미반영)");
+  // 세분화 카테고리는 각각 15종 이상
+  for (const cat of ["바다생물", "육지동물", "곤충", "식물"]) {
+    assert.ok((counts[cat] ?? 0) >= 15, `${cat} ${counts[cat] ?? 0} < 15`);
+  }
+  // 인기 캐릭터 신설(동물형 트렌디 캐릭터)
+  assert.ok((counts["인기 캐릭터"] ?? 0) >= 8, `인기 캐릭터 ${counts["인기 캐릭터"] ?? 0} < 8`);
+});
+
 test("공개 자산 실재: thumb·glb·meta·preview SVG 전 장", () => {
   for (const it of idx.items) {
     for (const f of ["thumb.png", "model.glb", "meta.json"]) {

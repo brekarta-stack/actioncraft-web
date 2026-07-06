@@ -149,7 +149,7 @@ export default function StudioUpload() {
             type="submit"
             disabled={busy}
             data-track="studio_upload_submit"
-            className="rounded-xl bg-[var(--pe-blue,#1a73e8)] px-6 py-2.5 text-white font-semibold hover:opacity-90 disabled:opacity-50"
+            className="rounded-xl bg-[var(--pe-blue,#1E22B2)] px-6 py-2.5 text-white font-semibold hover:opacity-90 disabled:opacity-50"
           >
             전개하기
           </button>
@@ -161,28 +161,31 @@ export default function StudioUpload() {
         </p>
       </form>
 
-      {phase.kind === "uploading" && <Progress text="파일을 올리는 중…" />}
-      {phase.kind === "queued" && (
-        <Progress text={`대기 중 — 앞에 ${Math.max(0, phase.position - 1)}건 (순번 ${phase.position})`} />
-      )}
-      {phase.kind === "running" && <Progress text="전개 중… 복잡한 모델은 몇 분 걸릴 수 있어요." />}
+      {/* 진행·결과 상태 변화를 스크린리더에 알림 — 폴링으로 시각만 바뀌던 문제 보완 */}
+      <div role="status" aria-live="polite" aria-atomic="true">
+        {phase.kind === "uploading" && <Progress text="파일을 올리는 중…" />}
+        {phase.kind === "queued" && (
+          <Progress text={`대기 중 — 앞에 ${Math.max(0, phase.position - 1)}건 (순번 ${phase.position})`} />
+        )}
+        {phase.kind === "running" && <Progress text="전개 중… 복잡한 모델은 몇 분 걸릴 수 있어요." />}
 
-      {(phase.kind === "failed" || phase.kind === "error") && (
-        <div className="mt-5 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700"
-             style={{ wordBreak: "keep-all" }}>
-          전개하지 못했습니다.
-          <div className="mt-1 font-medium">{phase.error}</div>
-        </div>
-      )}
+        {(phase.kind === "failed" || phase.kind === "error") && (
+          <div className="mt-5 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700"
+               style={{ wordBreak: "keep-all" }} aria-live="assertive">
+            전개하지 못했습니다.
+            <div className="mt-1 font-medium">{phase.error}</div>
+          </div>
+        )}
 
-      {phase.kind === "done" && <UploadResult job={phase.job} meta={phase.meta} />}
+        {phase.kind === "done" && <UploadResult job={phase.job} meta={phase.meta} />}
+      </div>
 
       {phase.kind === "idle" && lastJob && (
         <button
           type="button"
           onClick={() => watch(lastJob)}
           data-track="studio_upload_resume"
-          className="mt-4 text-sm text-[var(--pe-blue,#1a73e8)] underline underline-offset-2"
+          className="mt-4 text-sm text-[var(--pe-blue,#1E22B2)] underline underline-offset-2"
         >
           최근에 올린 모델 결과 다시 보기
         </button>

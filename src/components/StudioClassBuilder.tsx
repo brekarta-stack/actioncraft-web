@@ -18,6 +18,7 @@ import {
   encodeClassItems,
 } from "@/lib/studio-class-shared.mjs";
 import type { StudioItem } from "@/lib/studio";
+import { starsLabel } from "@/lib/studio";
 
 export const CART_KEY = "studio_class_cart";
 
@@ -30,8 +31,6 @@ export type ClassItem = Pick<
   StudioItem,
   "skey" | "name_ko" | "category" | "pdf_pages" | "stars" | "est_minutes"
 > & { thumb: string };
-
-const starsLabel = (n: number) => "★".repeat(Math.max(1, Math.min(5, n)));
 
 export default function StudioClassBuilder({ items }: { items: ClassItem[] }) {
   const bySkey = useMemo(() => new Map(items.map((i) => [i.skey, i])), [items]);
@@ -238,7 +237,7 @@ export default function StudioClassBuilder({ items }: { items: ClassItem[] }) {
                   <Link
                     href={`/studio/${it.skey}/custom`}
                     data-track={`studio_class_custom:${it.skey}`}
-                    className="inline-flex items-center gap-1 rounded-xl border-2 border-[var(--pe-blue,#1a73e8)] px-3 py-1.5 text-sm font-semibold text-[var(--pe-blue,#1a73e8)] hover:bg-blue-50 whitespace-nowrap"
+                    className="inline-flex items-center gap-1 rounded-xl border-2 border-[var(--pe-blue,#1E22B2)] px-3 py-1.5 text-sm font-semibold text-[var(--pe-blue,#1E22B2)] hover:bg-blue-50 whitespace-nowrap"
                   >
                     🎨 꾸미기
                   </Link>
@@ -249,7 +248,12 @@ export default function StudioClassBuilder({ items }: { items: ClassItem[] }) {
                       min={1}
                       max={CLASS_MAX_QTY}
                       value={r.qty}
-                      onChange={(e) => setQty(r.skey, Number(e.target.value))}
+                      // 빈 값/조합 입력 중 valueAsNumber 는 NaN — 무시해 NaN 이
+                      // 상태·요약 계산으로 새는 것을 막는다(재입력은 선택 후 덮어쓰기).
+                      onChange={(e) => {
+                        const v = e.target.valueAsNumber;
+                        if (!Number.isNaN(v)) setQty(r.skey, v);
+                      }}
                       className="w-16 rounded-lg border border-slate-300 px-2 py-1.5 text-right tabular-nums"
                     />
                   </label>
