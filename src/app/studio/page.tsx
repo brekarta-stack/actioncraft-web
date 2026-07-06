@@ -42,8 +42,17 @@ export default function StudioPage() {
           <br />
           베타 기간에는 인쇄용 PDF를 무료로 받을 수 있습니다.
         </p>
+        <p className="mt-3">
+          <Link
+            href="/studio/upload"
+            data-track="studio_to_upload"
+            className="inline-flex items-center gap-1.5 rounded-xl border-2 border-[var(--pe-blue,#1a73e8)] px-4 py-2 text-sm font-semibold text-[var(--pe-blue,#1a73e8)] hover:bg-blue-50"
+          >
+            ⬆ 내 3D 모델 올려서 전개하기 (베타)
+          </Link>
+        </p>
         <p className="mt-2 text-sm text-slate-500" style={{ wordBreak: "keep-all" }}>
-          내 3D 모델 전개·도면 편집까지 하려면{" "}
+          도면 편집까지 하려면{" "}
           <Link href="/download" className="underline underline-offset-2" data-track="studio_to_download">
             데스크톱 앱(Papercraft Studio 2)
           </Link>
