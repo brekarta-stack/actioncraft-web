@@ -31,7 +31,7 @@ export default function StudioViewer({ src, alt }: { src: string; alt: string })
           auto-rotate
           auto-rotate-delay="1200"
           rotation-per-second="20deg"
-          camera-orbit="-52deg 76deg auto"
+          camera-orbit="52deg 73deg auto"
           shadow-intensity="0.6"
           exposure="1.05"
           touch-action="pan-y"
