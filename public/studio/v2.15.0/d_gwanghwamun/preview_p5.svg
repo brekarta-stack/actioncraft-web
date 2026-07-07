@@ -7,6 +7,7 @@
 <polygon points="10.138,5.0 3.138,11.994 3.138,44.633 10.138,51.626" fill="rgb(216,216,216)"/>
 <polygon points="76.192,107.967 79.106,114.967 92.705,114.967 95.619,107.967" fill="rgb(216,216,216)"/>
 <polygon points="142.246,61.34 147.103,59.883 147.103,53.084 142.246,51.626" fill="rgb(216,216,216)"/>
+<polygon points="76.192,61.34 69.198,68.34 36.559,68.34 29.565,61.34" fill="#99d9fa"/>
 <line x1="76.192" y1="61.34" x2="76.192" y2="51.627" stroke="#8c8c8c" stroke-width="0.3" stroke-dasharray="1.2,0.8"/>
 <line x1="95.619" y1="61.34" x2="76.192" y2="61.34" stroke="#8c8c8c" stroke-width="0.3" stroke-dasharray="1.2,0.8"/>
 <line x1="95.619" y1="51.627" x2="95.619" y2="61.34" stroke="#8c8c8c" stroke-width="0.3" stroke-dasharray="1.2,0.8"/>
@@ -47,7 +48,7 @@
 <line x1="142.246" y1="61.34" x2="147.103" y2="59.883" stroke="#141414" stroke-width="0.4"/>
 <line x1="147.103" y1="59.883" x2="147.103" y2="53.084" stroke="#141414" stroke-width="0.4"/>
 <line x1="147.103" y1="53.084" x2="142.246" y2="51.626" stroke="#141414" stroke-width="0.4"/>
-<circle cx="52.878" cy="64.84" r="0.30" fill="#ffe082" stroke="#464646" stroke-width="0.2"/>
+<circle cx="52.878" cy="64.84" r="0.30" fill="#99d9fa" stroke="#464646" stroke-width="0.2"/>
 <text x="52.878" y="64.94" font-size="0.29" text-anchor="middle" fill="#141414">78</text>
 <circle cx="85.906" cy="48.126" r="0.30" fill="#ffe082" stroke="#464646" stroke-width="0.2"/>
 <text x="85.906" y="48.23" font-size="0.29" text-anchor="middle" fill="#141414">79</text>
@@ -72,6 +73,7 @@
 <polygon points="101.176,139.4 105.798,133.028 98.215,118.024 90.343,117.967" fill="rgb(216,216,216)"/>
 <polygon points="45.003,248.258 53.907,246.776 67.09,223.673 63.835,215.254" fill="rgb(216,216,216)"/>
 <polygon points="63.835,215.254 62.991,216.912 88.349,205.097 99.055,198.843" fill="rgb(216,216,216)"/>
+<polygon points="69.841,182.145 70.103,182.013 113.093,163.509 112.058,160.809" fill="#99d9fa"/>
 <line x1="69.841" y1="182.145" x2="27.674" y2="203.579" stroke="#8c8c8c" stroke-width="0.3" stroke-dasharray="1.2,0.8"/>
 <line x1="27.674" y1="203.579" x2="45.003" y2="248.257" stroke="#8c8c8c" stroke-width="0.3" stroke-dasharray="1.2,0.8"/>
 <line x1="113.376" y1="163.647" x2="27.674" y2="203.579" stroke="#8c8c8c" stroke-width="0.3" stroke-dasharray="1.2,0.8"/>

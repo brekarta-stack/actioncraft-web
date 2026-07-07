@@ -7,6 +7,7 @@
 <polygon points="102.577,159.117 102.63,158.276 111.409,87.115 107.217,86.006" fill="rgb(216,216,216)"/>
 <polygon points="173.542,140.932 165.061,151.049 115.385,167.193 102.577,163.996" fill="rgb(216,216,216)"/>
 <polygon points="75.965,163.996 79.957,170.995 98.585,170.995 102.577,163.996" fill="rgb(216,216,216)"/>
+<polygon points="102.577,84.498 102.577,84.01 106.846,80.107 102.577,79.619" fill="#99d9fa"/>
 <line x1="75.965" y1="84.498" x2="102.577" y2="84.498" stroke="#8c8c8c" stroke-width="0.3" stroke-dasharray="1.2,0.8"/>
 <line x1="75.965" y1="79.619" x2="75.965" y2="84.498" stroke="#8c8c8c" stroke-width="0.3" stroke-dasharray="1.2,0.8"/>
 <line x1="102.577" y1="84.498" x2="102.577" y2="159.117" stroke="#8c8c8c" stroke-width="0.3" stroke-dasharray="1.2,0.8"/>
@@ -64,6 +65,7 @@
 <polygon points="19.737,173.996 12.737,178.785 12.737,201.14 19.737,205.93" fill="rgb(216,216,216)"/>
 <polygon points="83.606,264.476 88.396,271.476 110.75,271.476 115.54,264.476" fill="rgb(216,216,216)"/>
 <polygon points="147.474,232.541 154.474,228.55 154.474,209.921 147.474,205.93" fill="rgb(216,216,216)"/>
+<polygon points="83.606,232.541 78.816,239.541 56.462,239.541 51.672,232.541" fill="#99d9fa"/>
 <line x1="83.606" y1="232.542" x2="83.606" y2="205.93" stroke="#8c8c8c" stroke-width="0.3" stroke-dasharray="1.2,0.8"/>
 <line x1="115.54" y1="232.542" x2="83.606" y2="232.542" stroke="#8c8c8c" stroke-width="0.3" stroke-dasharray="1.2,0.8"/>
 <line x1="115.54" y1="205.93" x2="115.54" y2="232.542" stroke="#8c8c8c" stroke-width="0.3" stroke-dasharray="1.2,0.8"/>
@@ -104,7 +106,7 @@
 <line x1="147.474" y1="232.541" x2="154.474" y2="228.55" stroke="#141414" stroke-width="0.4"/>
 <line x1="154.474" y1="228.55" x2="154.474" y2="209.921" stroke="#141414" stroke-width="0.4"/>
 <line x1="154.474" y1="209.921" x2="147.474" y2="205.93" stroke="#141414" stroke-width="0.4"/>
-<circle cx="67.639" cy="236.041" r="1.95" fill="#ffe082" stroke="#464646" stroke-width="0.2"/>
+<circle cx="67.639" cy="236.041" r="1.95" fill="#99d9fa" stroke="#464646" stroke-width="0.2"/>
 <text x="67.639" y="236.71" font-size="1.91" text-anchor="middle" fill="#141414">57</text>
 <circle cx="99.573" cy="202.43" r="1.95" fill="#ffe082" stroke="#464646" stroke-width="0.2"/>
 <text x="99.573" y="203.10" font-size="1.91" text-anchor="middle" fill="#141414">58</text>

@@ -7,6 +7,7 @@
 <polygon points="153.822,134.723 160.822,116.388 160.822,30.822 153.822,12.487" fill="rgb(216,216,216)"/>
 <polygon points="12.487,161.462 5.487,157.451 5.487,138.734 12.487,134.723" fill="rgb(216,216,216)"/>
 <polygon points="134.723,12.487 137.588,5.487 150.957,5.487 153.822,12.487" fill="rgb(216,216,216)"/>
+<polygon points="134.723,134.723 116.388,127.723 30.822,127.723 12.487,134.723" fill="#99d9fa"/>
 <line x1="134.723" y1="161.462" x2="134.723" y2="134.723" stroke="#8c8c8c" stroke-width="0.3" stroke-dasharray="1.2,0.8"/>
 <line x1="134.723" y1="134.723" x2="153.822" y2="134.723" stroke="#8c8c8c" stroke-width="0.3" stroke-dasharray="1.2,0.8"/>
 <line x1="153.822" y1="161.462" x2="134.723" y2="161.462" stroke="#8c8c8c" stroke-width="0.3" stroke-dasharray="1.2,0.8"/>
@@ -42,7 +43,7 @@
 <text x="144.273" y="165.98" font-size="2.90" text-anchor="middle" fill="#141414">31</text>
 <circle cx="73.605" cy="164.962" r="2.14" fill="#ffe082" stroke="#464646" stroke-width="0.2"/>
 <text x="73.605" y="165.98" font-size="2.90" text-anchor="middle" fill="#141414">32</text>
-<circle cx="73.605" cy="131.223" r="2.14" fill="#ffe082" stroke="#464646" stroke-width="0.2"/>
+<circle cx="73.605" cy="131.223" r="2.14" fill="#99d9fa" stroke="#464646" stroke-width="0.2"/>
 <text x="73.605" y="132.24" font-size="2.90" text-anchor="middle" fill="#141414">33</text>
 <circle cx="157.322" cy="148.092" r="2.14" fill="#ffe082" stroke="#464646" stroke-width="0.2"/>
 <text x="157.322" y="149.11" font-size="2.90" text-anchor="middle" fill="#141414">34</text>
