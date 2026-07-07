@@ -117,3 +117,23 @@ CREATE POLICY "Public read published posts"
 
 -- analytics_events: anon 접근 전면 차단 — 수집/조회 모두 service_role 경유
 -- (수집 → /api/track, 조회 → /admin/analytics)
+
+-- ============================================================
+-- studio_reviews — 종이모형 도면 검수 상태 (2026-07-07)
+-- /admin/studio-review 에서 관리자가 하루 한 개씩 검수. 행이 없으면 미검수.
+-- ============================================================
+CREATE TABLE IF NOT EXISTS studio_reviews (
+  skey        TEXT PRIMARY KEY,
+  status      TEXT NOT NULL DEFAULT 'pending'
+              CHECK (status IN ('pending', 'approved', 'rejected')),
+  note        TEXT,
+  reviewer    TEXT,
+  reviewed_at TIMESTAMPTZ,
+  created_at  TIMESTAMPTZ NOT NULL DEFAULT now(),
+  updated_at  TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS studio_reviews_status_idx      ON studio_reviews (status);
+CREATE INDEX IF NOT EXISTS studio_reviews_reviewed_at_idx ON studio_reviews (reviewed_at DESC);
+
+ALTER TABLE studio_reviews ENABLE ROW LEVEL SECURITY;
+-- studio_reviews: anon 접근 전면 차단 — 모든 접근은 service_role(어드민) 경유

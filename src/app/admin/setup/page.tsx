@@ -8,11 +8,14 @@ import Link from "next/link";
 import { readFileSync } from "fs";
 import path from "path";
 
-const TABLES = ["portfolio_items", "posts", "quotes", "analytics_events"] as const;
+const TABLES = ["portfolio_items", "posts", "quotes", "analytics_events", "studio_reviews"] as const;
+
+// studio_reviews 는 id 컬럼이 없고 skey 가 PK → 테이블별 존재 확인용 컬럼 매핑
+const PROBE_COL: Record<string, string> = { studio_reviews: "skey" };
 
 async function checkTable(name: string): Promise<"ok" | "missing" | "error"> {
   try {
-    const { error } = await supabaseAdmin.from(name).select("id").limit(1);
+    const { error } = await supabaseAdmin.from(name).select(PROBE_COL[name] ?? "id").limit(1);
     if (!error) return "ok";
     // PostgREST "relation does not exist" 류 오류
     if (

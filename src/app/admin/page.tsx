@@ -6,6 +6,7 @@ import { getItems } from "@/lib/portfolio";
 import { supabaseAdmin } from "@/lib/supabase-admin";
 import Link from "next/link";
 import type { QuoteSubmission } from "@/lib/quote-types";
+import { getReviewMap, mergeItems, computeStats, pickTodayTarget } from "@/lib/studio-review";
 
 const PRODUCT_LABELS: Record<string, string> = {
   papercraft: "페이퍼 크래프트",
@@ -23,7 +24,7 @@ export default async function AdminDashboard() {
   if (!session) redirect("/admin/login");
 
   /* ── 데이터 병렬 로드 ── */
-  const [posts, portfolioItems, quotesResult] = await Promise.all([
+  const [posts, portfolioItems, quotesResult, reviewData] = await Promise.all([
     getPosts(),
     getItems(),
     supabaseAdmin
@@ -31,7 +32,13 @@ export default async function AdminDashboard() {
       .select("*")
       .order("created_at", { ascending: false })
       .limit(6),
+    getReviewMap(),
   ]);
+
+  /* ── 도면 검수 진행 상황 ── */
+  const reviewItems = mergeItems(reviewData.map);
+  const reviewStats = computeStats(reviewItems);
+  const reviewTarget = pickTodayTarget(reviewItems);
 
   const publishedPosts      = posts.filter((p) => p.published);
   const publishedPortfolio  = portfolioItems.filter((i) => i.published);
@@ -120,6 +127,43 @@ export default async function AdminDashboard() {
           <p className="text-xs text-slate-400 mt-1">공개 {publishedPosts.length}건 · 비공개 {posts.length - publishedPosts.length}건</p>
         </Link>
       </div>
+
+      {/* ── 도면 검수 진행 ── */}
+      <Link
+        href="/admin/studio-review"
+        className="group block bg-white rounded-2xl border border-slate-200 p-5 mb-6 hover:border-blue-300 hover:shadow-md transition-all"
+      >
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center gap-2">
+            <h2 className="font-bold text-slate-900">도면 검수</h2>
+            {reviewStats.reviewedToday >= 1 ? (
+              <span className="text-[11px] px-2 py-0.5 rounded-full bg-green-50 text-green-700 border border-green-200">
+                오늘 {reviewStats.reviewedToday}건 완료
+              </span>
+            ) : reviewTarget ? (
+              <span className="text-[11px] px-2 py-0.5 rounded-full font-medium" style={{ background: "#EEF0FF", color: "#1E22B2" }}>
+                오늘의 검수: {reviewTarget.name_ko}
+              </span>
+            ) : (
+              <span className="text-[11px] px-2 py-0.5 rounded-full bg-green-50 text-green-700 border border-green-200">
+                전체 완료 🎉
+              </span>
+            )}
+          </div>
+          <span className="text-xs font-semibold group-hover:underline" style={{ color: "#1E22B2" }}>
+            검수하러 가기 →
+          </span>
+        </div>
+        <div className="flex items-center gap-4 mb-2 text-sm">
+          <span className="text-slate-500">전체 <b className="text-slate-800 tabular-nums">{reviewStats.total}</b></span>
+          <span className="text-slate-500">검수완료 <b className="text-green-700 tabular-nums">{reviewStats.reviewed}</b></span>
+          <span className="text-slate-500">미검수 <b className="text-amber-600 tabular-nums">{reviewStats.pending}</b></span>
+          <span className="ml-auto text-slate-700 font-semibold tabular-nums">{reviewStats.percent}%</span>
+        </div>
+        <div className="h-2 rounded-full bg-slate-100 overflow-hidden">
+          <div className="h-full rounded-full transition-all" style={{ width: `${reviewStats.percent}%`, background: "#1E22B2" }} />
+        </div>
+      </Link>
 
       {/* ── 최근 제작 문의 ── */}
       <div className="bg-white rounded-2xl border border-slate-200 mb-6">
