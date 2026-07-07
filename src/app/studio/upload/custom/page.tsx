@@ -11,6 +11,8 @@ import UploadCustomClient from "@/components/UploadCustomClient";
 export const metadata: Metadata = {
   title: "내 모델 꾸미기 (베타) — 종이모형 스튜디오",
   robots: { index: false, follow: false },
+  // 개인 산출물 페이지 — URL 의 잡 ID(?job=) 가 referrer 로 새지 않게
+  referrer: "no-referrer",
 };
 
 export default function UploadCustomPage() {

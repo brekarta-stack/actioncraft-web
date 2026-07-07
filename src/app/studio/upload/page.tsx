@@ -13,6 +13,8 @@ export const metadata: Metadata = {
   description:
     "STL·OBJ·GLB 등 내 3D 모델을 올리면 종이로 만들 수 있는 전개도(PDF)로 바꿔 드립니다.",
   robots: { index: false, follow: false },
+  // 개인 산출물 페이지 — URL 의 잡 ID 가 어떤 referrer 로도 새지 않게(같은 출처 포함)
+  referrer: "no-referrer",
 };
 
 export default function StudioUploadPage() {

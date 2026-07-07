@@ -3,7 +3,7 @@ import { getPosts } from "@/lib/blog";
 import { getItems } from "@/lib/portfolio";
 import { deriveSlug } from "@/lib/portfolio-meta";
 import { SITE_URL } from "@/lib/site";
-import { STUDIO_ITEMS } from "@/lib/studio";
+import { STUDIO_ITEMS, categoryLandings } from "@/lib/studio";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const base = SITE_URL;
@@ -39,6 +39,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // STUDIO_ITEMS 순회로 자동 반영된다(하드코딩 개수 없음).
   const studioPages: MetadataRoute.Sitemap = [
     { url: `${base}/studio`, lastModified: now, priority: 0.9, changeFrequency: "weekly" as const },
+    // 카테고리 랜딩(롱테일 진입점: 자동차/공룡/바다생물 종이모형 …)
+    ...categoryLandings().map((c) => ({
+      url: `${base}/studio/category/${c.slug}`,
+      lastModified: now,
+      priority: 0.8,
+      changeFrequency: "weekly" as const,
+    })),
     ...STUDIO_ITEMS.map((i) => ({
       url: `${base}/studio/${i.skey}`,
       lastModified: now,

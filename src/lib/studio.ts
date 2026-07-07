@@ -65,6 +65,43 @@ export function itemsByCategory(): Array<{ category: string; items: StudioItem[]
   }));
 }
 
+/**
+ * 카테고리 ↔ ASCII 슬러그 (색인 가능한 카테고리 랜딩 URL /studio/category/<slug>).
+ * 한국어 카테고리명은 공백·가운뎃점이 있어 URL 로 부적합 → 고정 슬러그로 매핑.
+ */
+export const CATEGORY_SLUG: Record<string, string> = {
+  "탈것": "vehicles",
+  "공룡": "dinosaurs",
+  "인기 캐릭터": "characters",
+  "육지동물": "land-animals",
+  "바다생물": "sea-animals",
+  "곤충": "insects",
+  "식물": "plants",
+  "세계 건축물": "world-landmarks",
+  "한국 건축물": "korea-landmarks",
+  "캐릭터·오브젝트": "objects",
+  "도형": "shapes",
+};
+const SLUG_TO_CATEGORY: Record<string, string> = Object.fromEntries(
+  Object.entries(CATEGORY_SLUG).map(([k, v]) => [v, k]),
+);
+
+/** 카탈로그에 실제 존재하는 카테고리만, CATEGORY_ORDER 순으로 {category, slug, count} */
+export function categoryLandings(): Array<{ category: string; slug: string; count: number }> {
+  return orderedCategories(STUDIO_ITEMS)
+    .filter((c) => CATEGORY_SLUG[c])
+    .map((c) => ({
+      category: c,
+      slug: CATEGORY_SLUG[c],
+      count: STUDIO_ITEMS.filter((i) => i.category === c).length,
+    }));
+}
+
+/** 슬러그 → 카테고리명 (없으면 undefined = 404) */
+export function categoryFromSlug(slug: string): string | undefined {
+  return SLUG_TO_CATEGORY[slug];
+}
+
 /** skey 화이트리스트 조회 — 없는 키는 undefined (라우트에서 404/경로조작 차단) */
 export function getStudioItem(skey: string): StudioItem | undefined {
   return STUDIO_ITEMS.find((i) => i.skey === skey);

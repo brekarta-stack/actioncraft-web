@@ -38,6 +38,9 @@ export async function GET(
     "Content-Type": contentTypeFor(name),
     "Cache-Control": "private, max-age=3600",
     "X-Robots-Tag": "noindex",
+    // 개인 산출물 — 잡 ID 가 referrer 로 새지 않게 + MIME 스니핑 차단(SVG XSS 방어 보강)
+    "Referrer-Policy": "no-referrer",
+    "X-Content-Type-Options": "nosniff",
   };
   if (name === "print.pdf") {
     headers["Content-Disposition"] =

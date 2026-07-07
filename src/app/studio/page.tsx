@@ -8,7 +8,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import StudioCatalog from "@/components/StudioCatalog";
-import { STUDIO_ITEMS } from "@/lib/studio";
+import { STUDIO_ITEMS, categoryLandings } from "@/lib/studio";
 import { SITE_NAME, SITE_URL } from "@/lib/site";
 
 export const metadata: Metadata = {
@@ -69,6 +69,23 @@ export default function StudioPage() {
       </header>
 
       <StudioCatalog items={STUDIO_ITEMS} />
+
+      {/* 카테고리별 랜딩으로의 크롤 가능한 내부 링크(SEO 롱테일 진입점) */}
+      <nav className="mt-10 border-t border-slate-200 pt-6" aria-label="카테고리별 종이모형">
+        <h2 className="text-sm font-semibold text-slate-500 mb-3">카테고리별 도안</h2>
+        <ul className="flex flex-wrap gap-x-4 gap-y-2 text-sm">
+          {categoryLandings().map((c) => (
+            <li key={c.slug}>
+              <Link href={`/studio/category/${c.slug}`}
+                    className="text-slate-600 hover:text-[#1E22B2] hover:underline"
+                    style={{ wordBreak: "keep-all" }}>
+                {c.category} 종이모형
+                <span className="ml-1 text-slate-400 tabular-nums">({c.count})</span>
+              </Link>
+            </li>
+          ))}
+        </ul>
+      </nav>
 
       <footer className="mt-10 text-xs text-slate-400" style={{ wordBreak: "keep-all" }}>
         도안은 Papercraft Studio 2 엔진이 생성했습니다. 미리보기 도면에는 papercraft.kr

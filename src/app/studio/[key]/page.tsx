@@ -96,7 +96,14 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       description,
       url: `/studio/${item.skey}`,
       type: "website",
-      images: [{ url: studioAsset(item.skey, "thumb.png"), width: 480, height: 480 }],
+      images: [{ url: studioAsset(item.skey, "og.png"), width: 1200, height: 630,
+                 alt: `${item.name_ko} 종이모형 도안` }],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: `${title} | ${SITE_NAME}`,
+      description,
+      images: [studioAsset(item.skey, "og.png")],
     },
   };
 }
