@@ -105,6 +105,8 @@ export default function StudioCustomizer({ name, sheets, netUrl, sheetUrlTemplat
   const [sticker, setSticker] = useState<string>(EMOJI_STICKERS[0]);
   const [textSize, setTextSize] = useState(8);
   const [scale, setScale] = useState(100);
+  const [curSheet, setCurSheet] = useState(0);          // 도면별 페이지네이션(화면에 한 장씩)
+  const [showBack, setShowBack] = useState(false);      // 현재 도면의 뒷면(접착 안내) 보기
   const [savedAt, setSavedAt] = useState("");
   const [canUndo, setCanUndo] = useState(false);
   const [canRedo, setCanRedo] = useState(false);
@@ -326,6 +328,16 @@ export default function StudioCustomizer({ name, sheets, netUrl, sheetUrlTemplat
     })();
     return () => { alive = false; };
   }, [netUrl, sheetUrlTemplate, sheets, storageKey, rebuild]);
+
+  /* ── 페이지네이션: 화면엔 현재 도면 한 장만(가벼움) · 뒷면은 거울상 참고 ── */
+  useEffect(() => {
+    const host = hostRef.current;
+    if (!host) return;
+    host.querySelectorAll<HTMLElement>(".pc-sheet").forEach((el, i) => {
+      el.classList.toggle("pc-hidden-sheet", i !== curSheet);
+      el.classList.toggle("pc-back", i === curSheet && showBack);
+    });
+  }, [ready, curSheet, showBack]);
 
   /* ── 포인터: 색칠 · 글자자리 · 스티커 · 데코 드래그/선택 ── */
   const onPointerDown = (e: React.PointerEvent) => {
@@ -566,9 +578,35 @@ export default function StudioCustomizer({ name, sheets, netUrl, sheetUrlTemplat
       {/* ── 시트 캔버스 ── */}
       {error && <p className="py-12 text-center text-red-600">{error}</p>}
       {!ready && !error && <p className="py-12 text-center text-slate-500">도면 불러오는 중…</p>}
+
+      {/* 도면별 페이지네이션 + 앞/뒷면 (화면 한 장씩, 인쇄는 전 장) */}
+      {ready && sheets > 0 && (
+        <div className="pc-hide-print mt-6 flex flex-wrap items-center justify-center gap-3 text-sm">
+          <button type="button" onClick={() => setCurSheet((v) => Math.max(0, v - 1))}
+                  disabled={curSheet <= 0} data-track="studio_custom_sheet_prev"
+                  className="rounded-lg border border-slate-300 px-3 py-1.5 disabled:opacity-40 hover:bg-slate-50"
+                  aria-label="이전 도면">◀ 이전</button>
+          <span className="tabular-nums text-slate-600">{curSheet + 1} / {sheets} 장</span>
+          <button type="button" onClick={() => setCurSheet((v) => Math.min(sheets - 1, v + 1))}
+                  disabled={curSheet >= sheets - 1} data-track="studio_custom_sheet_next"
+                  className="rounded-lg border border-slate-300 px-3 py-1.5 disabled:opacity-40 hover:bg-slate-50"
+                  aria-label="다음 도면">다음 ▶</button>
+          <span className="mx-1 h-4 w-px bg-slate-200" />
+          <button type="button" onClick={() => setShowBack((v) => !v)} data-track="studio_custom_back"
+                  className={`rounded-lg border px-3 py-1.5 ${showBack ? "border-[#1E22B2] bg-blue-50 text-[#1E22B2]" : "border-slate-300 hover:bg-slate-50"}`}>
+            {showBack ? "앞면 보기" : "뒷면 보기(접착)"}
+          </button>
+        </div>
+      )}
+      {ready && showBack && (
+        <p className="pc-hide-print mt-2 text-center text-xs text-slate-500" style={{ wordBreak: "keep-all" }}>
+          뒷면은 좌우 반전된 거울상이에요 — 양면 인쇄 시 접착 번호 위치를 맞추는 참고용입니다.
+        </p>
+      )}
+
       <div
         ref={hostRef}
-        className="pc-sheets mt-6 space-y-8"
+        className="pc-sheets mt-4 space-y-8"
         onPointerDown={onPointerDown}
         onPointerMove={onPointerMove}
         onPointerUp={onPointerUp}
@@ -603,16 +641,24 @@ export default function StudioCustomizer({ name, sheets, netUrl, sheetUrlTemplat
 
       {/* 화면·인쇄 스타일: 시트=A4 실측, 인쇄 시 도구막대/헤더 숨김 */}
       <style>{`
-        .pc-sheets .pc-sheet { box-shadow: 0 2px 14px rgba(15,23,42,.12); border-radius: 8px; overflow: hidden; }
-        .pc-sheets svg.pc-sheet-svg { display: block; width: 100%; height: auto; touch-action: pan-y; }
+        /* A4(210:297) 비율을 컨테이너에 못 박고 overflow:hidden — SVG 고유 종횡비(height:auto)에
+           의존하지 않아 뷰포트 이상 등 어떤 상황에서도 조각이 페이지 밖으로 넘치지 않는다. */
+        .pc-sheets .pc-sheet { position: relative; aspect-ratio: 210 / 297; box-shadow: 0 2px 14px rgba(15,23,42,.12); border-radius: 8px; overflow: hidden; background: #fff; }
+        .pc-sheets svg.pc-sheet-svg { display: block; position: absolute; inset: 0; width: 100%; height: 100%; touch-action: pan-y; }
+        .pc-sheets .pc-hidden-sheet { display: none; }
+        /* 뒷면 보기: 앞면을 좌우 반전한 거울상(양면 인쇄 참고용) — 편집은 앞면에서만(view-only) */
+        .pc-sheets .pc-back svg.pc-sheet-svg { transform: scaleX(-1); pointer-events: none; }
         /* 데코 위에서 시작한 터치는 스크롤이 아니라 드래그 — 세로 이동이 스크롤로 새지 않게 */
         .pc-sheets svg.pc-sheet-svg .pc-deco { touch-action: none; }
         .pc-deco.pc-sel { outline: none; filter: drop-shadow(0 0 1.4px #1E22B2) drop-shadow(0 0 1.4px #1E22B2); }
         @media print {
           header, footer, nav, .pc-toolbar, .pc-hide-print { display: none !important; }
           .pc-sheets { margin: 0 !important; }
-          .pc-sheets .pc-sheet { box-shadow: none; border-radius: 0; page-break-after: always; }
-          .pc-sheets svg.pc-sheet-svg { width: 210mm; height: 297mm; }
+          /* 인쇄는 페이지네이션 무시하고 전 도면을 각각 A4 실측 한 장씩 */
+          .pc-sheets .pc-sheet, .pc-sheets .pc-hidden-sheet {
+            display: block !important; width: 210mm !important; height: 297mm !important;
+            aspect-ratio: auto !important; box-shadow: none; border-radius: 0; page-break-after: always; overflow: visible;
+          }
           .pc-deco.pc-sel { filter: none; }
           @page { size: A4 portrait; margin: 0; }
         }
