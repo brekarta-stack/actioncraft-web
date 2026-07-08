@@ -11,10 +11,12 @@ import { notFound } from "next/navigation";
 import StudioCatalog from "@/components/StudioCatalog";
 import {
   CATEGORY_SLUG,
-  STUDIO_ITEMS,
   categoryFromSlug,
 } from "@/lib/studio";
+import { getExposedItems } from "@/lib/studio-review";
 import { SITE_NAME, SITE_URL } from "@/lib/site";
+
+export const revalidate = 300; // 검수 큐레이션 게이트 반영(ISR)
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -24,8 +26,9 @@ export function generateStaticParams() {
   return Object.values(CATEGORY_SLUG).map((slug) => ({ slug }));
 }
 
-function itemsOf(category: string) {
-  return STUDIO_ITEMS.filter((i) => i.category === category);
+/** 검수 게이트를 통과한 노출분 중 해당 카테고리 항목 */
+async function itemsOf(category: string) {
+  return (await getExposedItems()).filter((i) => i.category === category);
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
@@ -34,7 +37,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   if (!category) {
     return { title: "카테고리를 찾을 수 없습니다", robots: { index: false, follow: false } };
   }
-  const n = itemsOf(category).length;
+  const n = (await itemsOf(category)).length;
   const title = `${category} 종이모형 도안 ${n}종`;
   const description =
     `${category} 종이모형 ${n}종 — 3D로 미리 돌려 보고, 무료 인쇄 PDF 도안을 내려받아 ` +
@@ -56,7 +59,7 @@ export default async function StudioCategoryPage({ params }: Props) {
   const { slug } = await params;
   const category = categoryFromSlug(slug);
   if (!category) notFound();
-  const items = itemsOf(category);
+  const items = await itemsOf(category);
   if (items.length === 0) notFound();
   const n = items.length;
 

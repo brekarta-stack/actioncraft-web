@@ -145,3 +145,50 @@ export function computeStats(items: ReviewedItem[]): ReviewStats {
 export function pickTodayTarget(items: ReviewedItem[]): ReviewedItem | null {
   return items.find((it) => it.status === "pending") ?? null;
 }
+
+/* ── 큐레이션 게이트 — 공개(/studio) 노출 필터 ──────────────────────────
+ * 기본 모드: 검수에서 '반려(rejected)'된 도면만 숨긴다(미검수는 노출 유지 —
+ * 하루 1개 검수 페이스로 181종을 통과시키는 동안 사이트가 비지 않게).
+ * 엄격 모드: 환경변수 STUDIO_CURATION_STRICT=1 이면 '통과(approved)'만 노출.
+ * 테이블 부재/오류 시 fail-open(전체 노출) — 게이트가 사이트를 죽이지 않는다.
+ * 공개 페이지는 ISR(revalidate)+검수 API 의 revalidatePath 로 갱신된다. */
+
+let _hiddenCache: { at: number; set: Set<string> } | null = null;
+
+/** 공개에서 숨길 skey 집합(런타임 60초 메모리 캐시 — API 라우트 다건 호출 대비) */
+export async function getHiddenSkeys(): Promise<Set<string>> {
+  if (_hiddenCache && Date.now() - _hiddenCache.at < 60_000) return _hiddenCache.set;
+  const strict = process.env.STUDIO_CURATION_STRICT === "1";
+  try {
+    const { data, error } = await supabaseAdmin
+      .from("studio_reviews")
+      .select("skey, status");
+    if (error || !data) return new Set();
+    const hidden = new Set<string>();
+    if (strict) {
+      const approved = new Set(
+        data.filter((r) => r.status === "approved").map((r) => r.skey as string),
+      );
+      for (const it of STUDIO_ITEMS) if (!approved.has(it.skey)) hidden.add(it.skey);
+    } else {
+      for (const r of data) if (r.status === "rejected") hidden.add(r.skey as string);
+    }
+    _hiddenCache = { at: Date.now(), set: hidden };
+    return hidden;
+  } catch {
+    return new Set();
+  }
+}
+
+/** 게이트를 통과한(공개 노출) 카탈로그 아이템 — 공개 페이지의 단일 진입점 */
+export async function getExposedItems(): Promise<StudioItem[]> {
+  const hidden = await getHiddenSkeys();
+  if (!hidden.size) return STUDIO_ITEMS;
+  return STUDIO_ITEMS.filter((it) => !hidden.has(it.skey));
+}
+
+/** skey 하나가 공개 노출인지 (상세/꾸미기/자산 라우트용) */
+export async function isExposed(skey: string): Promise<boolean> {
+  const hidden = await getHiddenSkeys();
+  return !hidden.has(skey);
+}

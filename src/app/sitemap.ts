@@ -3,7 +3,8 @@ import { getPosts } from "@/lib/blog";
 import { getItems } from "@/lib/portfolio";
 import { deriveSlug } from "@/lib/portfolio-meta";
 import { SITE_URL } from "@/lib/site";
-import { STUDIO_ITEMS, categoryLandings } from "@/lib/studio";
+import { categoryLandings } from "@/lib/studio";
+import { getExposedItems } from "@/lib/studio-review";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const base = SITE_URL;
@@ -33,20 +34,21 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: "monthly" as const,
     }));
 
-  // 종이모형 스튜디오 — 목록 + 상세 STUDIO_ITEMS.length 종(도구 페이지
-  // upload/class/custom 은 noindex 라 제외). 네이버는 사이트맵 등록 URL 만
-  // 성실히 수집하므로 여기 빠지면 발견이 크게 늦는다. 카탈로그 증감은
-  // STUDIO_ITEMS 순회로 자동 반영된다(하드코딩 개수 없음).
+  // 종이모형 스튜디오 — 목록 + 상세(도구 페이지 upload/class/custom 은 noindex 라
+  // 제외). 네이버는 사이트맵 등록 URL 만 성실히 수집하므로 여기 빠지면 발견이
+  // 크게 늦는다. 목록은 검수 큐레이션 게이트 통과분(getExposedItems) — 반려된
+  // 도면은 상세가 404 이므로 사이트맵에서도 함께 빠져야 한다.
+  const studioItems = await getExposedItems();
   const studioPages: MetadataRoute.Sitemap = [
     { url: `${base}/studio`, lastModified: now, priority: 0.9, changeFrequency: "weekly" as const },
     // 카테고리 랜딩(롱테일 진입점: 자동차/공룡/바다생물 종이모형 …)
-    ...categoryLandings().map((c) => ({
+    ...categoryLandings(studioItems).map((c) => ({
       url: `${base}/studio/category/${c.slug}`,
       lastModified: now,
       priority: 0.8,
       changeFrequency: "weekly" as const,
     })),
-    ...STUDIO_ITEMS.map((i) => ({
+    ...studioItems.map((i) => ({
       url: `${base}/studio/${i.skey}`,
       lastModified: now,
       priority: 0.7,

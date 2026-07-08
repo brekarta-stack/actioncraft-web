@@ -86,14 +86,17 @@ const SLUG_TO_CATEGORY: Record<string, string> = Object.fromEntries(
   Object.entries(CATEGORY_SLUG).map(([k, v]) => [v, k]),
 );
 
-/** 카탈로그에 실제 존재하는 카테고리만, CATEGORY_ORDER 순으로 {category, slug, count} */
-export function categoryLandings(): Array<{ category: string; slug: string; count: number }> {
-  return orderedCategories(STUDIO_ITEMS)
+/** 카탈로그에 실제 존재하는 카테고리만, CATEGORY_ORDER 순으로 {category, slug, count}.
+ *  items 를 주면 그 목록(예: 검수 게이트 통과분) 기준으로 집계한다. */
+export function categoryLandings(
+  items: StudioItem[] = STUDIO_ITEMS,
+): Array<{ category: string; slug: string; count: number }> {
+  return orderedCategories(items)
     .filter((c) => CATEGORY_SLUG[c])
     .map((c) => ({
       category: c,
       slug: CATEGORY_SLUG[c],
-      count: STUDIO_ITEMS.filter((i) => i.category === c).length,
+      count: items.filter((i) => i.category === c).length,
     }));
 }
 

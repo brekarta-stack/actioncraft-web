@@ -8,7 +8,10 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import StudioClassBuilder, { type ClassItem } from "@/components/StudioClassBuilder";
-import { STUDIO_ITEMS, studioAsset } from "@/lib/studio";
+import { studioAsset } from "@/lib/studio";
+import { getExposedItems } from "@/lib/studio-review";
+
+export const revalidate = 300; // 검수 큐레이션 게이트 반영(ISR)
 
 export const metadata: Metadata = {
   title: "학급 세트 만들기 (베타) — 종이모형 스튜디오",
@@ -17,8 +20,8 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
-export default function StudioClassPage() {
-  const items: ClassItem[] = STUDIO_ITEMS.map((i) => ({
+export default async function StudioClassPage() {
+  const items: ClassItem[] = (await getExposedItems()).map((i) => ({
     skey: i.skey,
     name_ko: i.name_ko,
     category: i.category,

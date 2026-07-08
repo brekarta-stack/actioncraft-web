@@ -14,7 +14,7 @@ import { revalidatePath } from "next/cache";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { supabaseAdmin } from "@/lib/supabase-admin";
-import { getStudioItem } from "@/lib/studio";
+import { CATEGORY_SLUG, getStudioItem } from "@/lib/studio";
 
 export const dynamic = "force-dynamic";
 
@@ -76,9 +76,18 @@ export async function POST(req: Request) {
     );
   }
 
-  // 검수 목록/대시보드 캐시 무효화
+  // 검수 목록/대시보드 + 큐레이션 게이트가 걸린 공개 페이지 캐시 무효화
+  // (공개 페이지는 ISR — 여기서 즉시 재생성해 반려/복귀가 바로 반영되게 한다)
   revalidatePath("/admin/studio-review");
   revalidatePath("/admin");
+  revalidatePath("/studio");
+  revalidatePath("/studio/class");
+  revalidatePath(`/studio/${skey}`);
+  revalidatePath(`/studio/${skey}/custom`);
+  const item = getStudioItem(skey);
+  const slug = item ? CATEGORY_SLUG[item.category] : undefined;
+  if (slug) revalidatePath(`/studio/category/${slug}`);
+  revalidatePath("/sitemap.xml");
 
   return NextResponse.json({ ok: true, skey, status, reviewed_at: row.reviewed_at });
 }

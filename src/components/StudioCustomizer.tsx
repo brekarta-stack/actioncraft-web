@@ -318,6 +318,15 @@ export default function StudioCustomizer({ name, sheets, netUrl, sheetUrlTemplat
               ];
               init = { fills: lg.fills ?? {}, decos, scale: lg.scale ?? 100 };
             }
+            // 복원 후에도 되돌리기로 '처음(흰 도면)'까지 갈 수 있게 히스토리 바닥에
+            // 순정 상태를 심는다 — 복원 상태에서 undo 하면 흰 도면이 된다.
+            const dirty =
+              Object.keys(init.fills).length > 0 || init.decos.length > 0 || init.scale !== 100;
+            if (dirty) {
+              undoRef.current = [{ fills: {}, decos: [], scale: 100 }];
+              redoRef.current = [];
+              syncHistoryFlags();
+            }
             rebuild(init);
           }
         } catch { /* 복원 실패 시 새로 시작 */ }
@@ -327,7 +336,7 @@ export default function StudioCustomizer({ name, sheets, netUrl, sheetUrlTemplat
       }
     })();
     return () => { alive = false; };
-  }, [netUrl, sheetUrlTemplate, sheets, storageKey, rebuild]);
+  }, [netUrl, sheetUrlTemplate, sheets, storageKey, rebuild, syncHistoryFlags]);
 
   /* ── 페이지네이션: 화면엔 현재 도면 한 장만(가벼움) · 뒷면은 거울상 참고 ── */
   useEffect(() => {

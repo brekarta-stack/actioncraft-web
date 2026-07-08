@@ -8,6 +8,9 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import StudioCustomizer from "@/components/StudioCustomizer";
 import { getStudioItem, STUDIO_ITEMS } from "@/lib/studio";
+import { isExposed } from "@/lib/studio-review";
+
+export const revalidate = 300; // 검수 큐레이션 게이트 반영(ISR)
 
 interface Props {
   params: Promise<{ key: string }>;
@@ -30,6 +33,7 @@ export default async function StudioCustomPage({ params }: Props) {
   const { key } = await params;
   const item = getStudioItem(key);
   if (!item) notFound();
+  if (!(await isExposed(item.skey))) notFound();   // 검수 큐레이션 게이트(반려 비노출)
 
   return (
     <main className="mx-auto max-w-4xl px-4 py-8">

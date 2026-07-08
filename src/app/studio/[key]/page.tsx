@@ -13,6 +13,7 @@ import StudioSheets from "@/components/StudioSheets";
 import StudioClassAdd from "@/components/StudioClassAdd";
 import type { StudioItem } from "@/lib/studio";
 import { getStudioItem, starsLabel, studioAsset, STUDIO_ITEMS, STUDIO_PAPER } from "@/lib/studio";
+import { isExposed } from "@/lib/studio-review";
 import { SITE_NAME, SITE_URL } from "@/lib/site";
 
 /** 상세 구조화 데이터 — CreativeWork(제품 속성) + BreadcrumbList(카테고리 경로). GEO/리치결과용. */
@@ -69,6 +70,8 @@ function StudioJsonLd({ item }: { item: StudioItem }) {
   );
 }
 
+export const revalidate = 300; // 검수 큐레이션 게이트 반영(ISR)
+
 interface Props {
   params: Promise<{ key: string }>;
 }
@@ -112,6 +115,7 @@ export default async function StudioDetailPage({ params }: Props) {
   const { key } = await params;
   const item = getStudioItem(key);
   if (!item) notFound();
+  if (!(await isExposed(item.skey))) notFound();   // 검수 큐레이션 게이트(반려 비노출)
 
   // LCP = 도면 1쪽 SVG — HTML 파싱 시점에 페치가 시작되게 서버에서 preload 힌트
   // (클라이언트 컴포넌트 마운트를 기다리면 콜드 엣지에서 로드가 늦는다)

@@ -40,16 +40,19 @@ export default async function SetupPage() {
   );
 
   const allOk = results.every((r) => r.status === "ok");
+  const missing = results.filter((r) => r.status === "missing").map((r) => r.name);
 
-  // schema.sql 내용 읽기
+  // 누락 테이블에 맞는 SQL 만 보여준다 — studio_reviews 만 없으면 그 마이그레이션만,
+  // 그 외가 섞여 있으면 전체 schema.sql(모든 구문이 IF NOT EXISTS 라 재실행 안전).
+  const onlyStudioReviews = missing.length > 0 && missing.every((n) => n === "studio_reviews");
+  const sqlFile = onlyStudioReviews
+    ? path.join("supabase", "migrations", "20260707_studio_reviews.sql")
+    : path.join("supabase", "schema.sql");
   let sql = "";
   try {
-    sql = readFileSync(
-      path.join(process.cwd(), "supabase", "schema.sql"),
-      "utf-8"
-    );
+    sql = readFileSync(path.join(process.cwd(), sqlFile), "utf-8");
   } catch {
-    sql = "-- schema.sql 파일을 읽을 수 없습니다.";
+    sql = `-- ${sqlFile} 파일을 읽을 수 없습니다.`;
   }
 
   const statusLabel = (s: string) => {
@@ -94,25 +97,27 @@ export default async function SetupPage() {
       ) : (
         <>
           <div className="bg-amber-50 border border-amber-200 rounded-2xl p-5 mb-6">
-            <p className="font-bold text-amber-800 mb-1">❌ 없음 표시된 테이블을 생성해야 합니다</p>
-            <p className="text-sm text-amber-700">
-              아래 SQL을 복사해서{" "}
-              <a
-                href="https://supabase.com/dashboard"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="underline font-semibold"
-              >
-                Supabase 대시보드
-              </a>
-              {" "}→ <strong>SQL Editor</strong> → <strong>New Query</strong>에 붙여넣고 <strong>Run</strong>을 클릭하세요.
+            <p className="font-bold text-amber-800 mb-1">
+              ❌ 없음: {missing.map((n) => <code key={n} className="font-mono">{n} </code>)}
+              — 아래 SQL 로 생성하세요 (딱 이 테이블용 SQL 만 표시)
             </p>
+            <ol className="text-sm text-amber-700 list-decimal ml-4 space-y-0.5">
+              <li>
+                <a href="https://supabase.com/dashboard" target="_blank" rel="noopener noreferrer"
+                   className="underline font-semibold">Supabase 대시보드</a>
+                에서 <strong>이 사이트의 프로젝트</strong>를 선택
+              </li>
+              <li>왼쪽 메뉴 <strong>SQL Editor</strong> → <strong>New query</strong></li>
+              <li>아래 SQL 전체를 복사해 붙여넣고 <strong>Run</strong> (모든 구문이
+                  IF NOT EXISTS 라 여러 번 실행해도 안전합니다)</li>
+              <li>이 페이지를 새로고침 → ✅ 정상 확인</li>
+            </ol>
           </div>
 
           {/* SQL 코드 블록 */}
           <div className="bg-slate-900 rounded-2xl overflow-hidden mb-6">
             <div className="flex items-center justify-between px-4 py-3 border-b border-slate-700">
-              <span className="text-xs text-slate-400 font-mono">supabase/schema.sql</span>
+              <span className="text-xs text-slate-400 font-mono">{sqlFile.replaceAll("\\", "/")}</span>
               <span className="text-xs text-slate-500">복사하여 Supabase SQL Editor에 붙여넣기</span>
             </div>
             <pre className="p-4 text-xs text-green-300 font-mono overflow-x-auto whitespace-pre-wrap leading-relaxed">

@@ -77,6 +77,8 @@ const nextConfig: NextConfig = {
     "/api/studio/sheet/[key]/[n]": ["./content-private/studio/**/*"],
     "/api/studio/net/[key]": ["./content-private/studio/**/*"],
     "/api/studio/class/pdf": ["./content-private/studio/**/*"],
+    // DB 셋업 페이지가 누락 테이블별 SQL(schema.sql·migrations/*)을 런타임에 읽는다
+    "/admin/setup": ["./supabase/**/*"],
   },
 
   /**

@@ -5,6 +5,7 @@
 
 import { NextResponse } from "next/server";
 import { paidGateResponse, resolveStudioItem, servePrivateFile } from "@/lib/studio-server";
+import { isExposed } from "@/lib/studio-review";
 
 export async function GET(
   _request: Request,
@@ -13,6 +14,9 @@ export async function GET(
   const { key, n } = await params;
   const item = resolveStudioItem(key);
   if (!item) {
+    return NextResponse.json({ error: "존재하지 않는 도안입니다." }, { status: 404 });
+  }
+  if (!(await isExposed(item.skey))) {               // 검수 큐레이션 게이트(반려 비노출)
     return NextResponse.json({ error: "존재하지 않는 도안입니다." }, { status: 404 });
   }
   const num = Number.parseInt(n, 10);
