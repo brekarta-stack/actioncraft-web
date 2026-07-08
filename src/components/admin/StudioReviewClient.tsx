@@ -334,6 +334,29 @@ export default function StudioReviewClient({ ver, items: initial, categories, ta
           <p className="text-center text-slate-400 text-sm py-12">조건에 맞는 도면이 없습니다.</p>
         )}
       </section>
+
+      {/* ── 반려 도면 수정 파이프라인 안내 (데스크톱 PS2 연동) ── */}
+      <section className="mt-10 bg-slate-50 border border-slate-200 rounded-2xl p-5 text-sm text-slate-600">
+        <h2 className="font-bold text-slate-800 mb-2">🛠 반려한 도면은 이렇게 고칩니다 (데스크톱 연동)</h2>
+        <ol className="list-decimal ml-5 space-y-1" style={{ wordBreak: "keep-all" }}>
+          <li>데스크톱 <b>Papercraft Studio 2</b> 앱에서 해당 모델을 열어 수정합니다(씨임·붙이기·배치·꾸미기).</li>
+          <li><b>Ctrl+S</b>로 프로젝트(.pcz2)를 저장합니다.</li>
+          <li>윈도우 터미널에서:{" "}
+            <code className="bg-white border border-slate-200 rounded px-1.5 py-0.5 text-[11px]">
+              C:\Users\breka\papercraft-studio\.venv\Scripts\python tools\export_override.py &lt;저장한.pcz2&gt;
+            </code>
+          </li>
+          <li>이어서{" "}
+            <code className="bg-white border border-slate-200 rounded px-1.5 py-0.5 text-[11px]">
+              python tools\web_publish.py --all
+            </code>{" "}
+            → 수정본이 엔진 생성본 대신 배포됩니다(meta에 edited 표시).
+          </li>
+          <li>여기로 돌아와 해당 도면을 <b>통과</b>로 바꾸면 끝. (수정본 폐기 = {" "}
+            <code className="bg-white border border-slate-200 rounded px-1.5 py-0.5 text-[11px]">web\overrides\&lt;skey&gt;</code> 폴더 삭제 후 재배포)
+          </li>
+        </ol>
+      </section>
     </div>
   );
 }
