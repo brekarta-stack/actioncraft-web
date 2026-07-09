@@ -7,6 +7,7 @@
 <polygon points="35.344,86.536 36.903,96.547 64.038,117.328 74.109,116.224" fill="rgb(216,216,216)"/>
 <polygon points="83.559,18.691 89.021,16.044 94.526,22.04 91.422,27.257" fill="rgb(216,216,216)"/>
 <polygon points="21.318,10.556 15.538,5.941 6.146,11.937 7.9,19.122" fill="rgb(216,216,216)"/>
+<polygon points="55.454,60.277 65.584,60.481 90.761,37.366 91.422,27.257" fill="#99d9fa"/>
 <line x1="47.591" y1="51.712" x2="55.454" y2="60.277" stroke="#8c8c8c" stroke-width="0.3" stroke-dasharray="1.2,0.8"/>
 <line x1="34.173" y1="60.277" x2="47.591" y2="51.712" stroke="#8c8c8c" stroke-width="0.3" stroke-dasharray="1.2,0.8"/>
 <line x1="55.454" y1="60.277" x2="35.344" y2="86.536" stroke="#8c8c8c" stroke-width="0.3" stroke-dasharray="1.2,0.8"/>
@@ -49,7 +50,7 @@
 <line x1="6.146" y1="11.937" x2="7.9" y2="19.122" stroke="#141414" stroke-width="0.4"/>
 <circle cx="63.208" cy="32.623" r="2.19" fill="#ffe082" stroke="#464646" stroke-width="0.2"/>
 <text x="63.208" y="33.66" font-size="2.97" text-anchor="middle" fill="#141414">57</text>
-<circle cx="75.805" cy="46.345" r="2.19" fill="#ffe082" stroke="#464646" stroke-width="0.2"/>
+<circle cx="75.805" cy="46.345" r="2.19" fill="#99d9fa" stroke="#464646" stroke-width="0.2"/>
 <text x="75.805" y="47.39" font-size="2.97" text-anchor="middle" fill="#141414">58</text>
 <circle cx="31.262" cy="73.563" r="2.19" fill="#ffe082" stroke="#464646" stroke-width="0.2"/>
 <text x="31.262" y="74.60" font-size="2.97" text-anchor="middle" fill="#141414">59</text>
@@ -61,6 +62,7 @@
 <text x="89.632" y="22.05" font-size="2.97" text-anchor="middle" fill="#141414">62</text>
 <circle cx="12.726" cy="11.889" r="2.19" fill="#ffe082" stroke="#464646" stroke-width="0.2"/>
 <text x="12.726" y="12.93" font-size="2.97" text-anchor="middle" fill="#141414">63</text>
-<circle cx="57.219" cy="169.043" r="4.6" fill="#eaf1fe" stroke="#2e78e6" stroke-width="0.3"/>
-<text x="57.219" y="170.84300000000002" font-size="5.2" text-anchor="middle" fill="#14306e" font-weight="bold">9</text>
+<circle cx="67.891" cy="97.575" r="4.60" fill="#eaf1fe" stroke="#2e78e6" stroke-width="0.3"/>
+<text x="67.891" y="99.38" font-size="5.20" text-anchor="middle" fill="#14306e" font-weight="bold">9</text>
+<text x="205.0" y="295.0" font-size="3.2" text-anchor="end" fill="#737373" font-family="sans-serif">8 / 13</text>
 </svg>

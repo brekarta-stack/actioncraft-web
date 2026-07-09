@@ -3,6 +3,7 @@
 <polygon points="149.352,11.7 153.176,21.636 140.334,56.799 131.007,61.932" fill="rgb(216,216,216)"/>
 <polygon points="131.007,5.0 121.68,10.133 108.838,45.296 112.661,55.232" fill="rgb(216,216,216)"/>
 <polygon points="5.0,194.134 10.133,203.461 45.296,216.302 55.232,212.479" fill="rgb(216,216,216)"/>
+<polygon points="131.007,5.0 121.68,10.133 108.838,45.296 112.661,55.232" fill="#99d9fa"/>
 <line x1="131.007" y1="61.932" x2="112.661" y2="55.232" stroke="#8c8c8c" stroke-width="0.3" stroke-dasharray="1.2,0.8"/>
 <line x1="112.661" y1="55.232" x2="55.232" y2="212.479" stroke="#8c8c8c" stroke-width="0.3" stroke-dasharray="1.2,0.8"/>
 <line x1="131.007" y1="61.932" x2="149.352" y2="11.7" stroke="#8c8c8c" stroke-width="0.3" stroke-dasharray="1.2,0.8"/>
@@ -24,10 +25,11 @@
 <line x1="45.296" y1="216.302" x2="55.232" y2="212.479" stroke="#141414" stroke-width="0.4"/>
 <circle cx="143.467" cy="38.017" r="2.19" fill="#ffe082" stroke="#464646" stroke-width="0.2"/>
 <text x="143.467" y="39.06" font-size="2.97" text-anchor="middle" fill="#141414">83</text>
-<circle cx="118.546" cy="28.915" r="2.19" fill="#ffe082" stroke="#464646" stroke-width="0.2"/>
+<circle cx="118.546" cy="28.915" r="2.19" fill="#99d9fa" stroke="#464646" stroke-width="0.2"/>
 <text x="118.546" y="29.96" font-size="2.97" text-anchor="middle" fill="#141414">84</text>
 <circle cx="28.915" cy="206.594" r="2.19" fill="#ffe082" stroke="#464646" stroke-width="0.2"/>
 <text x="28.915" y="207.63" font-size="2.97" text-anchor="middle" fill="#141414">85</text>
-<circle cx="79.088" cy="225.279" r="4.6" fill="#eaf1fe" stroke="#2e78e6" stroke-width="0.3"/>
-<text x="79.088" y="227.079" font-size="5.2" text-anchor="middle" fill="#14306e" font-weight="bold">13</text>
+<circle cx="40.887" cy="147.833" r="4.60" fill="#eaf1fe" stroke="#2e78e6" stroke-width="0.3"/>
+<text x="40.887" y="149.63" font-size="5.20" text-anchor="middle" fill="#14306e" font-weight="bold">13</text>
+<text x="205.0" y="295.0" font-size="3.2" text-anchor="end" fill="#737373" font-family="sans-serif">12 / 13</text>
 </svg>

@@ -18,7 +18,7 @@
   {
    "category": "탈것",
    "est_minutes": 37,
-   "finished_mm": 145.5,
+   "finished_mm": 145.8,
    "key": "d:airplane",
    "name_ko": "비행기",
    "pages": 3,
@@ -31,7 +31,7 @@
   {
    "category": "탈것",
    "est_minutes": 45,
-   "finished_mm": 156.4,
+   "finished_mm": 152.0,
    "key": "d:ambulance",
    "name_ko": "구급차",
    "pages": 4,
@@ -53,6 +53,19 @@
    "skey": "d_ankylosaurus",
    "stars": 4,
    "svg_sheets": 11
+  },
+  {
+   "category": "세계 건축물",
+   "est_minutes": 65,
+   "finished_mm": 173.9,
+   "key": "d:arctriomphe",
+   "name_ko": "개선문",
+   "pages": 13,
+   "pdf_pages": 14,
+   "pieces": 15,
+   "skey": "d_arctriomphe",
+   "stars": 3,
+   "svg_sheets": 13
   },
   {
    "category": "식물",
@@ -174,7 +187,7 @@
   {
    "category": "탈것",
    "est_minutes": 69,
-   "finished_mm": 321.2,
+   "finished_mm": 244.4,
    "key": "d:bullettrain",
    "name_ko": "고속열차",
    "pages": 15,
@@ -264,15 +277,15 @@
   },
   {
    "category": "탈것",
-   "est_minutes": 47,
-   "finished_mm": 148.0,
+   "est_minutes": 77,
+   "finished_mm": 211.1,
    "key": "d:cementmixer",
    "name_ko": "레미콘",
-   "pages": 3,
-   "pdf_pages": 4,
-   "pieces": 10,
+   "pages": 6,
+   "pdf_pages": 7,
+   "pieces": 15,
    "skey": "d_cementmixer",
-   "stars": 2,
+   "stars": 3,
    "svg_sheets": 8
   },
   {
@@ -316,12 +329,12 @@
   },
   {
    "category": "세계 건축물",
-   "est_minutes": 96,
-   "finished_mm": 90.5,
+   "est_minutes": 97,
+   "finished_mm": 104.5,
    "key": "d:colosseum",
    "name_ko": "콜로세움",
-   "pages": 4,
-   "pdf_pages": 5,
+   "pages": 6,
+   "pdf_pages": 7,
    "pieces": 19,
    "skey": "d_colosseum",
    "stars": 4,
@@ -381,13 +394,13 @@
   },
   {
    "category": "한국 건축물",
-   "est_minutes": 75,
-   "finished_mm": 163.3,
+   "est_minutes": 83,
+   "finished_mm": 177.7,
    "key": "d:dabotap",
    "name_ko": "다보탑",
-   "pages": 4,
-   "pdf_pages": 5,
-   "pieces": 16,
+   "pages": 5,
+   "pdf_pages": 6,
+   "pieces": 17,
    "skey": "d_dabotap",
    "stars": 3,
    "svg_sheets": 11
@@ -798,7 +811,7 @@
   {
    "category": "탈것",
    "est_minutes": 45,
-   "finished_mm": 142.0,
+   "finished_mm": 141.1,
    "key": "d:jeep",
    "name_ko": "지프",
    "pages": 5,
@@ -858,7 +871,7 @@
    "pieces": 9,
    "skey": "d_liberty",
    "stars": 2,
-   "svg_sheets": 3
+   "svg_sheets": 4
   },
   {
    "category": "캐릭터·오브젝트",
@@ -875,12 +888,12 @@
   },
   {
    "category": "세계 건축물",
-   "est_minutes": 75,
-   "finished_mm": 248.1,
+   "est_minutes": 50,
+   "finished_mm": 478.0,
    "key": "d:lighthouse",
    "name_ko": "등대",
-   "pages": 7,
-   "pdf_pages": 8,
+   "pages": 5,
+   "pdf_pages": 6,
    "pieces": 10,
    "skey": "d_lighthouse",
    "stars": 2,
@@ -901,8 +914,8 @@
   },
   {
    "category": "한국 건축물",
-   "est_minutes": 23,
-   "finished_mm": 293.6,
+   "est_minutes": 20,
+   "finished_mm": 247.9,
    "key": "d:lottetower",
    "name_ko": "롯데월드타워",
    "pages": 3,
@@ -1006,7 +1019,7 @@
   {
    "category": "세계 건축물",
    "est_minutes": 69,
-   "finished_mm": 183.8,
+   "finished_mm": 376.7,
    "key": "d:pagoda",
    "name_ko": "오층탑",
    "pages": 6,
@@ -1097,7 +1110,7 @@
   {
    "category": "세계 건축물",
    "est_minutes": 85,
-   "finished_mm": 334.6,
+   "finished_mm": 265.7,
    "key": "d:pisa",
    "name_ko": "피사의 사탑",
    "pages": 9,
@@ -1292,7 +1305,7 @@
   {
    "category": "한국 건축물",
    "est_minutes": 36,
-   "finished_mm": 243.3,
+   "finished_mm": 221.2,
    "key": "d:seokgatap",
    "name_ko": "석가탑",
    "pages": 4,
@@ -1394,19 +1407,6 @@
    "svg_sheets": 3
   },
   {
-   "category": "세계 건축물",
-   "est_minutes": 59,
-   "finished_mm": 233.6,
-   "key": "d:sphinx",
-   "name_ko": "스핑크스",
-   "pages": 4,
-   "pdf_pages": 5,
-   "pieces": 11,
-   "skey": "d_sphinx",
-   "stars": 2,
-   "svg_sheets": 6
-  },
-  {
    "category": "탈것",
    "est_minutes": 49,
    "finished_mm": 143.8,
@@ -1474,7 +1474,7 @@
   {
    "category": "세계 건축물",
    "est_minutes": 37,
-   "finished_mm": 158.2,
+   "finished_mm": 176.0,
    "key": "d:stonehenge",
    "name_ko": "스톤헨지",
    "pages": 4,
@@ -1509,6 +1509,19 @@
    "skey": "d_sunflower",
    "stars": 3,
    "svg_sheets": 6
+  },
+  {
+   "category": "세계 건축물",
+   "est_minutes": 78,
+   "finished_mm": 147.5,
+   "key": "d:taj",
+   "name_ko": "타지마할",
+   "pages": 7,
+   "pdf_pages": 8,
+   "pieces": 16,
+   "skey": "d_taj",
+   "stars": 3,
+   "svg_sheets": 7
   },
   {
    "category": "탈것",
@@ -1565,7 +1578,7 @@
   {
    "category": "탈것",
    "est_minutes": 45,
-   "finished_mm": 147.3,
+   "finished_mm": 148.3,
    "key": "d:train",
    "name_ko": "기차",
    "pages": 6,
@@ -1590,8 +1603,8 @@
   },
   {
    "category": "식물",
-   "est_minutes": 19,
-   "finished_mm": 193.3,
+   "est_minutes": 20,
+   "finished_mm": 195.0,
    "key": "d:tree",
    "name_ko": "나무",
    "pages": 3,
@@ -1656,7 +1669,7 @@
   {
    "category": "탈것",
    "est_minutes": 58,
-   "finished_mm": 191.9,
+   "finished_mm": 190.6,
    "key": "d:van",
    "name_ko": "승합차",
    "pages": 8,
@@ -1695,11 +1708,11 @@
   {
    "category": "세계 건축물",
    "est_minutes": 33,
-   "finished_mm": 176.6,
+   "finished_mm": 157.7,
    "key": "d:windmill",
    "name_ko": "풍차",
-   "pages": 3,
-   "pdf_pages": 4,
+   "pages": 5,
+   "pdf_pages": 6,
    "pieces": 7,
    "skey": "d_windmill",
    "stars": 2,
