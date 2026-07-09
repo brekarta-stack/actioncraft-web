@@ -134,16 +134,16 @@
   },
   {
    "category": "탈것",
-   "est_minutes": 27,
-   "finished_mm": 109.5,
+   "est_minutes": 25,
+   "finished_mm": 141.7,
    "key": "d:boat",
    "name_ko": "배",
-   "pages": 2,
-   "pdf_pages": 3,
+   "pages": 3,
+   "pdf_pages": 4,
    "pieces": 5,
    "skey": "d_boat",
    "stars": 1,
-   "svg_sheets": 2
+   "svg_sheets": 3
   },
   {
    "category": "세계 건축물",
@@ -339,6 +339,19 @@
    "skey": "d_corgi",
    "stars": 3,
    "svg_sheets": 4
+  },
+  {
+   "category": "육지동물",
+   "est_minutes": 95,
+   "finished_mm": 159.1,
+   "key": "d:cow",
+   "name_ko": "소",
+   "pages": 4,
+   "pdf_pages": 5,
+   "pieces": 18,
+   "skey": "d_cow",
+   "stars": 4,
+   "svg_sheets": 10
   },
   {
    "category": "탈것",
