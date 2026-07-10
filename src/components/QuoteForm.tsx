@@ -166,7 +166,8 @@ export default function QuoteForm() {
       const saved = localStorage.getItem(STORAGE_KEY);
       if (saved) {
         const parsed = JSON.parse(saved);
-        if (parsed.form) setForm(parsed.form);
+        // 구버전 초안엔 fileUrl/logoFileUrl 이 없을 수 있으므로 기본값과 병합(누락 키 방지)
+        if (parsed.form) setForm({ ...INITIAL_FORM, ...parsed.form });
         if (typeof parsed.step === "number") setStep(Math.min(Math.max(parsed.step, 1), 4));
       }
     } catch {
