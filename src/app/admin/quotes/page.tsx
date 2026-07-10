@@ -40,7 +40,9 @@ export default async function AdminQuotesPage() {
         email: r.email,
         phone: r.phone,
         fileName: r.file_name,
+        fileUrl: r.file_url ?? "",
         logoFileName: r.logo_file_name ?? "",
+        logoFileUrl: r.logo_file_url ?? "",
         sampling:     !!r.sampling,
         rushed:       !!r.rushed,
         packaging:    r.packaging ?? "",
@@ -158,9 +160,33 @@ export default async function AdminQuotesPage() {
                   <span>📞</span> {q.phone}
                 </a>
                 {q.fileName && (
-                  <span className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-500 text-xs">
-                    📎 {q.fileName}
-                  </span>
+                  q.fileUrl ? (
+                    <a
+                      href={q.fileUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="flex items-center gap-1.5 px-3 py-1.5 bg-white border border-slate-200 rounded-lg hover:border-blue-300 hover:text-blue-700 transition-colors text-slate-700 text-xs"
+                    >
+                      📎 {q.fileName} <span className="text-blue-500">↗</span>
+                    </a>
+                  ) : (
+                    <span
+                      className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-400 text-xs"
+                      title="이 문의는 파일이 실제로 업로드되기 전(구버전 폼)에 접수되어 열 수 없습니다."
+                    >
+                      📎 {q.fileName} <span className="text-slate-300">(파일 없음)</span>
+                    </span>
+                  )
+                )}
+                {q.logoFileName && q.logoFileUrl && (
+                  <a
+                    href={q.logoFileUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="flex items-center gap-1.5 px-3 py-1.5 bg-white border border-slate-200 rounded-lg hover:border-blue-300 hover:text-blue-700 transition-colors text-slate-700 text-xs"
+                  >
+                    🏷️ {q.logoFileName} <span className="text-blue-500">↗</span>
+                  </a>
                 )}
               </div>
 

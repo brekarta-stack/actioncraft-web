@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState, type FormEvent } from "react";
+import { useEffect, useState, type ChangeEvent, type FormEvent } from "react";
+import { prepareImageForUpload } from "@/lib/image-resize";
 import {
   PaperToyIcon,
   GearIcon,
@@ -45,8 +46,12 @@ interface FormState {
   phone: string;
   /** 참고 자료 파일명 (필수) — 이미지·ai·문서 */
   fileName: string;
+  /** 참고 자료 파일 공개 URL — 업로드 성공 시 채워짐 */
+  fileUrl: string;
   /** 회사 로고 파일명 (선택) */
   logoFileName: string;
+  /** 회사 로고 파일 공개 URL (선택) */
+  logoFileUrl: string;
   /** 샘플링 희망 — B2B 기업 주문 시 필수 */
   sampling: boolean;
   /** 최대한 빠르게 제작 — 납품 희망일 선택 해제 */
@@ -88,7 +93,9 @@ const INITIAL_FORM: FormState = {
   email: "",
   phone: "",
   fileName: "",
+  fileUrl: "",
   logoFileName: "",
+  logoFileUrl: "",
   sampling: false,
   rushed: false,
   packaging: "",
@@ -148,6 +155,9 @@ export default function QuoteForm() {
   const [hydrated, setHydrated] = useState(false);
   /** Step 1 선택 모드 — 제품 종류별 / 용도별 토글 */
   const [step1Mode, setStep1Mode] = useState<"product" | "usage">("product");
+  /** 첨부파일 업로드 진행/오류 상태 (참고자료 file / 로고 logo) */
+  const [uploading, setUploading] = useState({ file: false, logo: false });
+  const [uploadErr, setUploadErr] = useState({ file: "", logo: "" });
 
   // localStorage 에서 작성 중인 폼 복원 (이탈 방지)
   useEffect(() => {
@@ -179,10 +189,37 @@ export default function QuoteForm() {
     setForm((prev) => ({ ...prev, [key]: value }));
   };
 
+  /** 파일 선택 → Supabase Storage 로 실제 업로드 후 공개 URL 저장.
+   *  이전 버전은 파일명만 저장하고 파일을 버려서 어드민에서 열 수 없었다(핵심 버그 수정). */
+  const handlePick = async (e: ChangeEvent<HTMLInputElement>, which: "file" | "logo") => {
+    const f = e.target.files?.[0];
+    e.target.value = ""; // 같은 파일 재선택 허용
+    const nameKey: keyof FormState = which === "file" ? "fileName" : "logoFileName";
+    const urlKey: keyof FormState = which === "file" ? "fileUrl" : "logoFileUrl";
+    if (!f) return;
+    setUploadErr((s) => ({ ...s, [which]: "" }));
+    setForm((prev) => ({ ...prev, [nameKey]: f.name, [urlKey]: "" }));
+    setUploading((s) => ({ ...s, [which]: true }));
+    try {
+      const prepared = await prepareImageForUpload(f);
+      const fd = new FormData();
+      fd.append("file", prepared.file, prepared.file.name);
+      const res = await fetch("/api/quote/upload", { method: "POST", body: fd });
+      const json = (await res.json().catch(() => ({}))) as { url?: string; name?: string; error?: string };
+      if (!res.ok || !json.url) throw new Error(json.error || "업로드에 실패했습니다.");
+      setForm((prev) => ({ ...prev, [nameKey]: json.name || f.name, [urlKey]: json.url as string }));
+    } catch (err) {
+      setUploadErr((s) => ({ ...s, [which]: err instanceof Error ? err.message : "업로드에 실패했습니다." }));
+      setForm((prev) => ({ ...prev, [nameKey]: "", [urlKey]: "" }));
+    } finally {
+      setUploading((s) => ({ ...s, [which]: false }));
+    }
+  };
+
   const canProceed = () => {
     if (step === 1) return form.product !== "";
-    // Step 2: 디자인 옵션 — 참고 자료 + 스타일 필수
-    if (step === 2) return form.fileName !== "" && form.styleType !== "";
+    // Step 2: 디자인 옵션 — 참고 자료 업로드 완료(URL 확보) + 스타일 필수
+    if (step === 2) return form.fileUrl !== "" && !uploading.file && form.styleType !== "";
     // Step 3: 제작 옵션 — 수량 + (희망일 OR 빠른 제작) + 포장 방식 필수
     if (step === 3)
       return form.quantity !== "" && (form.deliveryDate !== "" || form.rushed) && form.packaging !== "";
@@ -193,6 +230,7 @@ export default function QuoteForm() {
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     if (!canProceed()) return;
+    if (uploading.file || uploading.logo) return; // 업로드 완료 후 제출
     setSaving(true);
     const acquisition = getStoredAcquisition();
     try {
@@ -724,19 +762,37 @@ export default function QuoteForm() {
                   <label className="block text-sm font-semibold text-slate-700 mb-2">
                     참고 자료 업로드 <span style={{ color: "#E91E8C" }}>*</span>
                   </label>
-                  <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-slate-300 rounded-xl cursor-pointer hover:border-[#1E22B2] hover:bg-blue-50 transition-colors">
-                    <BoxIcon size={28} className="text-slate-400 mb-1" />
+                  <label
+                    className={`flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-xl transition-colors ${
+                      uploading.file
+                        ? "border-[#1E22B2] bg-blue-50 cursor-wait"
+                        : form.fileUrl
+                          ? "border-emerald-400 bg-emerald-50 cursor-pointer"
+                          : "border-slate-300 cursor-pointer hover:border-[#1E22B2] hover:bg-blue-50"
+                    }`}
+                  >
+                    <BoxIcon size={28} className={form.fileUrl ? "text-emerald-500 mb-1" : "text-slate-400 mb-1"} />
                     <span className="text-sm text-slate-700 font-medium" style={{ wordBreak: "keep-all" }}>
-                      {form.fileName || "파일을 클릭하거나 드래그하여 첨부"}
+                      {uploading.file
+                        ? `업로드 중… ${form.fileName}`
+                        : form.fileUrl
+                          ? `✓ ${form.fileName} — 첨부 완료`
+                          : form.fileName || "파일을 클릭하거나 드래그하여 첨부"}
                     </span>
-                    <span className="text-xs text-slate-400 mt-1">PDF · AI · PNG · JPG · ZIP (최대 10MB)</span>
+                    <span className="text-xs text-slate-400 mt-1">PNG · JPG · PDF · AI · ZIP (이미지 자동 축소 · 문서 4MB 이하)</span>
                     <input
                       type="file"
                       className="hidden"
-                      accept=".pdf,.ai,.png,.jpg,.jpeg,.zip"
-                      onChange={(e) => update("fileName", e.target.files?.[0]?.name ?? "")}
+                      accept=".pdf,.ai,.png,.jpg,.jpeg,.webp,.gif,.zip"
+                      disabled={uploading.file}
+                      onChange={(e) => handlePick(e, "file")}
                     />
                   </label>
+                  {uploadErr.file && (
+                    <p className="text-xs text-rose-600 mt-2" style={{ wordBreak: "keep-all" }}>
+                      ⚠ {uploadErr.file} — 다시 시도해 주세요.
+                    </p>
+                  )}
                   <p className="text-xs text-slate-500 mt-2" style={{ wordBreak: "keep-all" }}>
                     만들고자 하는 대상/캐릭터의 이미지, ai파일, 참고 문서 등을 업로드해주세요.
                   </p>
@@ -820,17 +876,35 @@ export default function QuoteForm() {
                   <label className="block text-sm font-semibold text-slate-700 mb-2">
                     회사 로고 업로드 <span className="text-slate-400 font-normal">(선택)</span>
                   </label>
-                  <label className="flex flex-col items-center justify-center w-full h-24 border-2 border-dashed border-slate-300 rounded-xl cursor-pointer hover:border-[#1E22B2] hover:bg-blue-50 transition-colors">
+                  <label
+                    className={`flex flex-col items-center justify-center w-full h-24 border-2 border-dashed rounded-xl transition-colors ${
+                      uploading.logo
+                        ? "border-[#1E22B2] bg-blue-50 cursor-wait"
+                        : form.logoFileUrl
+                          ? "border-emerald-400 bg-emerald-50 cursor-pointer"
+                          : "border-slate-300 cursor-pointer hover:border-[#1E22B2] hover:bg-blue-50"
+                    }`}
+                  >
                     <span className="text-sm text-slate-600" style={{ wordBreak: "keep-all" }}>
-                      {form.logoFileName || "로고 파일 첨부 (SVG·PNG·AI 권장)"}
+                      {uploading.logo
+                        ? `업로드 중… ${form.logoFileName}`
+                        : form.logoFileUrl
+                          ? `✓ ${form.logoFileName} — 첨부 완료`
+                          : form.logoFileName || "로고 파일 첨부 (SVG·PNG·AI 권장)"}
                     </span>
                     <input
                       type="file"
                       className="hidden"
                       accept=".svg,.png,.ai,.pdf,.jpg,.jpeg"
-                      onChange={(e) => update("logoFileName", e.target.files?.[0]?.name ?? "")}
+                      disabled={uploading.logo}
+                      onChange={(e) => handlePick(e, "logo")}
                     />
                   </label>
+                  {uploadErr.logo && (
+                    <p className="text-xs text-rose-600 mt-2" style={{ wordBreak: "keep-all" }}>
+                      ⚠ {uploadErr.logo} — 다시 시도해 주세요.
+                    </p>
+                  )}
                 </div>
               </div>
             )}

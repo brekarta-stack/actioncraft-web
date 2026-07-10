@@ -57,7 +57,8 @@ async function sendInquiryEmail(s: QuoteSubmission): Promise<void> {
     return `${source} / ${medium}${camp}`;
   })();
 
-  const rows: Array<[string, string]> = [
+  // [라벨, 값, 선택적 href] — href 가 있으면 값이 클릭 가능한 링크로 렌더된다.
+  const rows: Array<[string, string, string?]> = [
     ["제품 유형",         productLabel],
     ["샘플링 희망",       s.sampling ? "예 (생산 전 수제작 샘플 발송)" : "아니오"],
     ["수량",              s.quantity || "—"],
@@ -72,8 +73,8 @@ async function sendInquiryEmail(s: QuoteSubmission): Promise<void> {
     ["담당자 이름",       s.name],
     ["이메일",            s.email],
     ["연락처",            s.phone || "—"],
-    ["참고 자료 파일",    s.fileName || "—"],
-    ["회사 로고 파일",    s.logoFileName || "—"],
+    ["참고 자료 파일",    s.fileName || "—", s.fileUrl || undefined],
+    ["회사 로고 파일",    s.logoFileName || "—", s.logoFileUrl || undefined],
     ["유입 경로",         acqText],
     ["광고 클릭ID(gclid)", s.acquisition?.gclid || "—"],
     ["접수 일시",         s.createdAt],
@@ -84,10 +85,12 @@ async function sendInquiryEmail(s: QuoteSubmission): Promise<void> {
     v.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 
   const tableHtml = rows
-    .map(
-      ([k, v]) =>
-        `<tr><th align="left" style="padding:8px 14px;border-bottom:1px solid #eee;background:#fafafa;white-space:nowrap;width:120px;color:#555;font-weight:600;">${esc(k)}</th><td style="padding:8px 14px;border-bottom:1px solid #eee;color:#111;">${esc(v).replace(/\n/g, "<br/>")}</td></tr>`,
-    )
+    .map(([k, v, href]) => {
+      const cell = href
+        ? `<a href="${esc(href)}" target="_blank" rel="noreferrer" style="color:#6366f1;">${esc(v)} · 열기 ↗</a>`
+        : esc(v).replace(/\n/g, "<br/>");
+      return `<tr><th align="left" style="padding:8px 14px;border-bottom:1px solid #eee;background:#fafafa;white-space:nowrap;width:120px;color:#555;font-weight:600;">${esc(k)}</th><td style="padding:8px 14px;border-bottom:1px solid #eee;color:#111;">${cell}</td></tr>`;
+    })
     .join("");
 
   const html = `<!doctype html><html><body style="margin:0;padding:24px;background:#f4f4f5;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
@@ -103,7 +106,7 @@ async function sendInquiryEmail(s: QuoteSubmission): Promise<void> {
   </div>
 </div></body></html>`;
 
-  const textLines = rows.map(([k, v]) => `${k}: ${v}`).join("\n");
+  const textLines = rows.map(([k, v, href]) => `${k}: ${v}${href ? ` (${href})` : ""}`).join("\n");
   const text = `[papercraft.kr] 새 제작 문의\n\n${textLines}\n\n전체 목록: ${siteUrl}/admin/quotes\n`;
 
   const resend = new Resend(apiKey);
@@ -118,6 +121,16 @@ async function sendInquiryEmail(s: QuoteSubmission): Promise<void> {
     text,
   });
 }
+
+/* 첨부파일 URL 검증 — 빈 문자열이거나, 우리 스토리지의 공개 https URL만 허용.
+   (javascript:/data: 등 주입 차단 — 어드민/이메일에서 href 로 렌더되므로) */
+const QuoteFileUrl = z
+  .string()
+  .max(1024)
+  .default("")
+  .refine((v) => v === "" || /^https:\/\/[^\s"'<>]+\/storage\/v1\/object\/public\//.test(v), {
+    message: "허용되지 않는 파일 URL 입니다.",
+  });
 
 /* ── 입력 스키마 (Zod) ── */
 const QuoteSchema = z.object({
@@ -137,8 +150,12 @@ const QuoteSchema = z.object({
   email:        z.string().email("올바른 이메일을 입력하세요").max(200),
   phone:        z.string().max(30).default(""),
   fileName:     z.string().max(255).default(""),
+  // 신규: 참고 자료 파일의 공개 URL (Supabase Storage)
+  fileUrl:      QuoteFileUrl,
   // 신규: 회사 로고 파일명 (선택)
   logoFileName: z.string().max(255).default(""),
+  // 신규: 회사 로고 파일의 공개 URL (선택)
+  logoFileUrl:  QuoteFileUrl,
   // 제작 옵션 (Step 3 확장)
   sampling:     z.boolean().default(false),
   rushed:       z.boolean().default(false),
@@ -212,7 +229,9 @@ export async function POST(request: Request) {
     email:        data.email,
     phone:        data.phone,
     fileName:     data.fileName,
+    fileUrl:      data.fileUrl,
     logoFileName: data.logoFileName,
+    logoFileUrl:  data.logoFileUrl,
     sampling:     data.sampling,
     rushed:       data.rushed,
     packaging:    data.packaging,
@@ -259,6 +278,19 @@ export async function POST(request: Request) {
     }
   }
 
+  /* 첨부파일 URL best-effort 저장 — file_url/logo_file_url 컬럼(마이그레이션 20260710)이
+     없으면 조용히 건너뜀. 별도 update 라 컬럼 부재 시에도 위 insert(견적 접수)에는 영향 없음.
+     컬럼 생성(SQL Editor에서 1회 실행) 후부터 어드민/이메일에서 첨부 열람 가능. */
+  if (submission.fileUrl || submission.logoFileUrl) {
+    const { error: fileErr } = await supabaseAdmin
+      .from("quotes")
+      .update({ file_url: submission.fileUrl, logo_file_url: submission.logoFileUrl })
+      .eq("id", submission.id);
+    if (fileErr) {
+      console.warn("[api/quote] 첨부 URL 미저장 (마이그레이션 20260710 대기?):", fileErr.message);
+    }
+  }
+
   /* 알림 메일 발송 — 실패해도 사용자에게는 201 응답 유지 */
   try {
     await sendInquiryEmail(submission);
@@ -299,7 +331,9 @@ export async function GET() {
     email:        r.email,
     phone:        r.phone,
     fileName:     r.file_name,
+    fileUrl:      r.file_url ?? "",
     logoFileName: r.logo_file_name ?? "",
+    logoFileUrl:  r.logo_file_url ?? "",
     sampling:     !!r.sampling,
     rushed:       !!r.rushed,
     packaging:    r.packaging ?? "",

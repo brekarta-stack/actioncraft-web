@@ -27,8 +27,12 @@ export interface QuoteSubmission {
   email: string;
   phone: string;
   fileName: string;
+  /** 참고 자료 파일의 공개 URL (Supabase Storage) — 어드민/이메일 열람용. 마이그레이션 20260710 이후 저장 */
+  fileUrl: string;
   /** 회사 로고 파일명 (선택) */
   logoFileName: string;
+  /** 회사 로고 파일의 공개 URL (선택) */
+  logoFileUrl: string;
   /** 샘플링 희망 — B2B 기업 주문 시 필수 */
   sampling: boolean;
   /** 최대한 빠르게 제작 (납품 희망일 대체) */
