@@ -39,6 +39,7 @@ export const STUDIO_ITEMS: StudioItem[] = catalog.items as StudioItem[];
 export const CATEGORY_ORDER = [
   "탈것",
   "공룡",
+  "게임 캐릭터",
   "인기 캐릭터",
   "육지동물",
   "바다생물",
@@ -72,6 +73,7 @@ export function itemsByCategory(): Array<{ category: string; items: StudioItem[]
 export const CATEGORY_SLUG: Record<string, string> = {
   "탈것": "vehicles",
   "공룡": "dinosaurs",
+  "게임 캐릭터": "game-characters",
   "인기 캐릭터": "characters",
   "육지동물": "land-animals",
   "바다생물": "sea-animals",
