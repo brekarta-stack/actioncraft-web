@@ -133,7 +133,7 @@ export default async function StudioDetailPage({ params }: Props) {
       </nav>
 
       <div className="grid md:grid-cols-2 gap-8 items-start">
-        <StudioViewer src={studioAsset(item.skey, "model.glb")} alt={`${item.name_ko} 3D 미리보기`} />
+        <StudioViewer src={studioAsset(item.skey, "model.glb")} alt={`${item.name_ko} 3D 미리보기`} poster={studioAsset(item.skey, "thumb.png")} />
 
         <div>
           <div className="flex items-center gap-2">

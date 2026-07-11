@@ -8,7 +8,7 @@
 
 import { useEffect, useState } from "react";
 
-export default function StudioViewer({ src, alt }: { src: string; alt: string }) {
+export default function StudioViewer({ src, alt, poster }: { src: string; alt: string; poster?: string }) {
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
@@ -23,15 +23,16 @@ export default function StudioViewer({ src, alt }: { src: string; alt: string })
   return (
     <div className="relative w-full aspect-square rounded-2xl overflow-hidden border border-slate-200 bg-[#26282c]">
       {ready ? (
+        // 카드 썸네일(thumb.png)과 '동일한 각도·포즈'로 열리도록: poster=썸네일 +
+        // 썸네일 렌더 각도(측면 3/4)와 맞춘 camera-orbit + 자동회전 제거(포즈 고정).
+        // 자동회전이 모델을 딴 각도로 돌려 "썸네일과 다르다"는 인상을 줬음(사용자 지적).
         <model-viewer
           src={src}
           alt={alt}
+          poster={poster}
           loading="eager"
           camera-controls
-          auto-rotate
-          auto-rotate-delay="1200"
-          rotation-per-second="20deg"
-          camera-orbit="52deg 73deg auto"
+          camera-orbit="30deg 72deg auto"
           shadow-intensity="0.6"
           exposure="1.05"
           touch-action="pan-y"
