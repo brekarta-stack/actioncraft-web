@@ -20,7 +20,8 @@ const AI_BOTS = [
 ];
 
 export default function robots(): MetadataRoute.Robots {
-  const disallow = ["/admin/", "/api/"];
+  // /studio 는 품질 정비 전까지 비공개 — 크롤 차단(복구 시 이 항목 삭제, 2026-07-11)
+  const disallow = ["/admin/", "/api/", "/studio"];
   return {
     rules: [
       { userAgent: "*", allow: "/", disallow },
