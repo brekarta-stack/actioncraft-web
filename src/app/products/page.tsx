@@ -7,6 +7,7 @@ import {
 } from "@/components/icons";
 import { PaperNetBg } from "@/components/paper-art";
 import ProductCatalogTabs from "@/components/ProductCatalogTabs";
+import ProductionTypeGate from "@/components/ProductionTypeGate";
 import PageHero from "@/components/PageHero";
 
 export const metadata: Metadata = {
@@ -102,8 +103,12 @@ export default function ProductsPage() {
         }
       />
 
-      {/* Catalog — 제품 종류별 / 용도별 토글 */}
-      <ProductCatalogTabs />
+      {/* Step 1: 주문 제작 형태 선택 게이트
+          — 도면만 의뢰/제품 생산 선택 시 아래 카탈로그 노출, 완제품은 상담 안내 */}
+      <ProductionTypeGate>
+        {/* Catalog — 제품 종류별 / 용도별 토글 */}
+        <ProductCatalogTabs />
+      </ProductionTypeGate>
 
       {/* Process */}
       <section className="py-16 md:py-24 bg-white">

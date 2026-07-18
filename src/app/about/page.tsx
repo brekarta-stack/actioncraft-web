@@ -13,6 +13,7 @@ import {
 import { PatentBadge, PaperNetBg } from "@/components/paper-art";
 import StudioPhoto from "@/components/StudioPhoto";
 import PageHero from "@/components/PageHero";
+import ArtistsSection from "@/components/ArtistsSection";
 
 export const metadata: Metadata = {
   title: PAGE_META.about.title,
@@ -268,6 +269,9 @@ export default function AboutPage() {
           </div>
         </div>
       </section>
+
+      {/* Artists — 수주 프로젝트를 실제 작업하는 아티스트 소개 */}
+      <ArtistsSection />
 
       {/* Timeline */}
       <section className="py-16 md:py-24" style={{ background: "#F0F2FF" }}>

@@ -4,6 +4,7 @@ import { useState, useCallback, useMemo, useRef } from "react";
 import { useRouter } from "next/navigation";
 import type { PortfolioItem } from "@/lib/portfolio-types";
 import { CATEGORIES, CLIENT_TYPES, SUGGESTED_TAGS } from "@/lib/portfolio-types";
+import { getArtistTags } from "@/lib/artists";
 import { prepareImageForUpload, formatResizeNote } from "@/lib/image-resize";
 import { slugify, parseYearMonth, autoHyphenYearMonth } from "@/lib/portfolio-meta";
 
@@ -420,6 +421,22 @@ export default function PortfolioEditor({ item }: Props) {
                 type="button"
                 onClick={() => addTag(t)}
                 className="text-[11px] px-2 py-0.5 rounded-full text-slate-500 hover:text-blue-700 hover:bg-blue-50 border border-slate-200"
+              >
+                + {t}
+              </button>
+            ))}
+          </div>
+          {/* 작업 아티스트 태그 — 회사소개 아티스트 카드의 "작품 보기" 필터와 연동 */}
+          <div className="mt-2 flex flex-wrap gap-1 items-center">
+            <span className="text-[11px] text-slate-400 font-medium mr-0.5">작업 아티스트</span>
+            {getArtistTags().filter((t) => !tags.includes(t)).map((t) => (
+              <button
+                key={t}
+                type="button"
+                onClick={() => addTag(t)}
+                title="이 태그를 붙이면 회사소개 아티스트 카드의 '작품 보기'에 노출됩니다"
+                className="text-[11px] px-2 py-0.5 rounded-full font-medium border transition-colors"
+                style={{ background: "#FFF0F6", color: "#E91E8C", borderColor: "#fbcfe8" }}
               >
                 + {t}
               </button>
