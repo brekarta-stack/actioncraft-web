@@ -56,6 +56,16 @@ const NAV_GROUPS = [
         ),
       },
       {
+        href: "/admin/artists",
+        exact: false,
+        label: "아티스트",
+        icon: (
+          <svg viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4">
+            <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
+          </svg>
+        ),
+      },
+      {
         href: "/admin/blog",
         exact: false,
         label: "블로그",

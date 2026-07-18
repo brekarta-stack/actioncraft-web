@@ -1,53 +1,21 @@
 /**
- * 아티스트 정보 스키마 + 데이터 — 회사소개 아티스트 섹션의 단일 출처.
+ * 아티스트 데이터 접근 (server-only) — 회사소개 아티스트 섹션 + 어드민 CRUD 의 단일 출처.
  *
  * 컨셉: PE Studio 로 수주된 프로젝트는 이 아티스트들이 직접 설계·작업한다.
  * 아티스트별 작품은 portfolio_items.tags 에 `portfolioTag` 값을 붙여 연결하고,
  * /portfolio?tag={portfolioTag} 딥링크로 필터된 갤러리를 보여준다.
  *
- * ── 운영 방법 ──
- * 1. 아래 ARTISTS 배열의 플레이스홀더를 실제 정보로 교체
- * 2. 프로필 사진: Supabase Storage(uploads)에 정사각형 이미지 업로드 후 URL 을 photo 에
- * 3. 어드민 > 납품 사례 편집 화면의 "작업 아티스트" chips 로 각 작품에 태그 부착
- * 4. published: true 인 아티스트만 사이트에 노출됨
+ * 저장소: Supabase `artists` 테이블 (마이그레이션: supabase/migrations/20260607_artists.sql)
+ * 테이블이 아직 없으면 SEED_ARTISTS 로 폴백해 사이트는 정상 동작한다.
  */
 
-export interface Artist {
-  /** URL-safe 고유 슬러그 (안정 식별자 — 변경하지 말 것) */
-  id: string;
-  /** 표시 이름 (실명 또는 활동명) */
-  name: string;
-  /** 영문 표기 (선택) */
-  englishName?: string;
-  /** 직함/전문 분야 한 줄 (예: "페이퍼 엔지니어 · 지기구조 설계") */
-  role: string;
-  /** 프로필 사진 URL — 정사각형 권장. 비우면 이니셜 아바타로 대체 */
-  photo?: string;
-  /** 2~3문장 소개 */
-  bio: string;
-  /** 전문 영역 목록 (카드에 리스트로 노출) */
-  specialties: string[];
-  /** 작업 스타일 키워드 — 견적 폼의 스타일 옵션과 톤 맞춤 (리얼리즘/캐릭터라이즈 등) */
-  styleTags: string[];
-  /** 주요 이력·대표 프로젝트 (최대 3개 노출) */
-  career?: string[];
-  /**
-   * portfolio_items.tags 와 매칭되는 태그.
-   * 이 태그가 붙은 작품이 "이 아티스트 작품 보기" 필터 결과로 나온다.
-   * 이름을 바꾸면 기존 작품 태그도 함께 바꿔야 한다.
-   */
-  portfolioTag: string;
-  /** 외부 포트폴리오/SNS 링크 (선택) */
-  links?: { label: string; url: string }[];
-  /** 사이트 노출 여부 */
-  published: boolean;
-}
+import { supabaseAdmin } from "./supabase-admin";
+import type { Artist } from "./artist-types";
 
-/**
- * ⚠️ 플레이스홀더 데이터 — 실제 아티스트 정보로 교체 필요.
- * 이름·소개·이력을 실제 값으로 채우고, 프로필 사진 URL 을 넣어 주세요.
- */
-export const ARTISTS: Artist[] = [
+export type { Artist } from "./artist-types";
+
+/** DB 폴백용 시드 — 마이그레이션 SQL 이 동일 데이터를 INSERT 한다 */
+export const SEED_ARTISTS: Artist[] = [
   {
     id: "artist-01",
     name: "아티스트 01",
@@ -58,7 +26,9 @@ export const ARTISTS: Artist[] = [
     styleTags: ["리얼리즘", "구조 중심"],
     career: ["지기구조 설계 특허 참여", "관공서·기업 납품 다수"],
     portfolioTag: "아티스트 01",
+    links: [],
     published: true,
+    sortOrder: 1,
   },
   {
     id: "artist-02",
@@ -70,7 +40,9 @@ export const ARTISTS: Artist[] = [
     styleTags: ["캐릭터라이즈", "키즈 친화"],
     career: ["지자체 캐릭터 페이퍼토이 다수", "박물관 체험존 교구 디자인"],
     portfolioTag: "아티스트 02",
+    links: [],
     published: true,
+    sortOrder: 2,
   },
   {
     id: "artist-03",
@@ -82,16 +54,89 @@ export const ARTISTS: Artist[] = [
     styleTags: ["팝업", "정교한 구조"],
     career: ["기업 프로모션 팝업북 다수", "백화점 전시 연출물 제작"],
     portfolioTag: "아티스트 03",
+    links: [],
     published: true,
+    sortOrder: 3,
   },
 ];
 
-/** 사이트에 노출할 아티스트만 */
-export function getPublishedArtists(): Artist[] {
-  return ARTISTS.filter((a) => a.published);
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function toArtist(row: any): Artist {
+  return {
+    id: row.id,
+    name: row.name,
+    englishName: row.english_name ?? undefined,
+    role: row.role ?? "",
+    photo: row.photo ?? undefined,
+    bio: row.bio ?? "",
+    specialties: Array.isArray(row.specialties) ? row.specialties : [],
+    styleTags: Array.isArray(row.style_tags) ? row.style_tags : [],
+    career: Array.isArray(row.career) ? row.career : [],
+    portfolioTag: row.portfolio_tag ?? row.name,
+    links: Array.isArray(row.links) ? row.links : [],
+    published: !!row.published,
+    sortOrder: typeof row.sort_order === "number" ? row.sort_order : 0,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+  };
 }
 
-/** 어드민 에디터의 "작업 아티스트" quick-select 용 태그 목록 */
-export function getArtistTags(): string[] {
-  return ARTISTS.map((a) => a.portfolioTag);
+/**
+ * 전체 아티스트 조회 (어드민용 — 비공개 포함).
+ * source: "db" 정상 / "seed" 테이블 없음·에러 폴백 (어드민에서 마이그레이션 안내용)
+ */
+export async function getAllArtists(): Promise<{ artists: Artist[]; source: "db" | "seed" }> {
+  try {
+    const { data, error } = await supabaseAdmin
+      .from("artists")
+      .select("*")
+      .order("sort_order", { ascending: true })
+      .order("created_at", { ascending: true });
+    if (error) throw error;
+    return { artists: (data ?? []).map(toArtist), source: "db" };
+  } catch {
+    return { artists: SEED_ARTISTS, source: "seed" };
+  }
+}
+
+/** 사이트 노출용 — published 만 */
+export async function getPublishedArtists(): Promise<Artist[]> {
+  const { artists } = await getAllArtists();
+  return artists.filter((a) => a.published);
+}
+
+export async function getArtistById(id: string): Promise<Artist | undefined> {
+  try {
+    const { data } = await supabaseAdmin.from("artists").select("*").eq("id", id).maybeSingle();
+    if (data) return toArtist(data);
+  } catch {
+    /* fall through to seed */
+  }
+  return SEED_ARTISTS.find((a) => a.id === id);
+}
+
+export async function saveArtist(artist: Artist): Promise<void> {
+  const { error } = await supabaseAdmin.from("artists").upsert({
+    id: artist.id,
+    name: artist.name,
+    english_name: artist.englishName ?? null,
+    role: artist.role,
+    photo: artist.photo ?? null,
+    bio: artist.bio,
+    specialties: artist.specialties,
+    style_tags: artist.styleTags,
+    career: artist.career,
+    portfolio_tag: artist.portfolioTag,
+    links: artist.links,
+    published: artist.published,
+    sort_order: artist.sortOrder,
+    created_at: artist.createdAt ?? new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+  });
+  if (error) throw error;
+}
+
+export async function deleteArtist(id: string): Promise<void> {
+  const { error } = await supabaseAdmin.from("artists").delete().eq("id", id);
+  if (error) throw error;
 }

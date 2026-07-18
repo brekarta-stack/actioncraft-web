@@ -1,10 +1,9 @@
 "use client";
 
-import { useState, useCallback, useMemo, useRef } from "react";
+import { useState, useCallback, useMemo, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import type { PortfolioItem } from "@/lib/portfolio-types";
 import { CATEGORIES, CLIENT_TYPES, SUGGESTED_TAGS } from "@/lib/portfolio-types";
-import { getArtistTags } from "@/lib/artists";
 import { prepareImageForUpload, formatResizeNote } from "@/lib/image-resize";
 import { slugify, parseYearMonth, autoHyphenYearMonth } from "@/lib/portfolio-meta";
 
@@ -62,6 +61,34 @@ export default function PortfolioEditor({ item }: Props) {
 
   // 각 슬롯의 파일 input ref
   const inputRefs = [useRef<HTMLInputElement>(null), useRef<HTMLInputElement>(null)];
+
+  /* ── 작업 아티스트 드롭다운 — /api/artists 에서 로드, 태그로 저장 ── */
+  const [artistOptions, setArtistOptions] = useState<{ name: string; portfolioTag: string }[]>([]);
+  useEffect(() => {
+    fetch("/api/artists")
+      .then((r) => r.json())
+      .then((d) => {
+        if (Array.isArray(d?.artists)) {
+          setArtistOptions(
+            d.artists.map((a: { name: string; portfolioTag: string }) => ({
+              name: a.name,
+              portfolioTag: a.portfolioTag,
+            }))
+          );
+        }
+      })
+      .catch(() => {});
+  }, []);
+  const artistTagList = artistOptions.map((a) => a.portfolioTag);
+  /** 현재 태그 중 아티스트 태그 (첫 매칭) — 드롭다운 표시값 */
+  const selectedArtistTag = tags.find((t) => artistTagList.includes(t)) ?? "";
+  /** 아티스트 선택 → 기존 아티스트 태그 제거 후 새 태그 부착 */
+  function pickArtist(tag: string) {
+    setTags((prev) => {
+      const rest = prev.filter((t) => !artistTagList.includes(t));
+      return tag ? [...rest, tag] : rest;
+    });
+  }
 
   const handleSave = useCallback(
     async (pub?: boolean) => {
@@ -302,6 +329,24 @@ export default function PortfolioEditor({ item }: Props) {
                 : "숫자로 직접 입력 (2021-05·202105·2021년 5월) · 비워두면 등록일 기준"}
             </p>
           </div>
+          <div>
+            <label className="text-sm font-medium text-slate-700 block mb-1">
+              작업 아티스트 <span className="text-slate-400 font-normal">(회사소개 연동)</span>
+            </label>
+            <select
+              value={selectedArtistTag}
+              onChange={(e) => pickArtist(e.target.value)}
+              className="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-300"
+            >
+              <option value="">— 선택 안 함 —</option>
+              {artistOptions.map((a) => (
+                <option key={a.portfolioTag} value={a.portfolioTag}>{a.name}</option>
+              ))}
+            </select>
+            <p className="text-[11px] text-slate-400 mt-1" style={{ wordBreak: "keep-all" }}>
+              태그로 저장되어 회사소개 &lsquo;이 아티스트 작품 보기&rsquo; 필터에 노출됩니다.
+            </p>
+          </div>
         </div>
 
         {/* Client Type */}
@@ -421,22 +466,6 @@ export default function PortfolioEditor({ item }: Props) {
                 type="button"
                 onClick={() => addTag(t)}
                 className="text-[11px] px-2 py-0.5 rounded-full text-slate-500 hover:text-blue-700 hover:bg-blue-50 border border-slate-200"
-              >
-                + {t}
-              </button>
-            ))}
-          </div>
-          {/* 작업 아티스트 태그 — 회사소개 아티스트 카드의 "작품 보기" 필터와 연동 */}
-          <div className="mt-2 flex flex-wrap gap-1 items-center">
-            <span className="text-[11px] text-slate-400 font-medium mr-0.5">작업 아티스트</span>
-            {getArtistTags().filter((t) => !tags.includes(t)).map((t) => (
-              <button
-                key={t}
-                type="button"
-                onClick={() => addTag(t)}
-                title="이 태그를 붙이면 회사소개 아티스트 카드의 '작품 보기'에 노출됩니다"
-                className="text-[11px] px-2 py-0.5 rounded-full font-medium border transition-colors"
-                style={{ background: "#FFF0F6", color: "#E91E8C", borderColor: "#fbcfe8" }}
               >
                 + {t}
               </button>

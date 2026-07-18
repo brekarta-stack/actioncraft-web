@@ -160,8 +160,8 @@ function ArtistsJsonLd({ artists }: { artists: Artist[] }) {
   );
 }
 
-export default function ArtistsSection() {
-  const artists = getPublishedArtists();
+export default async function ArtistsSection() {
+  const artists = await getPublishedArtists();
   if (artists.length === 0) return null;
 
   return (
