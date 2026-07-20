@@ -111,7 +111,8 @@ async function sendInquiryEmail(s: QuoteSubmission): Promise<void> {
 
   const resend = new Resend(apiKey);
   const subject = `[papercraft.kr] 새 제작 문의 — ${s.name} · ${productLabel}`;
-  await resend.emails.send({
+  // Resend SDK 는 실패 시 throw 하지 않고 { error } 를 반환 — 반드시 체크해서 로그에 드러냄
+  const { error } = await resend.emails.send({
     from,
     to:      [to],
     bcc:     bcc ? [bcc] : undefined,
@@ -120,6 +121,7 @@ async function sendInquiryEmail(s: QuoteSubmission): Promise<void> {
     html,
     text,
   });
+  if (error) throw new Error(`Resend(운영자 알림): ${error.message ?? JSON.stringify(error)}`);
 }
 
 /**
@@ -193,7 +195,7 @@ async function sendCustomerAckEmail(s: QuoteSubmission): Promise<void> {
   ].join("\n");
 
   const resend = new Resend(apiKey);
-  await resend.emails.send({
+  const { error } = await resend.emails.send({
     from,
     to:      [s.email],
     replyTo,
@@ -201,6 +203,7 @@ async function sendCustomerAckEmail(s: QuoteSubmission): Promise<void> {
     html,
     text,
   });
+  if (error) throw new Error(`Resend(고객 확인): ${error.message ?? JSON.stringify(error)}`);
 }
 
 /* 첨부파일 URL 검증 — 빈 문자열이거나, 우리 스토리지의 공개 https URL만 허용.
