@@ -121,7 +121,7 @@ export default function ProductsPage() {
               주문은 이렇게 진행됩니다
             </h2>
             <p className="text-slate-500">
-              대부분의 제품은 <strong style={{ color: "#1E22B2" }}>약 4주 내 납품</strong> 가능합니다.
+              제품에 따라 <strong style={{ color: "#1E22B2" }}>3주~6주</strong> 내 납품됩니다. (팝업북 약 3주 · 페이퍼 크래프트 6주 이상)
             </p>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-5 mb-12">
@@ -185,7 +185,7 @@ export default function ProductsPage() {
         <div className="relative max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="text-3xl font-bold text-white mb-3 tracking-tight">만들고 싶은 것이 있으신가요</h2>
           <p className="text-blue-200 mb-2" style={{ wordBreak: "keep-all" }}>
-            최소 1,000부부터 대량 제작까지 가능합니다.
+            팝업북은 1부부터, 대량 제작까지 — 제품별 맞춤 견적으로 진행합니다.
           </p>
           <p className="text-blue-300 text-sm mb-8">견적 문의를 남겨 주시면 빠르게 회신드립니다.</p>
           <Link

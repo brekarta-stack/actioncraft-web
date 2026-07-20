@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import {
   PaperToyIcon,
@@ -22,6 +22,8 @@ interface Product {
   icon: IconKey;
   name: string;
   subtitle: string;
+  /** 제작 문의(/quote) 폼의 product 값 — CTA 클릭 시 제품 선택을 건너뛰도록 전달 */
+  quoteId: string;
   accent: string;
   bgGradient: string;
   highlight: string;
@@ -40,11 +42,25 @@ const USAGE_NAME: Record<UsageKey, string> = {
   hobby: "취미",
 };
 
+/**
+ * 제작 문의 CTA href — 선택한 제품/용도 + 주문 형태(?type=)를 /quote 로 전달해
+ * 폼에서 같은 선택을 반복하지 않게 한다. (게이트가 URL 에 반영한 type 을 마운트 시 1회 판독)
+ */
+function useQuoteHref() {
+  const [ptype, setPtype] = useState("");
+  useEffect(() => {
+    const t = new URLSearchParams(window.location.search).get("type");
+    if (t === "blueprint" || t === "production") setPtype(t);
+  }, []);
+  return (productId: string) => `/quote?product=${productId}${ptype ? `&ptype=${ptype}` : ""}`;
+}
+
 const products: Product[] = [
   {
     icon: "paperToy",
     name: "Paper Craft",
     subtitle: "페이퍼 크래프트",
+    quoteId: "papercraft",
     accent: "#06C6C8",
     bgGradient: "from-cyan-50 to-sky-50",
     highlight: "핵심 서비스",
@@ -67,6 +83,7 @@ const products: Product[] = [
     icon: "gear",
     name: "Action Paper Toy",
     subtitle: "액션 페이퍼 토이",
+    quoteId: "action",
     accent: "#1E22B2",
     bgGradient: "from-blue-50 to-indigo-50",
     highlight: "특허 핵심 기술",
@@ -89,6 +106,7 @@ const products: Product[] = [
     icon: "sparkle",
     name: "Popup Book",
     subtitle: "팝업북",
+    quoteId: "popup",
     accent: "#E91E8C",
     bgGradient: "from-pink-50 to-fuchsia-50",
     highlight: "선물·기념품 인기",
@@ -111,6 +129,7 @@ const products: Product[] = [
     icon: "box",
     name: "Foamboard (Woodlock)",
     subtitle: "폼보드(우드락)",
+    quoteId: "foamboard",
     accent: "#F5C518",
     bgGradient: "from-amber-50 to-yellow-50",
     highlight: "쉬운 조립 구조",
@@ -198,6 +217,7 @@ function ProductIcon({ name, size = 48 }: { name: IconKey; size?: number }) {
 }
 
 function ProductCard({ p }: { p: Product }) {
+  const quoteHref = useQuoteHref();
   return (
     <div className="pe-paper-lift group bg-white border border-slate-100 rounded-2xl overflow-hidden pe-paper-shadow">
       {/* ── 상단 헤더 영역: topImage 있으면 이미지, 없으면 기존 아이콘 ── */}
@@ -266,9 +286,9 @@ function ProductCard({ p }: { p: Product }) {
           <span>납기 <strong className="text-slate-800 pe-num">{p.leadTime}</strong></span>
         </div>
 
-        {/* 견적 받기 버튼 */}
+        {/* 견적 받기 버튼 — 선택 제품·주문 형태를 폼으로 전달 */}
         <Link
-          href="/quote"
+          href={quoteHref(p.quoteId)}
           className="group/btn block text-center py-2.5 text-white text-sm font-semibold rounded-lg transition-opacity hover:opacity-90 relative z-10"
           style={{ background: `linear-gradient(135deg, ${p.accent}, ${p.accent}cc)` }}
         >
@@ -283,6 +303,7 @@ function ProductCard({ p }: { p: Product }) {
 }
 
 function UsageCard({ u }: { u: UsageCategory }) {
+  const quoteHref = useQuoteHref();
   const matched = products.filter((p) => p.usages.includes(u.key));
   return (
     <div className="pe-paper-lift group bg-white border border-slate-100 rounded-2xl overflow-hidden pe-paper-shadow flex flex-col">
@@ -337,7 +358,7 @@ function UsageCard({ u }: { u: UsageCategory }) {
           </ul>
         </div>
         <Link
-          href="/quote"
+          href={quoteHref(u.key)}
           className="group block text-center py-2.5 text-white text-sm font-semibold rounded-lg transition-opacity hover:opacity-90 mt-auto"
           style={{ background: `linear-gradient(135deg, ${u.accent}, ${u.accent}cc)` }}
         >

@@ -4,10 +4,11 @@
  * /products 첫 단계 — [주문 제작 형태] 선택 게이트.
  *
  * 도면만 의뢰 / 제품 생산 → 아래에 기존 제품 선택(제품 종류별/용도별) 카탈로그 노출.
- * 완제품 의뢰 → 별도 프로세스 안내 패널 (추후 전용 프로세스 연결 예정).
+ * 완제품 의뢰 → 중간 화면 없이 /quote?consult=finished 로 직행 (연락처 단계 바로 랜딩).
  *
  * 선택은 ?type= URL 파라미터와 동기화되어 뒤로가기·딥링크가 자연스럽다.
- *   /products?type=blueprint | production | finished
+ *   /products?type=blueprint | production
+ *   (?type=finished 구 딥링크는 /quote?consult=finished 로 리다이렉트)
  *
  * ⚠️ useSearchParams 를 쓰지 않는 이유: /products 는 정적(SSG) 페이지라
  * useSearchParams + Suspense 조합이 fallback 에서 멈추는 문제가 있음
@@ -16,7 +17,6 @@
  */
 
 import { useEffect, useState, type ReactNode } from "react";
-import Link from "next/link";
 import { CheckIcon, ArrowRightIcon } from "@/components/icons";
 
 type ProductionType = "blueprint" | "production" | "finished";
@@ -157,66 +157,27 @@ function TypeIllust({ id }: { id: ProductionType }) {
 }
 
 /* ────────── 완제품 의뢰 — 별도 프로세스 안내 패널 ────────── */
-/* TODO: 전용 완제품 프로세스 페이지가 준비되면 이 패널 대신 라우팅으로 교체 */
-
-function FinishedProcessPanel() {
-  return (
-    <section className="py-16 md:py-20 bg-slate-50">
-      <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="bg-white rounded-3xl border border-slate-100 pe-paper-shadow p-8 md:p-12 text-center">
-          <span
-            className="inline-block px-3 py-1.5 text-xs font-semibold rounded-full mb-5"
-            style={{ background: "#FFF0F6", color: "#E91E8C" }}
-          >
-            완제품 의뢰 · 상담 진행
-          </span>
-          <h3 className="text-2xl md:text-3xl font-bold text-slate-900 mb-4 tracking-tight">
-            완제품 의뢰는 담당자와 상담으로 진행됩니다
-          </h3>
-          <p className="text-slate-500 mb-8 max-w-xl mx-auto" style={{ wordBreak: "keep-all" }}>
-            조립·설치 범위, 수량, 설치 환경에 따라 진행 방식과 비용 편차가 큽니다.
-            프로젝트 내용을 남겨 주시면 담당자가 확인 후 맞춤 프로세스를 안내드립니다.
-          </p>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-9 text-left">
-            {[
-              { step: "01", label: "문의 접수", desc: "프로젝트 개요·일정 전달" },
-              { step: "02", label: "담당자 상담", desc: "설치 환경·범위 확인" },
-              { step: "03", label: "맞춤 견적", desc: "제작·조립·설치 일괄 견적" },
-            ].map((s) => (
-              <div key={s.step} className="bg-slate-50 rounded-xl p-4 border border-slate-100">
-                <div className="pe-num text-sm font-bold mb-1" style={{ color: "#E91E8C" }}>{s.step}</div>
-                <div className="font-semibold text-slate-900 text-sm">{s.label}</div>
-                <div className="text-xs text-slate-500 mt-0.5" style={{ wordBreak: "keep-all" }}>{s.desc}</div>
-              </div>
-            ))}
-          </div>
-          <Link
-            href="/quote"
-            className="group inline-flex items-center justify-center gap-2 px-8 py-4 font-bold rounded-xl text-white shadow-xl shadow-pink-500/30 hover:-translate-y-0.5 transition-all"
-            style={{ background: "linear-gradient(135deg, #06C6C8, #E91E8C)" }}
-          >
-            완제품 제작 문의 남기기
-            <ArrowRightIcon size={18} className="transition-transform group-hover:translate-x-1" />
-          </Link>
-        </div>
-      </div>
-    </section>
-  );
-}
-
 /* ────────── 메인 게이트 ────────── */
 
-function parseType(search: string): ProductionType | null {
+/** 완제품 의뢰는 게이트에 머물지 않고 제작 문의 연락처 단계로 직행 */
+const FINISHED_CONSULT_URL = "/quote?consult=finished";
+
+function parseType(search: string): Exclude<ProductionType, "finished"> | null {
   const t = new URLSearchParams(search).get("type");
-  return t === "blueprint" || t === "production" || t === "finished" ? t : null;
+  return t === "blueprint" || t === "production" ? t : null;
 }
 
 export default function ProductionTypeGate({ children }: { children: ReactNode }) {
   // SSR 은 항상 미선택(3택 카드) 상태로 렌더 — 카드 콘텐츠가 정적 HTML 에 포함돼 SEO 에도 유리.
   // 딥링크(?type=...)는 마운트 직후 클라이언트에서 반영.
-  const [selected, setSelected] = useState<ProductionType | null>(null);
+  const [selected, setSelected] = useState<Exclude<ProductionType, "finished"> | null>(null);
 
   useEffect(() => {
+    // 구 딥링크 호환 — ?type=finished 는 상담 직행으로 승격
+    if (new URLSearchParams(window.location.search).get("type") === "finished") {
+      window.location.replace(FINISHED_CONSULT_URL);
+      return;
+    }
     const read = () => setSelected(parseType(window.location.search));
     read();
     window.addEventListener("popstate", read);
@@ -224,11 +185,21 @@ export default function ProductionTypeGate({ children }: { children: ReactNode }
   }, []);
 
   function pick(type: ProductionType | null) {
+    // 완제품 의뢰 — 중간 화면 없이 제작 문의(연락처 단계)로 바로 이동
+    if (type === "finished") {
+      window.location.href = FINISHED_CONSULT_URL;
+      return;
+    }
     setSelected(type);
     const url = new URL(window.location.href);
-    if (type) url.searchParams.set("type", type);
-    else url.searchParams.delete("type");
-    window.history.replaceState(null, "", url.toString());
+    if (type) {
+      // 선택은 히스토리에 쌓아 브라우저 뒤로가기 = 형태 다시 선택으로 복귀
+      url.searchParams.set("type", type);
+      window.history.pushState(null, "", url.toString());
+    } else {
+      url.searchParams.delete("type");
+      window.history.replaceState(null, "", url.toString());
+    }
   }
 
   const selectedOption = TYPE_OPTIONS.find((o) => o.id === selected);
@@ -262,7 +233,7 @@ export default function ProductionTypeGate({ children }: { children: ReactNode }
           </div>
         </div>
 
-        {selected === "finished" ? <FinishedProcessPanel /> : children}
+        {children}
       </>
     );
   }
