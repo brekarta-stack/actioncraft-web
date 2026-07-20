@@ -13,6 +13,7 @@ HOOK_DIR="$(cd "$(dirname "$0")" && pwd)"
 
 if [ $# -lt 2 ]; then
   echo "usage: guard.sh <label> <command...>" >&2
+  notify ":x: [guard] 설정 오류 — 인자 부족으로 예약 작업이 실행되지 않음: guard.sh $*"
   exit 2
 fi
 
@@ -22,6 +23,7 @@ LABEL="$1"; shift
 case "$LABEL" in
   ""|*[!A-Za-z0-9._-]*)
     echo "usage: guard.sh <label> — 라벨은 영숫자 . _ - 만 허용" >&2
+    notify ":x: [guard] 설정 오류 — 잘못된 라벨 '$LABEL' 로 예약 작업이 실행되지 않음 (영숫자 . _ - 만 허용)"
     exit 2
     ;;
 esac

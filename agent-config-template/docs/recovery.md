@@ -15,7 +15,9 @@
 ## 복구 절차 (새 Mini 또는 초기화된 Mini 기준, 약 1시간)
 
 ```bash
-# 1. 레포 복원
+# 1. 레포 복원 (git 신원부터 — 없으면 격리함 자동 캡처 커밋이 조용히 실패한다)
+git config --global user.name "이름"
+git config --global user.email "you@example.com"
 git clone <agent-config 레포 URL> ~/agent-config
 cd ~/agent-config
 

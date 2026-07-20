@@ -19,20 +19,30 @@ check() {
   fi
 }
 
+checki() {
+  # 대소문자 무시 버전
+  if grep -niE "$1" "$FILE" 2>/dev/null | head -3 | grep -q .; then
+    echo "🚩 $2:"
+    grep -niE "$1" "$FILE" | head -3 | sed 's/^/   /'
+    FOUND=1
+  fi
+}
+
 FILE="$1"
 
-# 난독화·간접 실행
-check 'base64[[:space:]]+(-d|--decode)' "base64 디코드 (난독화 의심)"
+# 난독화·간접 실행 (macOS BSD base64는 디코드가 대문자 -D)
+check 'base64[[:space:]]+(-[dD]|--decode)' "base64 디코드 (난독화 의심)"
 check '\beval\b' "eval 사용 (간접 실행)"
-check 'curl[^|]*\|[[:space:]]*(ba)?sh' "curl | sh (원격 코드 실행)"
-check 'wget[^|]*\|[[:space:]]*(ba)?sh' "wget | sh (원격 코드 실행)"
+check 'curl[^|]*\|[[:space:]]*(ba|z|k)?sh' "curl | sh (원격 코드 실행)"
+check 'wget[^|]*\|[[:space:]]*(ba|z|k)?sh' "wget | sh (원격 코드 실행)"
 
-# 행동 조작 지시문 (프롬프트 주입)
+# 행동 조작 지시문 (프롬프트 주입) — 한국어 + 영어. 기계 검사는 보조일 뿐, 최종 판정은 사람.
 check '(항상|절대|조용히|몰래|사용자에게[[:space:]]*알리지)' "행동 조작 지시문 의심 (문맥 확인 필요)"
 check '(이[[:space:]]*규칙을[[:space:]]*우선|규칙을[[:space:]]*무시|지침을[[:space:]]*무시)' "규칙 우회 지시문"
+checki '(always|never|silently|without[[:space:]]+(asking|telling)|ignore[[:space:]]+(the|all)[[:space:]]+(rules|instructions)|system[[:space:]]+prompt|jailbreak)' "행동 조작 지시문 의심 (영어)"
 
-# 시크릿 하드코딩 흔적
-check '(sk-[A-Za-z0-9]{20,}|xox[bap]-|hooks\.slack\.com/services/)' "시크릿/토큰 하드코딩 의심"
+# 시크릿 하드코딩 흔적 (sk-ant-… Anthropic 형식 포함 — 하이픈 허용)
+check '(sk-[A-Za-z0-9-]{20,}|xox[bap]-|hooks\.slack\.com/services/)' "시크릿/토큰 하드코딩 의심"
 
 if [ $FOUND -eq 0 ]; then
   echo "OK: 기계 검사 통과 (사람 심사 항목은 별도 수행)"
