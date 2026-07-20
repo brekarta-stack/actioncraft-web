@@ -46,14 +46,21 @@ launchctl load ~/Library/LaunchAgents/com.agent.hermes.plist
 sh hooks/heartbeat.sh                   # #agent-log에 :green_heart: 도착 확인
 ```
 
-## 헤르메스 카드 (설치 시 채우고, 바뀔 때마다 갱신 — 이 카드가 복구 시간을 결정한다)
+## 헤르메스 카드 (이 카드가 복구 시간을 결정한다 — 비어 있으면 복구 보장 불가)
+
+> 대상: **Hermes Agent** (Nous Research, MIT). 로컬 오픈모델 + Claude 하이브리드로 운용.
+> **자동 채우기**: 맥에서 `sh hooks/detect-hermes.sh` 실행 → 출력된 표를 아래에 붙여넣고 커밋.
+> (설치·버전·설정경로·시작명령은 이 맥에 실제로 무엇이 깔렸는지에 달렸으므로 감지 스크립트로 확정한다.)
 
 | 항목 | 값 |
 |---|---|
-| 설치 방법/명령 | (예: `brew install hermes-agent` 또는 설치 스크립트 URL) |
-| 현재 버전 | (예: v3.x — `hermes --version` 출력) |
-| 설정 파일 위치 | (예: `~/.hermes/config.yaml` — 백업: 레포 `config/`에 사본) |
-| 포그라운드 시작 명령 | (plist `__HERMES_START_COMMAND__`에 들어가는 값. `exec` 가능해야 함) |
+| 제품 | Hermes Agent (Nous Research, MIT) — 자기개선 스킬 루프 |
+| 설치 방법/명령 | (detect-hermes.sh 로 확인 — 예: brew / 설치 스크립트) |
+| 현재 버전 | (detect-hermes.sh: `hermes --version`) |
+| 설정 파일 위치 | (detect-hermes.sh — 예: `~/.hermes/config.yaml`. 사본을 레포 `config/`에 백업 권장) |
+| 스킬 저장 경로 | **`skills/_quarantine/` 로 지정** (헤르메스 자동 생성 스킬이 격리함에 쌓이도록) |
+| 포그라운드 시작 명령 | (detect-hermes.sh — plist `__HERMES_START_COMMAND__`에 들어감. `exec` 가능해야 함) |
+| 라우팅(로컬↔Claude) | `config/routing-policy.md` 를 따른다 (안정화 단계 = Claude 단일) |
 | Slack 봇 토큰 | 패스워드 매니저 `agent-hermes-bot` (값은 절대 여기 쓰지 않는다) |
 
 ## 월간 리허설 (실제 복구 없이, 약 30분)

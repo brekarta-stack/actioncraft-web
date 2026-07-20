@@ -41,6 +41,25 @@ sh ~/acw/agent-config-template/install.sh
 
 ---
 
+## 맥에 직접 못 갈 때 — SSH/Tailscale 무인 설치
+
+물리적으로 맥 앞에 없어도 됩니다. **다른 기기(윈도우 노트북, 폰의 Tailscale SSH 등)에서 맥에 SSH 접속**한 뒤, 아래 한 줄을 붙여넣으면 **질문 없이 자동 설치**됩니다(값을 환경변수로 미리 주기 때문):
+
+```bash
+AGENT_WEBHOOK='https://hooks.slack.com/services/여기에-웹훅' \
+GIT_NAME='이름' GIT_EMAIL='you@example.com' \
+sh -c 'git clone https://github.com/brekarta-stack/actioncraft-web.git ~/acw 2>/dev/null; sh ~/acw/agent-config-template/install.sh'
+```
+
+- SSH(무인) 환경에서는 `sudo pmset`(잠자기 해제)만 자동으로 안 됩니다. 접속한 김에 한 줄 더:
+  ```bash
+  sudo pmset -a sleep 0 autorestart 1 && sudo pmset repeat wakeorpoweron MTWRFSU 07:55:00
+  ```
+- 헤르메스 시작 명령을 알면 `AGENT_HERMES_CMD='exec hermes run --foreground'` 를 위 앞에 붙이세요.
+  모르면 접속한 김에 `sh ~/agent-config/hooks/detect-hermes.sh` 를 실행해 자동 감지하면 됩니다.
+
+---
+
 ## 확인 · 다음
 
 - **성공 신호**: #agent-log 에 `[heartbeat] ...` 메시지 도착.
