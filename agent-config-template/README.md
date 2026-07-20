@@ -45,7 +45,25 @@ agent-config-template/
     └── mock_webhook.py    # 테스트용 목 Slack 웹훅 서버
 ```
 
-## Mac Mini 설치 (최초 1회, 약 30분)
+## 설치 — 원커맨드 (권장)
+
+대부분의 단계를 `install.sh` 가 자동 수행합니다. **당신이 할 일은 2가지뿐** → **[QUICKSTART.md](QUICKSTART.md)** 참조.
+
+```bash
+# 맥 터미널에서 (이미 클론돼 있다면 두 번째 줄만)
+git clone https://github.com/brekarta-stack/actioncraft-web.git ~/acw
+sh ~/acw/agent-config-template/install.sh
+```
+
+설치기는 재실행해도 안전하며, 웹훅·헤르메스·원격 백업을 물어보되 **모르면 Enter로 건너뛰고 나중에** 붙일 수 있습니다. 끝나면 즉시 heartbeat를 쏘아 #agent-log에서 동작을 확인시켜 줍니다. 되돌리기는 `sh uninstall.sh`.
+
+웹훅 앱은 **`slack-app-manifest.json`** 을 api.slack.com에 붙여넣어 몇 번의 클릭으로 만듭니다.
+
+---
+
+## 상세 설치 (수동 — 원커맨드가 하는 일의 내부)
+
+> `install.sh` 없이 직접 이해하며 설치하려는 경우. 아래 단계를 스크립트가 그대로 자동화한다.
 
 ```bash
 # 0. 사전 준비 (한 번만)
