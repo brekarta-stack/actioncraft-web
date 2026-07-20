@@ -2,8 +2,14 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <!--
   헤르메스 데몬 상시 실행 (KeepAlive). 데몬이 죽으면 launchd가 자동 재시작한다.
-  ProgramArguments 의 __HERMES_START_COMMAND__ 를 실제 헤르메스 실행 명령으로
-  교체한 뒤 load 한다. (예: /usr/local/bin/hermes start ...옵션)
+
+  설정 방법: 아래 __HERMES_START_COMMAND__ 를 실제 실행 명령으로 교체한다.
+  ⚠️ 반드시 "포그라운드로 실행되는" 명령이어야 한다.
+     (데몬화하며 즉시 종료하는 start 명령을 넣으면 launchd가 30초마다 무한 재스폰한다)
+
+  래퍼가 (재)시작 시마다 #agent-log에 알림을 남긴다.
+  이 알림이 곧 "무단 다운" 카운터다 — 운영자가 의도하지 않은 시작 알림 = 크래시 1회.
+  (routing-policy.md 의 PHASE 전환 조건 측정에 사용)
 -->
 <plist version="1.0">
 <dict>
@@ -13,7 +19,7 @@
   <array>
     <string>/bin/sh</string>
     <string>-c</string>
-    <string>__HERMES_START_COMMAND__</string>
+    <string>. __REPO__/hooks/lib/notify.sh; notify ":arrows_counterclockwise: [hermes] 데몬 (재)시작됨 — 의도한 시작이 아니면 크래시 1회로 기록"; exec __HERMES_START_COMMAND__</string>
   </array>
   <key>RunAtLoad</key>
   <true/>
@@ -22,8 +28,8 @@
   <key>ThrottleInterval</key>
   <integer>30</integer>
   <key>StandardOutPath</key>
-  <string>/tmp/com.agent.hermes.out</string>
+  <string>__REPO__/logs/com.agent.hermes.out</string>
   <key>StandardErrorPath</key>
-  <string>/tmp/com.agent.hermes.err</string>
+  <string>__REPO__/logs/com.agent.hermes.err</string>
 </dict>
 </plist>

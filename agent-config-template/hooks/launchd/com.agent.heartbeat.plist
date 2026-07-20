@@ -17,6 +17,6 @@
     <integer>0</integer>
   </dict>
   <key>StandardErrorPath</key>
-  <string>/tmp/com.agent.heartbeat.err</string>
+  <string>__REPO__/logs/com.agent.heartbeat.err</string>
 </dict>
 </plist>

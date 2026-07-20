@@ -12,6 +12,6 @@
   <key>StartInterval</key>
   <integer>300</integer>
   <key>StandardErrorPath</key>
-  <string>/tmp/com.agent.gitsync.err</string>
+  <string>__REPO__/logs/com.agent.gitsync.err</string>
 </dict>
 </plist>

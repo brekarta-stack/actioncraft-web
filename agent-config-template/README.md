@@ -8,7 +8,7 @@
 
 | 병목 | 해결 |
 |---|---|
-| 설정이 Mini에만 존재 → 이력 없음, 사망 시 소실 | 모든 설정·스킬이 여기에. 롤백 1분, 복구 = clone |
+| 설정이 Mini에만 존재 → 이력 없음, 사망 시 소실 | 모든 설정·스킬이 여기에. 롤백 커밋 1분(Mini 반영 ≤5분), 복구 = clone |
 | 자동 생성 스킬 무심사 누적 → 행동 오염 | `skills/_quarantine/` 격리 + 주간 심사 후 편입 |
 | 알림·재시작까지 LLM 판단 의존 | `hooks/` 결정적 스크립트가 100% 강제 |
 | 관제 = pull(들어가서 확인) | heartbeat·실패알림이 `#agent-log`로 옴 (push) |
@@ -65,6 +65,7 @@ open -e ~/.agent-secrets/hermes.env   # 열어서 실제 값 입력 (Slack webho
 
 # 3. 훅 실행 권한 + 테스트
 chmod +x hooks/*.sh hooks/lib/*.sh tests/*.sh
+mkdir -p logs                # launchd 로그 디렉토리 (git에는 안 올라감)
 tests/test_hooks.sh          # 전부 PASS 확인
 
 # 4. launchd 등록 (상시 실행)
@@ -73,6 +74,14 @@ sed -i '' "s|__REPO__|$HOME/agent-config|g" ~/Library/LaunchAgents/com.agent.*.p
 launchctl load ~/Library/LaunchAgents/com.agent.heartbeat.plist
 launchctl load ~/Library/LaunchAgents/com.agent.gitsync.plist
 launchctl list | grep com.agent      # 등록 확인 (com.agent.hermes 는 실행 명령을 채운 뒤 load)
+
+# 4.5 상시 가동 설정 — Mini가 잠들면 위의 전부가 멈춘다
+sudo pmset -a sleep 0 autorestart 1              # 잠자기 금지 + 정전 복구 시 자동 부팅
+sudo pmset repeat wakeorpoweron MTWRFSU 07:55:00 # heartbeat(08:00) 직전 기상 보장
+#  ⚠️ LaunchAgent는 "로그인된 동안"만 실행된다.
+#     시스템 설정 > 사용자 및 그룹 > 자동 로그인을 켜둘 것.
+#     (FileVault가 켜져 있으면 자동 로그인 불가 — 원격 운영 Mini에는 FileVault 해제와
+#      물리 보안 확보 중 하나를 선택해야 한다. 재부팅 후 로그인 전까지 시스템은 침묵한다.)
 
 # 5. 검증
 sh hooks/heartbeat.sh        # #agent-log 채널에 heartbeat 도착 확인
@@ -87,5 +96,8 @@ sh hooks/heartbeat.sh        # #agent-log 채널에 heartbeat 도착 확인
 
 1. **시크릿은 절대 이 레포에 넣지 않는다.** (`.gitignore`가 차단하지만, 사람이 1차 방어선)
 2. **Mini에서 직접 수정하지 않는다.** 어디서든 수정 → 커밋 → `git-sync.sh`가 반영.
+   (예외 없음 — Mini가 만드는 유일한 변경인 `_quarantine/` 자동 생성 스킬은
+   git-sync가 자동 커밋·푸시하므로, 심사도 어느 기기에서든 원격으로 한다.)
 3. **`_quarantine/` 밖으로 스킬을 옮기는 유일한 방법은 `AUDIT.md` 심사 후 커밋.**
+   (heartbeat가 `_quarantine/` 밖 무커밋 변경을 매일 검사해 우회를 적발한다.)
 4. 새 기능 추가 전 두 질문: "고장을 5분 내 알 수 있나?" / "따로 끌 수 있나?"
