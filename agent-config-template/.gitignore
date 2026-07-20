@@ -1,0 +1,17 @@
+# ── 시크릿 차단 (절대 커밋 금지) ──
+# 주의: 이름 기반 광범위 패턴(*secret* 등)은 정상 문서까지 무음 누락시키므로
+# 확장자·형식 기반의 좁은 패턴만 쓴다. 1차 방어선은 언제나 사람이다.
+*.env
+.env*
+*.env.*
+!*.env.example
+*credentials*
+*.key
+*.pem
+
+# ── 로컬 산출물 ──
+*.log
+logs/
+.DS_Store
+node_modules/
+__pycache__/
