@@ -422,7 +422,8 @@ export default function QuoteForm() {
             제작 문의가 접수됐습니다
           </h2>
           <p className="text-slate-500 mb-8" style={{ wordBreak: "keep-all" }}>
-            담당자가 영업일 기준 <strong className="text-slate-900">1~2일 내</strong>로 회신 드립니다.
+            담당자가 <strong className="text-slate-900">3영업일 이내</strong>에 회신 드립니다.
+            접수 확인 메일을 입력하신 이메일로 보내드렸습니다.
             <br />
             추가 문의는 <strong className="text-slate-900">ask@papercraft.kr</strong> 로 보내주세요.
           </p>
@@ -496,7 +497,7 @@ export default function QuoteForm() {
           </h1>
           <p className="text-blue-200 text-lg max-w-2xl mx-auto" style={{ wordBreak: "keep-all" }}>
             아는 만큼만 입력하셔도 됩니다.
-            연락처만 남기시면 영업일 1~2일 내 맞춤 견적을 보내드립니다.
+            연락처만 남기시면 3영업일 이내 맞춤 견적을 보내드립니다.
           </p>
         </div>
       </section>
@@ -1187,8 +1188,9 @@ export default function QuoteForm() {
         <div className="mt-6 p-4 bg-blue-50 rounded-xl flex gap-3 text-sm text-blue-900 border border-blue-100">
           <CheckIcon size={18} className="flex-shrink-0 mt-0.5 text-blue-700" />
           <span style={{ wordBreak: "keep-all" }}>
-            필수 입력은 <strong>연락처뿐</strong>입니다. 제출 후 영업일 기준 <strong>1~2일 내</strong>로
-            담당자가 견적서를 이메일로 발송합니다. 중간에 페이지를 벗어나도 작성 내용은 자동 저장됩니다.
+            필수 입력은 <strong>연락처뿐</strong>입니다. 제출 즉시 접수 확인 메일이 발송되고,
+            <strong> 3영업일 이내</strong> 담당자가 견적서를 이메일로 회신합니다.
+            중간에 페이지를 벗어나도 작성 내용은 자동 저장됩니다.
           </span>
         </div>
         </div>

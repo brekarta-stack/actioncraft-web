@@ -326,7 +326,7 @@ export default async function PortfolioDetailPage({ params }: Props) {
             {item.client || "이런 작업"}처럼 만들고 싶으신가요
           </h2>
           <p className="text-blue-200 mb-8" style={{ wordBreak: "keep-all" }}>
-            지기구조 전문 설계 페이퍼 엔지니어링 스튜디오에 직접 의뢰해 보세요. 영업일 1~2일 내 회신 드립니다.
+            지기구조 전문 설계 페이퍼 엔지니어링 스튜디오에 직접 의뢰해 보세요. 3영업일 이내 회신 드립니다.
           </p>
           <Link
             href="/quote"

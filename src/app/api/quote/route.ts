@@ -122,6 +122,87 @@ async function sendInquiryEmail(s: QuoteSubmission): Promise<void> {
   });
 }
 
+/**
+ * 고객 접수 확인 자동 회신 — "검토 중이며 3영업일 이내 담당자 회신" 안내.
+ * 운영자 알림(sendInquiryEmail)과 독립적으로 best-effort 발송 —
+ * 실패해도 접수(201)에는 영향 없음.
+ */
+async function sendCustomerAckEmail(s: QuoteSubmission): Promise<void> {
+  const apiKey  = process.env.RESEND_API_KEY;
+  const from    = process.env.INQUIRY_FROM_EMAIL ?? "PE Studio <onboarding@resend.dev>";
+  const replyTo = process.env.INQUIRY_TO_EMAIL ?? "ask@papercraft.kr";
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://papercraft.kr";
+
+  if (!apiKey) {
+    console.warn("[api/quote] RESEND_API_KEY not set — skipping customer ack email");
+    return;
+  }
+  if (!s.email) return;
+
+  const productLabel = PRODUCT_LABEL[s.product] ?? s.product;
+  const shortId = s.id.slice(0, 8).toUpperCase();
+
+  const esc = (v: string) =>
+    v.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+
+  const summaryRows: Array<[string, string]> = [
+    ["제품",       productLabel],
+    ["수량",       s.quantity ? `${s.quantity}개` : "상담 후 결정"],
+    ["희망 납기",  s.rushed ? "최대한 빠르게" : (s.deliveryDate || "상담 후 결정")],
+    ["접수 번호",  shortId],
+  ];
+
+  const summaryHtml = summaryRows
+    .map(
+      ([k, v]) =>
+        `<tr><th align="left" style="padding:7px 14px;border-bottom:1px solid #eee;background:#fafafa;white-space:nowrap;width:100px;color:#555;font-weight:600;">${esc(k)}</th><td style="padding:7px 14px;border-bottom:1px solid #eee;color:#111;">${esc(v)}</td></tr>`
+    )
+    .join("");
+
+  const html = `<!doctype html><html><body style="margin:0;padding:24px;background:#f4f4f5;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Apple SD Gothic Neo','Malgun Gothic',sans-serif;">
+<div style="max-width:560px;margin:0 auto;background:#fff;border-radius:12px;overflow:hidden;border:1px solid #e5e7eb;">
+  <div style="padding:26px 28px 18px;border-bottom:1px solid #e5e7eb;">
+    <div style="font-size:12px;letter-spacing:1.5px;color:#1E22B2;font-weight:700;">PE STUDIO · PAPER ENGINEERING</div>
+    <h1 style="margin:10px 0 0;font-size:21px;color:#111;">제작 문의가 접수되었습니다</h1>
+  </div>
+  <div style="padding:22px 28px;font-size:14px;color:#333;line-height:1.7;word-break:keep-all;">
+    <p style="margin:0 0 14px;">${esc(s.name)}님, 문의해 주셔서 감사합니다.</p>
+    <p style="margin:0 0 14px;">
+      보내주신 내용은 현재 <strong>검토 중</strong>입니다.<br/>
+      담당자가 확인 후 <strong style="color:#1E22B2;">3영업일 이내</strong>에 이 메일 주소로 회신드립니다.
+    </p>
+  </div>
+  <table style="width:100%;border-collapse:collapse;font-size:14px;">${summaryHtml}</table>
+  <div style="padding:18px 28px;background:#fafafa;border-top:1px solid #e5e7eb;font-size:12px;color:#666;line-height:1.7;word-break:keep-all;">
+    급한 문의는 <a href="mailto:${esc(replyTo)}" style="color:#1E22B2;">${esc(replyTo)}</a> 로 연락 주세요.
+    이 메일에 바로 회신하셔도 담당자에게 전달됩니다.<br/>
+    <a href="${siteUrl}" style="color:#1E22B2;">papercraft.kr</a> · Paper Engineering Studio
+  </div>
+</div></body></html>`;
+
+  const text = [
+    `${s.name}님, 문의해 주셔서 감사합니다.`,
+    ``,
+    `보내주신 내용은 현재 검토 중입니다.`,
+    `담당자가 확인 후 3영업일 이내에 이 메일 주소로 회신드립니다.`,
+    ``,
+    ...summaryRows.map(([k, v]) => `${k}: ${v}`),
+    ``,
+    `급한 문의: ${replyTo}`,
+    `Paper Engineering Studio · ${siteUrl}`,
+  ].join("\n");
+
+  const resend = new Resend(apiKey);
+  await resend.emails.send({
+    from,
+    to:      [s.email],
+    replyTo,
+    subject: `[PE Studio] 제작 문의가 접수되었습니다 (접수번호 ${shortId})`,
+    html,
+    text,
+  });
+}
+
 /* 첨부파일 URL 검증 — 빈 문자열이거나, 우리 스토리지의 공개 https URL만 허용.
    (javascript:/data: 등 주입 차단 — 어드민/이메일에서 href 로 렌더되므로) */
 const QuoteFileUrl = z
@@ -296,6 +377,13 @@ export async function POST(request: Request) {
     await sendInquiryEmail(submission);
   } catch (mailErr) {
     console.error("[api/quote] email notification failed:", mailErr);
+  }
+
+  /* 고객 접수 확인 자동 회신 — 운영자 알림과 독립 best-effort */
+  try {
+    await sendCustomerAckEmail(submission);
+  } catch (ackErr) {
+    console.error("[api/quote] customer ack email failed:", ackErr);
   }
 
   return NextResponse.json(submission, { status: 201 });

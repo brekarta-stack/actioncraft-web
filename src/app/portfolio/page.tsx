@@ -110,7 +110,7 @@ export default async function PortfolioPage() {
             비슷한 작업을 의뢰하고 싶으신가요?
           </h2>
           <p className="text-blue-200 mb-8" style={{ wordBreak: "keep-all" }}>
-            지기구조 전문 설계 페이퍼 엔지니어링 스튜디오에게 직접 문의해 보세요. 영업일 1~2일 내 회신 드립니다.
+            지기구조 전문 설계 페이퍼 엔지니어링 스튜디오에게 직접 문의해 보세요. 3영업일 이내 회신 드립니다.
           </p>
           <a
             href="/quote"

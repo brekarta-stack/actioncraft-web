@@ -488,7 +488,7 @@ export default function HomePage() {
             지기구조 전문 설계 페이퍼 엔지니어링 스튜디오가 함께합니다.
           </p>
           <p className="text-blue-300 text-sm mb-10">
-            제품 정보 입력 → 영업일 1~2일 내 담당자 회신 · 최소 수량 1,000부 · 평균 납기 약 4주
+            제품 정보 입력 → 3영업일 이내 담당자 회신 · 최소 수량 1,000부 · 평균 납기 약 4주
           </p>
           <div className="flex flex-col sm:flex-row justify-center gap-3">
             <Link
