@@ -17,6 +17,26 @@ export type { Artist } from "./artist-types";
 /** DB 폴백용 시드 — 마이그레이션 SQL 이 동일 데이터를 INSERT 한다 */
 export const SEED_ARTISTS: Artist[] = [
   {
+    id: "artist-04",
+    name: "오세기",
+    englishName: "액션크래프트", // 브랜드/활동명
+    role: "액션크래프트 대표 · 액션 페이퍼 토이 기획",
+    photo: "/artists/osegi-actioncraft.jpg",
+    // 공개 언론(전자신문 등) 기반 — 액션크래프트 창업자·대표.
+    bio: "'움직이는 페이퍼 토이'를 만드는 액션크래프트를 이끄는 대표입니다. 캐릭터 속에 정교하게 숨긴 기믹으로 움직임을 구현하는 액션 페이퍼 토이를 기획·구조설계하며, 교육 교구부터 기업·전시 캐릭터까지 다양한 주문 제작을 이끌어 왔습니다.",
+    specialties: ["액션 페이퍼 토이 기획", "구조·기믹 설계", "캐릭터 콘텐츠 개발"],
+    styleTags: ["액션 메커니즘", "캐릭터"],
+    career: [
+      "액션크래프트 창업·대표",
+      "자사 상품·교육 서비스·기업 캐릭터 3개 사업 운영",
+      "교육 교구·전시 캐릭터 주문 제작 다수",
+    ],
+    portfolioTag: "오세기",
+    links: [],
+    published: true,
+    sortOrder: 0,
+  },
+  {
     id: "artist-01",
     name: "김철호",
     englishName: "Kim Cheol-ho",
