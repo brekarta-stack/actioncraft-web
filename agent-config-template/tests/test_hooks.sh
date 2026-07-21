@@ -136,11 +136,15 @@ env -i PATH=/usr/bin:/bin:/usr/sbin:/sbin HOME="$HOME" \
 [ -f "$WORK/state/gitsync.ok" ] && pass "동기화 신선도 기록" || fail "gitsync.ok 미기록"
 
 # 8b. git 신원 부재 → 허위 성공 알림 금지 (복구 직후 Mini 시나리오)
+# macOS/최신 git은 신원이 없으면 user@host 로 자동 생성하므로, useConfigOnly=true 로
+# 자동 생성을 막아 "커밋 실패" 조건을 확실히 재현한다(안 그러면 커밋이 성공해 오탐).
 mkdir -p "$WORK/nohome"
+printf '[user]\n\tuseConfigOnly = true\n' > "$WORK/nohome/gitconfig"
 git clone -q "$WORK/remote.git" "$WORK/repo2" 2>/dev/null
 echo "orphan-skill" > "$WORK/repo2/skills/_quarantine/orphan.md"
 : > "$WORK/bodies.s_ok"
 env -i PATH=/usr/bin:/bin:/usr/sbin:/sbin HOME="$WORK/nohome" \
+  GIT_CONFIG_GLOBAL="$WORK/nohome/gitconfig" GIT_CONFIG_SYSTEM=/dev/null \
   AGENT_SECRETS=/nonexistent AGENT_LOG_DIR="$WORK/logs" AGENT_STATE_DIR="$WORK/state2" \
   AGENT_REPO="$WORK/repo2" SLACK_WEBHOOK_URL="http://127.0.0.1:$PORT_OK" \
   sh "$BASE/hooks/git-sync.sh" 2>/dev/null
@@ -177,6 +181,6 @@ if [ $FAIL -eq 0 ]; then
   echo "ALL PASS"
   exit 0
 else
-  echo "$FAIL개 실패"
+  echo "${FAIL}개 실패"
   exit 1
 fi
