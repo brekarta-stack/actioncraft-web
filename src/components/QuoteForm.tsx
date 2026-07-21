@@ -288,6 +288,14 @@ export default function QuoteForm() {
       // URL 파싱 실패는 무시
     }
 
+    // 제품이 이미 정해졌으면(URL 프리필·초안·상담) 제품 선택 단계(1)에 머물 이유가 없다.
+    // Step 1 은 '제품을 고르는' 단계이므로, 이미 고른 상태면 옵션 단계(2)부터 시작한다.
+    // → /products 카드 CTA 는 물론, 상단/하단 '제작 문의' 링크나 남은 초안으로 들어와도
+    //   "어떤 제품을 원하시나요?"를 다시 보여주는 중복이 사라진다.
+    if (restoredForm.product && restoredStep === 1) {
+      restoredStep = 2;
+    }
+
     setForm(restoredForm);
     setStepRaw(Math.min(Math.max(restoredStep, 1), TOTAL_STEPS));
     if (isUsageId(restoredForm.product)) setStep1Mode("usage");
