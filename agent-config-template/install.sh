@@ -17,6 +17,7 @@ DEST="${AGENT_HOME:-$HOME/agent-config}"
 SECRETS_DIR="$HOME/.agent-secrets"
 SECRETS_FILE="$SECRETS_DIR/hermes.env"
 DRY="${AGENT_INSTALL_DRYRUN:-0}"
+NONINT="${AGENT_NONINTERACTIVE:-0}"   # 1이면 선택 프롬프트(원격·헤르메스)를 건너뛴다
 IS_MAC=0; [ "$(uname 2>/dev/null)" = "Darwin" ] && IS_MAC=1
 
 say()  { printf '\n\033[1;34m▶ %s\033[0m\n' "$1"; }
@@ -46,8 +47,12 @@ command -v git >/dev/null 2>&1 || die "git이 필요합니다. Xcode Command Lin
 ok "git 확인"
 if ! git config --global user.email >/dev/null 2>&1; then
   warn "git 신원이 없습니다 (없으면 자동 커밋이 실패합니다)."
-  _nm="${GIT_NAME:-$(ask 'git 사용자 이름:')}"
-  _em="${GIT_EMAIL:-$(ask 'git 이메일:')}"
+  if [ "$NONINT" = 1 ]; then
+    _nm="${GIT_NAME:-agent}"; _em="${GIT_EMAIL:-agent@localhost}"
+  else
+    _nm="${GIT_NAME:-$(ask 'git 사용자 이름:')}"
+    _em="${GIT_EMAIL:-$(ask 'git 이메일:')}"
+  fi
   run git config --global user.name "$_nm"
   run git config --global user.email "$_em"
   ok "git 신원 설정"
@@ -114,7 +119,10 @@ fi
 # ── 5. 원격 백업(선택) ──
 say "5/7 원격 백업 저장소 (선택)"
 if [ "$DRY" != 1 ] && ! git -C "$DEST" remote get-url origin >/dev/null 2>&1; then
-  _rm="${AGENT_REMOTE:-$(ask 'agent-config 비공개 레포 URL (없으면 Enter로 건너뜀 — 원격 백업은 나중에):')}"
+  _rm="${AGENT_REMOTE:-}"
+  if [ -z "$_rm" ] && [ "$NONINT" != 1 ]; then
+    _rm="$(ask 'agent-config 비공개 레포 URL (없으면 Enter로 건너뜀 — 원격 백업은 나중에):')"
+  fi
   if [ -n "$_rm" ]; then
     git -C "$DEST" add -A && git -C "$DEST" commit -m "chore: bootstrap agent-config" >/dev/null 2>&1
     git -C "$DEST" remote add origin "$_rm"
@@ -142,7 +150,7 @@ if [ "$IS_MAC" = 1 ] && [ "$DRY" != 1 ]; then
   done
   # 헤르메스 시작 명령 (선택) — 감지 + 프롬프트
   _hcmd="${AGENT_HERMES_CMD:-}"
-  if [ -z "$_hcmd" ]; then
+  if [ -z "$_hcmd" ] && [ "$NONINT" != 1 ]; then
     if pgrep -fl hermes >/dev/null 2>&1; then
       warn "실행 중인 헤르메스로 보이는 프로세스가 있습니다:"
       pgrep -fl hermes 2>/dev/null | head -2 | sed 's/^/      /'
