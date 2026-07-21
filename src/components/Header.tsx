@@ -8,9 +8,11 @@ const navLinks = [
   { href: "/", label: "홈" },
   { href: "/about", label: "회사소개" },
   { href: "/products", label: "주문 제작" },
-  // { href: "/studio", label: "무료도면" },  // 품질 정비 전까지 비공개(2026-07-11)
+  // 페이퍼크래프트 스튜디오(웹 /studio · 데스크톱 /download)는 베타라 메뉴에서 비공개.
+  // 페이지 자체는 직접 접근·SEO 색인 유지 — 정식 출시 시 아래 두 줄 주석 해제.
+  // { href: "/studio", label: "무료도면" },  // 웹 카탈로그 — 품질 정비 전까지 비공개(2026-07-11)
+  // { href: "/download", label: "다운로드" },  // 데스크톱 프로그램 배포 — 베타라 비공개(2026-07-21)
   { href: "/portfolio", label: "납품 사례" },
-  { href: "/download", label: "다운로드" },
   { href: "/blog", label: "블로그" },
 ];
 
