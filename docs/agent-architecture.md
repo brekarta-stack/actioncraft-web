@@ -363,3 +363,37 @@ F. 보안 점검: 도구 권한·시크릿·외부 스킬 검증
 
 > 요약: "계층을 늘리는 것"이 아니라 **이미 뭉쳐 있는 것을 계층으로 분리해 각자에게 직무기술서를 주는 것**. 순서는 맥락→제어→연결→지능→실행.
 6. **(F) 나머지 2개 사업 온보딩** — 데이터·흐름 연결
+
+---
+
+## 15. 기기 간 연결성 트러블 검토 (2026-07-21) — 실제 장애 로그 기반
+
+> 근거: Slack #소셜/DM의 과거 인프라 로그. 실제 하드웨어: Studio `m3ui-MacStudio.local` / `192.168.0.245` / user `agent`, Mini 24h 상시, Tailscale 사용 중, ollama 보유.
+
+### 15.1 과거 실제 장애 (로그에서 추출)
+
+- **mDNS(`.local`) 해상도 실패** — Studio↔Mini SSH/rsync가 `m3ui-MacStudio.local` 미해석으로 실패. 로그: "mDNS 해상도 실패 — 같은 LAN 미연결 또는 SSH 미활성. mini에서 직접 실행."
+- **같은 LAN 미연결 / DHCP·서브넷 변동**
+- **원격 로그인(SSH) 꺼짐** — rsync 전제조건 누락
+- **슬립으로 Studio 도달 불가** — `pmset womp/powernap` 로 대응 시도
+- **기기 간 rsync 의존** — v2/v3 코드 동기화가 취약
+
+### 15.2 핵심: 단계별 연결 의존도
+
+- **PHASE 1 (Claude 두뇌)**: 미니는 Slack + Claude API(인터넷)하고만 통신 → **Studio↔Mini LAN 의존 0 → 위 장애 구조적 발생 불가.**
+- **git-sync가 rsync를 대체**: 각 기기가 GitHub에서 독립 pull → 기기 간 SSH/mDNS/rsync 의존 제거(과거 장애 클래스 해소).
+- 연결 트러블은 **오직 PHASE 2**(미니→Studio 로컬 모델 LAN 호출)에서만 재등장.
+
+### 15.3 PHASE 2 연결 설계 원칙 (재발 방지)
+
+1. **`.local`(mDNS) 사용 금지 → Tailscale 주소 사용.** Studio 모델 엔드포인트를 `macstudio.tail….ts.net`(100.x)로 호출. mDNS·서브넷·DHCP 변동에 무관하게 항상 해석 — 과거 #1 장애의 근본 해결. (Tailscale 이미 사용 중이라 추가 비용 없음.)
+2. **모델 접근은 SSH가 아니라 ollama OpenAI 호환 엔드포인트(:11434)를 Tailscale 인터페이스에 바인딩.** SSH/원격로그인 의존 제거.
+3. **Studio 상시가동**: `pmset -a sleep 0 powernap 1 womp 1 autorestart 1` + ollama를 launchd KeepAlive.
+4. **헬스체크 + 폴백**: 미니 heartbeat가 Studio 엔드포인트를 핑 → `STUDIO=DOWN` 알림, 라우터는 해당 작업을 Claude로 자동 폴백(조용한 대기 금지).
+5. **NAS**: `NAS_MOUNT` 설정 시 heartbeat가 마운트 감지(구현됨). 백업 작업은 마운트 확인 후에만(guard 예시 참조).
+
+### 15.4 PHASE 2 착수 시 추가할 산출물 (아직 미구축)
+
+- `hooks/setup-studio.sh` — Studio에 ollama 서빙(Tailscale 바인딩) + pmset + launchd 등록
+- heartbeat의 Studio 헬스체크 항목(`STUDIO_ENDPOINT` 설정 시)
+- routing-policy PHASE 2의 "로컬 다운 → Claude 폴백" 라우터 규칙 구현
