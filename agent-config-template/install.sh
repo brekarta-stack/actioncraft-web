@@ -75,6 +75,12 @@ if [ "$DRY" != 1 ] && [ ! -d .git ]; then
   ok "git 저장소 초기화"
 fi
 run mkdir -p logs
+# 베이스라인 커밋 — 안 하면 전 파일이 '미추적'이라 heartbeat의 격리-우회 검사가 오탐한다
+if [ "$DRY" != 1 ] && ! git -C "$DEST" rev-parse HEAD >/dev/null 2>&1; then
+  git -C "$DEST" add -A >/dev/null 2>&1
+  git -C "$DEST" commit -q -m "chore: bootstrap agent-config baseline" >/dev/null 2>&1 \
+    && ok "베이스라인 커밋" || warn "베이스라인 커밋 실패 (git 신원 확인)"
+fi
 ok "파일 배치 완료"
 
 # ── 3. 시크릿 ──
