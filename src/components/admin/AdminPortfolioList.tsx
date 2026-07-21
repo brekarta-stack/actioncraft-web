@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { PortfolioItem } from "@/lib/portfolio-types";
 import { parseYearMonth, autoHyphenYearMonth } from "@/lib/portfolio-meta";
 
@@ -94,6 +94,55 @@ export default function AdminPortfolioList({ initialItems }: { initialItems: Por
   /** 행별 '제작 시기' 입력 ref — 입력 완성 시 다음 행으로 포커스 이동용 */
   const producedAtRefs = useRef<(HTMLInputElement | null)[]>([]);
 
+  /* ── 작업 아티스트 드롭다운 — /api/artists 에서 로드, 태그로 저장 ── */
+  const [artistOptions, setArtistOptions] = useState<{ name: string; portfolioTag: string }[]>([]);
+  useEffect(() => {
+    fetch("/api/artists")
+      .then((r) => r.json())
+      .then((d) => {
+        if (Array.isArray(d?.artists)) {
+          setArtistOptions(
+            d.artists.map((a: { name: string; portfolioTag: string }) => ({
+              name: a.name,
+              portfolioTag: a.portfolioTag,
+            }))
+          );
+        }
+      })
+      .catch(() => {});
+  }, []);
+  const artistTagList = artistOptions.map((a) => a.portfolioTag);
+  /** 항목 태그 중 아티스트 태그(첫 매칭) — 드롭다운 표시값 */
+  const currentArtistTag = (item: PortfolioItem) =>
+    (item.tags ?? []).find((t) => artistTagList.includes(t)) ?? "";
+
+  /**
+   * '작업 아티스트' 인라인 변경 — 기존 아티스트 태그 제거 후 새 태그 부착, 즉시 PUT (낙관적).
+   * 아티스트가 아닌 일반 태그는 보존한다. 실패 시 롤백 + alert.
+   */
+  async function setItemArtist(id: string, newTag: string) {
+    const item = items.find((i) => i.id === id);
+    if (!item) return;
+    const prevTags = item.tags ?? [];
+    const rest = prevTags.filter((t) => !artistTagList.includes(t));
+    const nextTags = newTag ? [...rest, newTag] : rest;
+    setSavingId(id);
+    setItems((prev) => prev.map((i) => (i.id === id ? { ...i, tags: nextTags } : i)));
+    try {
+      const res = await fetch(`/api/portfolio/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ tags: nextTags }),
+      });
+      if (!res.ok) throw new Error("저장 실패");
+    } catch {
+      setItems((prev) => prev.map((i) => (i.id === id ? { ...i, tags: prevTags } : i)));
+      alert("작업 아티스트 변경에 실패했습니다. 잠시 후 다시 시도해 주세요.");
+    } finally {
+      setSavingId(null);
+    }
+  }
+
   /** idx 다음 행의 제작 시기 칸으로 포커스 이동 (마지막 행이면 포커스 해제) */
   function advanceProducedAt(idx: number) {
     const next = producedAtRefs.current[idx + 1];
@@ -178,7 +227,7 @@ export default function AdminPortfolioList({ initialItems }: { initialItems: Por
   return (
     <div className="space-y-3">
       <p className="text-xs text-slate-400">
-        사이트(납품 사례·홈)는 <strong className="text-slate-500">제작 시기(없으면 등록일) 최신순</strong>으로
+        사이트(작업 포트폴리오·홈)는 <strong className="text-slate-500">제작 시기(없으면 등록일) 최신순</strong>으로
         노출됩니다. 행의 제작 시기를 바꾸면 즉시 저장되며, 목록 순서는 새로고침 시 반영됩니다.
       </p>
       {items.map((item, idx) => (
@@ -241,6 +290,23 @@ export default function AdminPortfolioList({ initialItems }: { initialItems: Por
               }}
             />
             <span className="text-[10px] text-slate-500 font-medium leading-none">제작 시기</span>
+          </div>
+
+          {/* 작업 아티스트 — 목록에서 바로 선택 (편집 페이지 진입 불필요) */}
+          <div className="flex flex-col items-center gap-1 flex-shrink-0 select-none">
+            <select
+              value={currentArtistTag(item)}
+              disabled={savingId === item.id || artistOptions.length === 0}
+              onChange={(e) => setItemArtist(item.id, e.target.value)}
+              title="이 작업을 만든 아티스트 선택 — 회사소개 '작품 보기' 필터와 연동"
+              className="w-28 px-2 py-1.5 border border-slate-200 rounded-lg text-xs text-slate-700 bg-white focus:outline-none focus:ring-2 focus:ring-[#1E22B2]/30 disabled:opacity-50"
+            >
+              <option value="">— 미지정 —</option>
+              {artistOptions.map((a) => (
+                <option key={a.portfolioTag} value={a.portfolioTag}>{a.name}</option>
+              ))}
+            </select>
+            <span className="text-[10px] text-slate-500 font-medium leading-none">작업 아티스트</span>
           </div>
 
           <div className="flex gap-2 flex-shrink-0">

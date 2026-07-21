@@ -40,7 +40,7 @@ function PortfolioJsonLd({
   const data = {
     "@context": "https://schema.org",
     "@type": "ItemList",
-    name: "Paper Engineering Studio 납품 사례",
+    name: "Paper Engineering Studio 작업 포트폴리오",
     url: `${SITE_URL}/portfolio`,
     numberOfItems: items.length,
     itemListElement: items.slice(0, 50).map((item, idx) => ({
@@ -88,8 +88,8 @@ export default async function PortfolioPage() {
       <PortfolioJsonLd items={jsonLdItems} />
       {/* Hero */}
       <PageHero
-        eyebrow="납품 사례"
-        title={<span className="pe-gradient-text">납품 사례</span>}
+        eyebrow="작업 포트폴리오"
+        title={<span className="pe-gradient-text">작업 포트폴리오</span>}
         subtitle="2013년부터 우리가 만들어 온 대표 작업들입니다."
       />
 

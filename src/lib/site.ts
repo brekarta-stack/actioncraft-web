@@ -116,7 +116,7 @@ export const PAGE_META = {
       "Action Paper Toy, STEAM 교육 키트, 캐릭터 굿즈, BI/CI 편집 디자인. 페이퍼 엔지니어링 기술로 최소 1,000부부터 평균 3~4주 납기로 페이퍼토이 외주 제작이 가능합니다.",
   },
   portfolio: {
-    title: "현대백화점·KAIST 페이퍼 엔지니어링 납품 사례",
+    title: "현대백화점·KAIST 페이퍼 엔지니어링 작업 포트폴리오",
     description:
       "현대백화점 스마일리, KAIST 납육이, 경주박물관 도토리, 수원시 수원이 등 PE Studio가 페이퍼 엔지니어링 기술로 제작한 페이퍼토이·캐릭터 굿즈 사례.",
   },

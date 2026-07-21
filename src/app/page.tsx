@@ -290,7 +290,7 @@ export default function HomePage() {
           </div>
           <PartnersMarquee />
           <p className="text-center text-xs text-slate-400 mt-6" style={{ wordBreak: "keep-all" }}>
-            * 실제 작업물 사진은 납품 사례 페이지에서 확인하실 수 있습니다.
+            * 실제 작업물 사진은 작업 포트폴리오 페이지에서 확인하실 수 있습니다.
           </p>
         </div>
       </section>

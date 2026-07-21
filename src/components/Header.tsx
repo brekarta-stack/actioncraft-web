@@ -12,7 +12,7 @@ const navLinks = [
   // 페이지 자체는 직접 접근·SEO 색인 유지 — 정식 출시 시 아래 두 줄 주석 해제.
   // { href: "/studio", label: "무료도면" },  // 웹 카탈로그 — 품질 정비 전까지 비공개(2026-07-11)
   // { href: "/download", label: "다운로드" },  // 데스크톱 프로그램 배포 — 베타라 비공개(2026-07-21)
-  { href: "/portfolio", label: "납품 사례" },
+  { href: "/portfolio", label: "작업 포트폴리오" },
   { href: "/blog", label: "블로그" },
 ];
 

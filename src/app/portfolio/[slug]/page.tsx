@@ -92,7 +92,7 @@ function PortfolioItemJsonLd({ item, slug }: { item: Awaited<ReturnType<typeof g
     dateModified: item.updatedAt,
     isPartOf: {
       "@type": "CollectionPage",
-      name: "Paper Engineering Studio 납품 사례",
+      name: "Paper Engineering Studio 작업 포트폴리오",
       url: `${SITE_URL}/portfolio`,
     },
   };
@@ -103,7 +103,7 @@ function PortfolioItemJsonLd({ item, slug }: { item: Awaited<ReturnType<typeof g
     "@type": "BreadcrumbList",
     itemListElement: [
       { "@type": "ListItem", position: 1, name: "홈", item: SITE_URL },
-      { "@type": "ListItem", position: 2, name: "납품 사례", item: `${SITE_URL}/portfolio` },
+      { "@type": "ListItem", position: 2, name: "작업 포트폴리오", item: `${SITE_URL}/portfolio` },
       { "@type": "ListItem", position: 3, name: item.title, item: url },
     ],
   };
@@ -155,7 +155,7 @@ export default async function PortfolioDetailPage({ params }: Props) {
               </li>
               <li className="text-blue-300/50">/</li>
               <li>
-                <Link href="/portfolio" className="hover:text-white">납품 사례</Link>
+                <Link href="/portfolio" className="hover:text-white">작업 포트폴리오</Link>
               </li>
               <li className="text-blue-300/50">/</li>
               <li className="text-white font-medium truncate max-w-[60vw]" aria-current="page">
@@ -338,7 +338,7 @@ export default async function PortfolioDetailPage({ params }: Props) {
           </Link>
           <div className="mt-6">
             <Link href="/portfolio" className="text-blue-200 hover:text-white text-sm">
-              ← 전체 납품 사례 보기
+              ← 전체 작업 포트폴리오 보기
             </Link>
           </div>
         </div>

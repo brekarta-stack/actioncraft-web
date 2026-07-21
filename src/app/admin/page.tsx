@@ -109,7 +109,7 @@ export default async function AdminDashboard() {
             </svg>
           </div>
           <p className="text-3xl font-bold text-slate-900 mb-0.5">{portfolioItems.length}</p>
-          <p className="text-sm text-slate-500">납품 사례</p>
+          <p className="text-sm text-slate-500">작업 포트폴리오</p>
           <p className="text-xs text-slate-400 mt-1">공개 {publishedPortfolio.length}건 · 비공개 {portfolioItems.length - publishedPortfolio.length}건</p>
         </Link>
 
@@ -234,7 +234,7 @@ export default async function AdminDashboard() {
               <path fillRule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clipRule="evenodd" />
             </svg>
           </div>
-          <span className="text-sm font-semibold text-slate-700 group-hover:text-slate-900">납품 사례 등록</span>
+          <span className="text-sm font-semibold text-slate-700 group-hover:text-slate-900">작업 포트폴리오 등록</span>
         </Link>
 
         <Link

@@ -68,12 +68,12 @@ export async function GET() {
 - 회사 소개: ${SITE_URL}/about
 - 주문 제작 서비스: ${SITE_URL}/products
 - 종이모형 스튜디오(무료 3D 미리보기 + 인쇄 PDF 도안 ${STUDIO_ITEMS.length}종): ${SITE_URL}/studio
-- 납품 사례: ${SITE_URL}/portfolio
+- 작업 포트폴리오: ${SITE_URL}/portfolio
 - 블로그(페이퍼 엔지니어링 지식): ${SITE_URL}/blog
 - 자주 묻는 질문: ${SITE_URL}/faq
 - 제작 문의(견적): ${SITE_URL}/quote
 
-## 대표 납품 사례
+## 대표 작업 포트폴리오
 ${caseLines}
 
 ## 최근 블로그 글

@@ -18,7 +18,7 @@ export default function AdminArtistList({ initialItems, source }: Props) {
   const [savingId, setSavingId] = useState<string | null>(null);
 
   async function remove(id: string, name: string) {
-    if (!confirm(`'${name}' 아티스트를 삭제할까요?\n납품 사례에 붙은 태그는 그대로 남습니다.`)) return;
+    if (!confirm(`'${name}' 아티스트를 삭제할까요?\n작업 포트폴리오에 붙은 태그는 그대로 남습니다.`)) return;
     const res = await fetch(`/api/artists/${id}`, { method: "DELETE" });
     if (!res.ok) {
       const err = await res.json().catch(() => ({}));

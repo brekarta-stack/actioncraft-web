@@ -4,7 +4,7 @@
  * 아티스트 등록/편집 폼 — /admin/artists/new, /admin/artists/[id]/edit
  *
  * 프로필 사진은 /api/upload (Supabase Storage) 로 올리고 URL 만 저장.
- * portfolioTag 는 비워두면 이름과 동일하게 저장된다 (납품 사례 태그와 매칭).
+ * portfolioTag 는 비워두면 이름과 동일하게 저장된다 (작업 포트폴리오 태그와 매칭).
  */
 
 import { useState, useCallback } from "react";
@@ -387,7 +387,7 @@ export default function ArtistEditor({ artist }: Props) {
             className="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-300"
           />
           <p className="text-[11px] text-slate-400 mt-1" style={{ wordBreak: "keep-all" }}>
-            납품 사례에 이 태그를 붙이면 회사소개의 &lsquo;이 아티스트 작품 보기&rsquo; 결과로 노출됩니다.
+            작업 포트폴리오에 이 태그를 붙이면 회사소개의 &lsquo;이 아티스트 작품 보기&rsquo; 결과로 노출됩니다.
             태그를 바꾸면 기존 작품의 태그도 함께 바꿔야 합니다.
           </p>
         </div>

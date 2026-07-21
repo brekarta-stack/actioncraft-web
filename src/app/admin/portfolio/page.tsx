@@ -14,7 +14,7 @@ export default async function AdminPortfolioPage() {
     <div className="p-6 md:p-8 max-w-4xl mx-auto">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">납품 사례</h1>
+          <h1 className="text-2xl font-bold text-slate-900">작업 포트폴리오</h1>
           <p className="text-slate-500 text-sm mt-0.5">총 {items.length}개</p>
         </div>
         <a
