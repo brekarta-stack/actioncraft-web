@@ -1,4 +1,4 @@
-# 리팩토링 로드맵 — 스튜디오 로컬 우선 + 하이브리드 (2026-07-21)
+# 리팩토링 로드맵 — 스튜디오 로컬 우선 + 하이브리드 (2026-07-21 · C안 확정 2026-07-22)
 
 > 요청: 4계층 블루프린트 관점에서 스튜디오 도입 시 필요한 하드웨어·관제 시스템·Orca 도입을 검토하고 시스템을 리팩토링.
 > 서비스(stage.ai.kr / impact ledger / papercraft.kr)는 **보존**, 삭제 대상은 **에이전트 잡동사니만**.
@@ -35,17 +35,15 @@
 ## 2. 타깃 아키텍처 (4계층 × 로컬-우선 하이브리드)
 
 ```
-[관제/인터페이스]  Slack #agent(명령)·#agent-log(관제)  +  (선택) Orca 폰앱  +  Tailscale SSH
+[관제/인터페이스]  Slack #agent(명령)·#agent-log(관제)  +  (선택) Orca 폰앱  +  Tailscale SSH/Remote Control
         │  어떤 디바이스든 온라인 관제
-[오케스트레이션]  Claude Code (headless, launchd 24h) @ Mac Mini 24GB
-        │  라우터(.ccr): 쉬운/오프라인 → 로컬,  어려운/완성도 → 온라인 Claude
-   ┌────┴─────────────────────────────┐
-[지능·로컬]  Mac Studio 96GB          [지능·온라인]  Claude API
-   MLX: Qwen3 30~35B MoE(70~87 tok/s)   (어려운 5~15%만)
-   로컬 이미지(Draw Things/MLX-Flux)
-        │
+[오케스트레이션 + 지능·로컬]  Mac Studio 96GB (24시간 상시)
+   Claude Code(headless, launchd) + hooks/heartbeat + 라우터(.ccr): 쉬운/오프라인→로컬, 어려운→온라인 Claude
+   MLX: Qwen3 30~35B MoE(70~87 tok/s) + 로컬 이미지(Draw Things/MLX-Flux)
+        │                              [지능·온라인]  Claude API (어려운 5~15%만)
 [제어 HOOKS]  heartbeat·guard·git-sync (결정론적, LLM 무관) → 실패는 #agent-log로 push
-[저장]  git 레포(설정·스킬 = 단일 진실원)  +  NAS(모델 가중치·생성물·상태)
+[무거운 보조]  NAS DXP4800+ Docker(리눅스 네이티브): n8n·스크래핑·큐 + 스튜디오 감시 워치독 컨테이너
+[저장]  git 레포(설정·스킬 = 단일 진실원)  +  NAS(모델 가중치·생성물·상태·백업)
 [실행 SUBAGENTS/자동화]  수집→포스팅 / 주제→퀴즈 / 주제→영상  (사업·용도별 격리)
 ```
 
@@ -57,7 +55,7 @@
 
 문자 그대로 되는 것과 타협이 필요한 것을 구분한다:
 
-- ✅ **24시간 로컬 오케스트레이션**: Claude Code headless를 launchd로 미니에 상시 구동. 됨.
+- ✅ **24시간 로컬 오케스트레이션**: Claude Code headless를 launchd로 스튜디오에 상시 구동. 됨.
 - ⚠️ **"오프라인에서도 Claude Code"**: Claude(클라우드)는 오프라인 불가. 정확히는 **"오프라인일 땐 로컬 모델로, 온라인이고 어려우면 Claude로"** 전환하는 하이브리드가 가능하다. 라우터(.ccr / OpenAI 호환 로컬 엔드포인트)가 이 전환을 담당. → "오프라인에도 도는 로컬 에이전트 + 온라인 시 Claude 승급"으로 이해하면 100% 달성 가능.
 - ✅ **어려운 것만 온라인**: 라우터 규칙(신뢰도·난이도·대외 산출물) + `routing-policy.md`. 됨.
 - ✅ **어디서든 관제**: Slack 2채널(모바일 포함) + (선택) Orca 폰앱(완료 알림·폰에서 지시) + Tailscale SSH. 됨.
@@ -88,16 +86,18 @@
 
 ---
 
-## 6. 하드웨어 최종 판정 — **추가 구매 불필요**
+## 6. 하드웨어 최종 판정 — **C안 확정(2026-07-22): 스튜디오 24h + NAS 도커, 미니 정리**
 
-현재 자산(Studio 96GB + Mini 24GB + NAS)이 목표에 **이미 충분**하다. 역할 재배치가 핵심:
+추가 구매는 **NAS 램 증설 하나뿐**(금요일 예정). 역할 재배치가 핵심:
 
-- **Mac Mini 24GB** = 24시간 경량 오케스트레이터/관제(heartbeat·git-sync·guard·Slack·스케줄러). 저전력 상시.
-- **Mac Studio 96GB** = 로컬 LLM 서빙(MLX; Qwen3 30~35B MoE 70~87 tok/s, 70B dense Q4~Q5) + 로컬 이미지 생성. 필요 시 깨워 작업.
-- **NAS** = 모델 가중치·생성물·상태.
+- **Mac Studio 96GB (24시간 상시)** = 두뇌+오케스트레이션 통합: 로컬 LLM 서빙(MLX; Qwen3 30~35B MoE 70~87 tok/s) + 로컬 이미지 + Claude Code headless + hooks/heartbeat + 라우터. 오케스트레이션 부하는 2~6GB라 96GB에 얹어도 여유.
+- **NAS UGREEN DXP4800 Plus** = 무거운 보조 + 저장 + 보조 워치독. UGOS Pro의 Docker 공식 지원(x86 리눅스 네이티브 — macOS 도커의 VM 오버헤드 없음)으로 n8n·스크래핑·큐 구동 + 스튜디오 heartbeat 감시 컨테이너(→ B안의 '관제 동반 사망' 약점 상쇄). **램 8→32GB 증설 후** 무거운 컨테이너 투입. Pentium Gold 8505는 자동화엔 충분하나 **LLM 추론 금지**. 접근은 **Tailscale 전용, 외부 노출(포트포워딩) 금지**.
+- **Mac Mini 24GB** = 스튜디오 관제 2주 무사고 후 정리(처분/타용도). 그 전까진 병행 유지 — 대체 검증 전 삭제 금지.
 - **온라인 분기** = 어려운 추론 → Claude, **영상 렌더 → 클라우드 API**(로컬 불가한 유일한 항목).
 
-**RAM 256/512GB 업그레이드 = 권장 안 함.** "어려운 추론은 온라인 Claude" 전략과 중복 투자다. (512GB라야 도는 671B급은 온라인 Claude로 대체되는 영역.) **소형 UPS(600~1000VA)** 1대로 정전 시 안전 종료만 확보. 예외: 영상이 '매일 다수편 뽑는 핵심 프로덕트'가 되면 그때만 CUDA 박스/상시 클라우드 GPU 검토.
+**Mac RAM 256/512GB 업그레이드 = 권장 안 함.** "어려운 추론은 온라인 Claude" 전략과 중복 투자다. **소형 UPS(600~1000VA)** 1대로 정전 시 안전 종료만 확보. 예외: 영상이 '매일 다수편 뽑는 핵심 프로덕트'가 되면 그때만 CUDA 박스/상시 클라우드 GPU 검토.
+
+- C안 근거: ① 추론 크리티컬 패스에서 기기 간 연결 제거(#1 장애 유형이 비핵심 경로로 이동 — NAS 링크가 끊겨도 자동화만 멈추고 코어 무사) ② NAS 워치독으로 감시자 분리 확보 ③ 유지 기기 -1. (DXP4800+ 검증: Pentium Gold 8505 / DDR5 최대 64GB / 10GbE / UGOS Docker 공식 지원)
 
 - 대역폭 819GB/s가 로컬 토큰속도를 좌우 / Apple Silicon 약점 = 긴 프롬프트 prefill(MLX가 llama.cpp 대비 4~5배 개선) / 영상 로컬은 Metal 지원 미흡으로 비실용(2026 커뮤니티 합의).
 
@@ -105,14 +105,15 @@
 
 ## 7. 턴별 빌딩 로드맵 (순차, 각 턴 = 빌드→검증→다음)
 
-1. **T1 · 96GB 검증** — `verify-local-model` 키트를 스튜디오에서 실행 → 로컬 모델 확정(Qwen3.6-35B-A3B 우선). *(키트 준비 완료)*
-2. **T2 · 로컬 두뇌 상설** — 스튜디오에 MLX/ollama 서빙(**Tailscale 주소 바인딩**, `.local` 금지) + heartbeat Studio 헬스체크 + `.ccr` 라우터(로컬↔Claude). *(§연결성: agent-architecture.md §15)*
-3. **T3 · 24시간 오케스트레이터** — 미니에 Claude Code headless(launchd) + Cron/Scheduled + Slack 관제 확립.
-4. **T4 · 자동화(a) 수집→포스팅** — 첫 파이프라인(가장 단순·고가치), hooks→#agent-log 관제.
-5. **T5 · 자동화(b) 퀴즈** — 100% 로컬, 스키마 검증 가드.
-6. **T6 · 자동화(c) 영상** — 로컬 오케스트레이션 + 클라우드 렌더 API. 가장 복잡 → 마지막.
-7. **T7 · 레거시 폐기** — 신 구조 2주 무사고 후, 레거시 에이전트 삭제. **stage.ai.kr·impact ledger 경계 확인 후에만.**
-8. **T8 · 사업 B·C 온보딩** — biz-b/c 정의 확정 후 스킬 네임스페이스·채널 추가.
+1. **T1 · 96GB 검증** — `verify-local-model` 키트를 스튜디오에서 실행 → 로컬 모델 확정(Qwen3.6-35B-A3B 우선). *(키트 준비 완료 · NAS 램과 무관 — 즉시 실행 가능)*
+2. **T2 · 스튜디오 상설화(관제 이전)** — 초기화된 스튜디오 셋업(전원·자동 로그인·Tailscale·Claude Code) → 레포 clone → `agent-config-template/install.sh`로 관제 이식(미니 관제는 병행 유지) → MLX 서빙 상설(**Tailscale 주소 바인딩**, `.local` 금지) + `.ccr` 라우터. *(§연결성: agent-architecture.md §15)*
+3. **T3 · 24시간 오케스트레이터 @ 스튜디오** — Claude Code headless(launchd) + Cron/Scheduled + Slack 관제 확립.
+4. **T3.5 · NAS 투입(금요일 램 32GB 증설 후)** — Tailscale 설치 → Docker(n8n) → 스튜디오 heartbeat 감시 워치독 컨테이너. 외부 노출 금지.
+5. **T4 · 자동화(a) 수집→포스팅** — 첫 파이프라인(가장 단순·고가치), n8n@NAS + hooks→#agent-log 관제.
+6. **T5 · 자동화(b) 퀴즈** — 100% 로컬, 스키마 검증 가드.
+7. **T6 · 자동화(c) 영상** — 로컬 오케스트레이션 + 클라우드 렌더 API. 가장 복잡 → 마지막.
+8. **T7 · 레거시·미니 정리** — 신 구조(스튜디오 관제) 2주 무사고 후 레거시 에이전트 삭제 + 미니 정리. **stage.ai.kr·impact ledger 경계 확인 후에만.**
+9. **T8 · 사업 B·C 온보딩** — biz-b/c 정의 확정 후 스킬 네임스페이스·채널 추가.
 
 > 원칙: **대체가 검증되기 전엔 아무것도 삭제하지 않는다.** 각 자동화는 켜고 끌 수 있게(개별 kill switch), 실패는 5분 내 #agent-log로.
 
