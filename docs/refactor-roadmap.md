@@ -106,8 +106,8 @@
 ## 7. 턴별 빌딩 로드맵 (순차, 각 턴 = 빌드→검증→다음)
 
 1. **T1 · 96GB 검증** — ✅ **완료(2026-07-22)**: `qwen3.6:35b-a3b` @ 스튜디오 실측 **83.0 tok/s**(예측 70~87 적중), 도구호출 3/3 · JSON 3/3 · 과잉호출억제 PASS · 일관성 3/3 → **모델 확정, 96GB 충분**. 단 Q1(대외 견적)에서 **가격 산술 10× 오류(300×7,500원=225만원을 2,250만원으로) + 미확인 사실 날조(선금 50%·가공방식 등)** 확인 → **대외 산출물은 반드시 온라인 Claude 경유** 라우팅 원칙이 실측으로 재확인됨.
-2. **T2 · 스튜디오 상설화(관제 이전)** — 초기화된 스튜디오 셋업(전원·자동 로그인·Tailscale·Claude Code) → 레포 clone → `agent-config-template/install.sh`로 관제 이식(미니 관제는 병행 유지) → MLX 서빙 상설(**Tailscale 주소 바인딩**, `.local` 금지) + `.ccr` 라우터. *(§연결성: agent-architecture.md §15)*
-3. **T3 · 24시간 오케스트레이터 @ 스튜디오** — Claude Code headless(launchd) + Cron/Scheduled + Slack 관제 확립.
+2. **T2 · 스튜디오 상설화(관제 이전)** — ✅ **대부분 완료(2026-07-22)**: 스튜디오에 Tailscale 설치 + `install.sh`로 관제 이식 완료(heartbeat·git-sync launchd 등록, 전원 상시(잠자기0·정전복구·07:55 자동기상), 자동 테스트 ALL PASS, git 신원 brekarta). ollama(0.32.1)+모델 상주. **C안 단순화**: 헤르메스·모델이 **동일 스튜디오**에 상주하므로 ollama는 **localhost 유지**(구 설계의 Tailscale/LAN 바인딩 불필요 — 노출 0, 더 단순). Tailscale은 이제 폰·노트북 **원격 관제**용으로만. **남은 것**: 헤르메스 데몬을 스튜디오에서 기동(현재 미니에서 구동 중으로 추정 → heartbeat가 hermes=DOWN 보고, 정상) + `.ccr` 라우터(기본 로컬, 어려운/대외 → Claude).
+3. **T3 · 24시간 오케스트레이터 @ 스튜디오** — 헤르메스 데몬을 스튜디오 launchd(`com.agent.hermes`)로 상주(시작 명령 확정 필요) + 미니 헤르메스 config/스킬 이관 + Cron/Scheduled + Slack 관제 확립.
 4. **T3.5 · NAS 투입(금요일 램 32GB 증설 후)** — Tailscale 설치 → Docker(n8n) → 스튜디오 heartbeat 감시 워치독 컨테이너. 외부 노출 금지.
 5. **T4 · 자동화(a) 수집→포스팅** — 첫 파이프라인(가장 단순·고가치), n8n@NAS + hooks→#agent-log 관제.
 6. **T5 · 자동화(b) 퀴즈** — 100% 로컬, 스키마 검증 가드.
