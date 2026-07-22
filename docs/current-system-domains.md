@@ -38,9 +38,35 @@
 | 어학 | voicebridge 가동 (오세기 정보 기억 중) | 언어·수준·목표 |
 | SNS/브랜드 | sns-daily 가동 | 포지셔닝·콘텐츠축·빈도 |
 
-## 다음: 깊은 검토가 필요한 것 (코드 열람 필요 — 덤프 스크립트로)
-1. **스킬 효과 측정** [Q5]: `agents/skills/`, `agent-config/skills/`, `memory/reviews/*.md`, qc-eval 결과 → 어떤 스킬이 실제로 품질을 올렸나
-2. **카운슬 시스템 정체**: channel-council이 뭘 하는가 (다중에이전트 심의?)
-3. **BD/SNS 잡의 소속**: 어느 사업/브랜드를 위한 것인가
-4. **learning 주제**: 현재 무엇을 수집·학습 중인가
-5. **글쓰기 스킬 현황** [Q6]: 현재 한국어 글쓰기 스킬이 어떻게 짜여 있나 → 개선 기준선
+---
+
+## 🔑 딥리뷰 실측 (2026-07-22 deep-review.sh) — 미정이던 것들의 답
+
+### 실제 사업 3개 확정 [실측: agents 자기점검 리포트]
+그동안 [확인필요]였던 biz-b/biz-c의 정체가 드러남 — 자기점검이 "24개 채널 중 **biz·regen·edu 3개만 사업 커버**"라고 명시:
+- **biz-a = 페이퍼크래프트 사업** (papercraft.kr) [채널: biz-페이퍼크래프트사업]
+- **biz-b = 지역재생** (regen) [채널: regen-지역재생, sns-regen]
+- **biz-c = 스타트업강의** (edu) [채널: edu-스타트업강의, sns-edu]
+
+### 핵심 진단: 시스템이 과확장됨 [실측, 자기점검이 스스로 지적]
+- **24개 채널** 존재, 그중 **21개는 "활용 전략 부재"** — 당신의 "도메인 재편" 직감을 시스템이 데이터로 확증.
+- 24채널: biz·per-일상·inv-투자·brn-브랜딩학습·ai-omc·sysops·daily·regen·edu·idea·ai-builder·travel·weekly·work·personal·learning·미진행·cos-오케스트레이터·따라잡기·img·sns-biz·sns-edu·sns-regen·sns-personal
+- **62 에이전트 / 62 config** (무결성 OK), **엔진 배분 claude 54 / codex 1 / ollama 7** → 자기점검이 "Claude 과의존, codex/ollama 미미"로 지적.
+- **에러 발생 파이프라인**: channel-council · invest-poll · learning-quiz · learning-youtube · proactive-nudge → **우리가 n8n으로 재구축할 바로 그것들**(이관=버그 수정 겸함).
+
+### 스킬 현황 [Q5 답]
+- **`agent-config/skills/`는 전부 비어있음**(.gitkeep만, 실파일 0개). 신규 관제층의 "미리 써둘 스킬"은 **아직 채워지지 않음.**
+- 실제 자산은 `agents`의 **62개 에이전트 config + 설정 파일**에 있음. "스킬"이 별도 폴더가 아니라 채널별 에이전트 정의에 내장.
+- **효과 측정 루프는 작동 중**: 자기점검이 로컬 gemma3로 매일 돌며 과확장·Claude과의존·에러를 실제로 잡아냄 → **루프 자체는 유효.** 즉 "미리 써둔 스킬이 효과 있었나"의 답 = 루프는 효과적, 그러나 그 루프가 "너무 넓게 벌렸다"고 경고 중.
+
+### 이미 "파트 정의 테이블" 패턴을 쓰고 있음 [실측 — 재활용 가치 높음]
+- `sns-daily` → **config/sns_lines.json**의 모든 사업 라인 순회(스크립트 불변, 설정만 수정) = 내가 제안한 공용 플로우와 동일 철학.
+- `learning-quiz` → **config/learning.json**의 요일별 블록(industry=claude+검색 / invest=ollama gemma3:27b / culture=claude). ObsidianVault 아카이브.
+- `invest-morning-report` → **kis-balance 모듈로 KIS 잔고 조회 이미 통합**(READ-ONLY). 주식 도메인이 생각보다 진척됨.
+→ 이 config 파일들(sns_lines.json, learning.json)이 n8n 파트 정의 테이블의 **직접 재료**. 재작성 아님, 이관.
+
+### 새 설계로의 함의
+1. **도메인 재편 = 24채널 → 핵심 3사업 + 소수 개인용으로 축소** (자기점검이 이미 처방).
+2. 재구축 대상(에러나는 council/invest/learning)은 n8n에서 깨끗이 다시 — 버그 수정 겸함.
+3. Claude 과의존(54/62) → LiteLLM 라우팅으로 로컬·저가 티어 이동이 실측 근거를 얻음.
+4. sns_lines.json·learning.json·kis-balance = **검증된 재활용 자산**. 블라인드 폐기 금지.
