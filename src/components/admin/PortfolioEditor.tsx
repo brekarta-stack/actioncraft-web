@@ -7,7 +7,8 @@ import { CATEGORIES, CLIENT_TYPES, SUGGESTED_TAGS } from "@/lib/portfolio-types"
 import { prepareImageForUpload, formatResizeNote } from "@/lib/image-resize";
 import { slugify, parseYearMonth, autoHyphenYearMonth } from "@/lib/portfolio-meta";
 
-const MAX_IMAGES = 2;
+/** 대표 1장 + 다른 컷 3장 */
+const MAX_IMAGES = 4;
 
 interface Props {
   item?: PortfolioItem;
@@ -27,8 +28,8 @@ export default function PortfolioEditor({ item }: Props) {
   const [description, setDescription] = useState(item?.description ?? "");
   const [client, setClient] = useState(item?.client ?? "");
   const [imageAlts, setImageAlts] = useState<(string | null)[]>(() => {
-    const base: (string | null)[] = [null, null];
-    (item?.imageAlts ?? []).slice(0, 2).forEach((a, i) => { base[i] = a ?? null; });
+    const base: (string | null)[] = Array(MAX_IMAGES).fill(null);
+    (item?.imageAlts ?? []).slice(0, MAX_IMAGES).forEach((a, i) => { base[i] = a ?? null; });
     return base;
   });
 
@@ -38,9 +39,9 @@ export default function PortfolioEditor({ item }: Props) {
     const auto = [client, title].filter(Boolean).map(slugify).filter(Boolean).join("-");
     return auto || (item ? `case-${item.id.slice(0, 8)}` : "(저장 시 자동 생성)");
   }, [slug, client, title, item]);
-  // 최대 2장: index 0 = 대표, index 1 = 호버용
+  // 최대 4장: index 0 = 대표, index 1~3 = 다른 컷 (index 1 은 갤러리 호버용도 겸함)
   const [images, setImages] = useState<(string | null)[]>(() => {
-    const base: (string | null)[] = [null, null];
+    const base: (string | null)[] = Array(MAX_IMAGES).fill(null);
     (item?.images ?? []).slice(0, MAX_IMAGES).forEach((url, i) => { base[i] = url; });
     return base;
   });
@@ -59,8 +60,13 @@ export default function PortfolioEditor({ item }: Props) {
   // 마지막 업로드의 리사이즈 안내 ("2.4MB → 0.6MB로 줄였어요")
   const [resizeNote, setResizeNote] = useState<string | null>(null);
 
-  // 각 슬롯의 파일 input ref
-  const inputRefs = [useRef<HTMLInputElement>(null), useRef<HTMLInputElement>(null)];
+  // 각 슬롯의 파일 input ref (슬롯 수 고정 — 훅 순서 안전)
+  const inputRefs = [
+    useRef<HTMLInputElement>(null),
+    useRef<HTMLInputElement>(null),
+    useRef<HTMLInputElement>(null),
+    useRef<HTMLInputElement>(null),
+  ];
 
   /* ── 작업 아티스트 드롭다운 — /api/artists 에서 로드, 태그로 저장 ── */
   const [artistOptions, setArtistOptions] = useState<{ name: string; portfolioTag: string }[]>([]);
@@ -232,7 +238,9 @@ export default function PortfolioEditor({ item }: Props) {
 
   const slotMeta = [
     { label: "대표 이미지", hint: "갤러리 카드의 기본 이미지", badgeLabel: "대표", badgeColor: "#1E22B2" },
-    { label: "호버 이미지", hint: "마우스 오버 시 전환되는 이미지 (선택)", badgeLabel: "호버", badgeColor: "#E91E8C" },
+    { label: "다른 컷 1", hint: "갤러리 마우스 오버 전환 + 상세 '다른 컷' 노출", badgeLabel: "컷 1", badgeColor: "#E91E8C" },
+    { label: "다른 컷 2", hint: "상세 페이지 '다른 컷'에 노출 (선택)", badgeLabel: "컷 2", badgeColor: "#06C6C8" },
+    { label: "다른 컷 3", hint: "상세 페이지 '다른 컷'에 노출 (선택)", badgeLabel: "컷 3", badgeColor: "#F5C518" },
   ];
 
   return (
@@ -569,7 +577,7 @@ export default function PortfolioEditor({ item }: Props) {
         <div className="mb-5">
           <h3 className="font-semibold text-slate-900">이미지</h3>
           <p className="text-xs text-slate-400 mt-0.5">
-            최대 2장 · 두 번째 이미지는 갤러리에서 마우스 오버 시 자동 전환됩니다
+            최대 4장 (대표 1 + 다른 컷 3) · &lsquo;다른 컷 1&rsquo;은 갤러리에서 마우스 오버 시 자동 전환됩니다
           </p>
         </div>
 
@@ -577,7 +585,7 @@ export default function PortfolioEditor({ item }: Props) {
           {slotMeta.map((meta, slot) => {
             const url = images[slot];
             const isLoading = uploading === slot;
-            const isDisabled = slot === 1 && !images[0]; // slot 1은 slot 0 먼저
+            const isDisabled = slot > 0 && !images[0]; // 다른 컷은 대표 이미지 먼저
 
             return (
               <div key={slot}>
