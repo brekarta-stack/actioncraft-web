@@ -1,0 +1,51 @@
+# 파트 정의 테이블 (공용 골격 · D5) — 도메인 종속 파이프라인의 단일 설정원
+# 공용 파이프라인 1개가 이 파일을 읽어 파트별로 동작한다. 도메인 재편돼도 "코드가 아니라 이 표"만 수정.
+# 출처: docs/domain-definition-template.md(사람이 채움) → 이 파일(기계가 읽음)로 distill.
+# 값은 사용자 확정 필요(?=미정). biz-a는 deep-review 실측 기반 초안. 실파일명 part-definitions.yaml(gitignore).
+version: 1
+
+defaults:                        # 파트가 생략하면 이 값 사용
+  approval_channel: "#approvals"
+  score_model: classify-fast     # 로컬 저가(리드 1차 스코어링)
+  draft_model: write-ko-draft    # 로컬 초안(한국어)
+  polish_model: write-ko-final   # 프런티어 퇴고 — 대외 산출물 고정(T1: 로컬 대외문서 금지)
+  quote_model: quote-legal       # 견적·계약 문안(프런티어)
+
+parts:
+  biz-a:                         # 페이퍼크래프트 (papercraft.kr) — 실측
+    name: 페이퍼크래프트
+    active: true
+    lead_gen:
+      enabled: true
+      sources: [naver_search, google_news]
+      keywords: ["기념품 제작", "전시 조형물", "브랜드 굿즈 제작"]
+      min_score: 0.6            # 이 미만은 드롭
+    blog:
+      enabled: true
+      platform: wordpress        # 완전자동. 네이버는 API 없음→반자동(초안→붙여넣기)
+      approval: required         # 발행 전 #approvals 버튼
+    quote:
+      enabled: true
+      pricebook: pricebooks/biz-a.yaml     # 품목·단가 테이블(사용자 작성)
+      template: templates/quote-biz-a.html # PDF 템플릿
+      send: gmail
+      approval: required
+    sns:
+      enabled: false
+      channels: []               # 예: [linkedin]
+
+  biz-b:                         # 지역재생(regen) — 도메인 정의 후 채움
+    name: 지역재생
+    active: false                # 게이트 통과 후 true
+    lead_gen: { enabled: false, sources: [], keywords: [] }
+    blog:     { enabled: false, platform: "?", approval: required }
+    quote:    { enabled: false, pricebook: "?", template: "?", send: gmail, approval: required }
+    sns:      { enabled: false, channels: [] }
+
+  biz-c:                         # 스타트업강의(edu) — 도메인 정의 후 채움
+    name: 스타트업강의
+    active: false
+    lead_gen: { enabled: false, sources: [], keywords: [] }
+    blog:     { enabled: false, platform: "?", approval: required }
+    quote:    { enabled: false, pricebook: "?", template: "?", send: gmail, approval: required }
+    sns:      { enabled: false, channels: [] }

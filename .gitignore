@@ -45,3 +45,7 @@ next-env.d.ts
 # local debug/check screenshots (not for repo)
 vercel-check.png
 *-check.png
+
+# 파트 정의 실값(민감)
+deploy/pipelines/part-definitions.yaml
+deploy/pipelines/pricebooks/
