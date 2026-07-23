@@ -14,8 +14,8 @@ services:
       POSTGRES_DB: ${PG_DB}
       TZ: Asia/Seoul
     volumes:
-      - ./data/postgres:/var/lib/postgresql/data
-      - ./init-db.sql:/docker-entrypoint-initdb.d/init.sql:ro   # 최초 1회만 실행됨
+      - pgdata:/var/lib/postgresql/data                         # 명명 볼륨(UGOS 바인드마운트 권한오류 회피 — M2)
+      - ./init-db.sql:/docker-entrypoint-initdb.d/init.sql:ro   # ⚠️ 볼륨이 비었을 때만 1회 실행(M1)
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${PG_USER} -d ${PG_DB}"]
       interval: 10s
@@ -41,12 +41,13 @@ services:
       N8N_HOST: ${N8N_HOST}                 # Tailscale MagicDNS 호스트네임 (IP 하드코딩 금지)
       N8N_PROTOCOL: http
       N8N_PORT: "5678"
+      N8N_SECURE_COOKIE: "false"            # ★ HTTP+비localhost 호스트에서 로그인 튕김 방지(C1). Tailscale이 이미 암호화
       N8N_DIAGNOSTICS_ENABLED: "false"      # 텔레메트리 off
       N8N_RUNNERS_ENABLED: "true"           # 태스크 러너(권장)
     volumes:
       - ./data/n8n:/home/node/.n8n
     ports:
-      - "5678:5678"                         # Tailscale 내부 전용 — 공유기 포트포워딩 금지
+      - "${NAS_TS_IP}:5678:5678"            # ★ Tailscale IP에만 바인딩(H1) — 0.0.0.0=LAN 전체 노출 방지
 
   litellm:
     image: ghcr.io/berriai/litellm:main-stable   # ← 설치 시 특정 버전으로 핀(메모리릭 이력)
@@ -60,13 +61,14 @@ services:
       ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY}
       OPENAI_API_KEY: ${OPENAI_API_KEY}
       MOONSHOT_API_KEY: ${MOONSHOT_API_KEY}
+      STUDIO_OLLAMA_BASE: ${STUDIO_OLLAMA_BASE}   # litellm config가 os.environ/로 참조(L3)
       DATABASE_URL: postgresql://${PG_USER}:${PG_PASSWORD}@postgres:5432/${PG_DB}   # 예산·키관리 UI 활성
       TZ: Asia/Seoul
     volumes:
       - ./litellm-config.yaml:/app/config.yaml:ro
     mem_limit: 1g                           # 메모리릭 방어(주기 재시작은 restart 정책이 커버)
     ports:
-      - "4000:4000"
+      - "${NAS_TS_IP}:4000:4000"            # Tailscale IP 전용(H1)
 
   uptime-kuma:
     image: louislam/uptime-kuma:1           # NAS 안에서 '컨테이너·플로우' 감시 (NAS 자체는 외부 클라우드 모니터가 감시)
@@ -76,7 +78,11 @@ services:
     volumes:
       - ./data/kuma:/app/data
     ports:
-      - "3001:3001"
+      - "${NAS_TS_IP}:3001:3001"            # Tailscale IP 전용(H1)
+
+volumes:
+  pgdata:                                   # 명명 볼륨(M2)
 
 # 매매 엔진(python-kis)은 커스텀 코드라 D7에 별도 서비스로 추가(격리 컨테이너, GD-1).
 # 백업 데몬(pg_dump→restic→B2)은 D5에 추가.
+# 포트 노출 주의(H1): NAS_TS_IP에만 바인딩 → LAN·공인망 모두 차단, Tailscale 내부만 접근.

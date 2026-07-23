@@ -45,6 +45,9 @@ CREATE TABLE IF NOT EXISTS archive (
   title      TEXT,
   body       TEXT,
   summary    TEXT,
-  embedding  vector(1024),              -- BGE-M3 차원(확인 후 조정)
+  embedding  vector(1024),              -- BGE-M3 dense 차원(1024, 확인됨)
   created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
+-- ANN 인덱스(L1): 아카이브 커지면 풀스캔 방지. 코사인 기준.
+CREATE INDEX IF NOT EXISTS idx_archive_embedding
+  ON archive USING hnsw (embedding vector_cosine_ops);

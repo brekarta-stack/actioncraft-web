@@ -8,23 +8,26 @@ model_list:
   - model_name: classify-fast          # 태깅·분류·리드 1차 스코어링 (고volume 저비용)
     litellm_params:
       model: ollama_chat/qwen2.5:7b
-      api_base: http://STUDIO_HOST:11434
+      api_base: os.environ/STUDIO_OLLAMA_BASE
   - model_name: summarize
     litellm_params:
       model: ollama_chat/qwen3.6:35b-a3b     # T1 실측 83 tok/s
-      api_base: http://STUDIO_HOST:11434
+      api_base: os.environ/STUDIO_OLLAMA_BASE
   - model_name: write-ko-draft         # 블로그·SNS 초안(한국어)
     litellm_params:
       model: ollama_chat/qwen3.6:35b-a3b
-      api_base: http://STUDIO_HOST:11434
+      api_base: os.environ/STUDIO_OLLAMA_BASE
   - model_name: code-fast              # n8n 노드·스크립트·표준 리팩터링
     litellm_params:
       model: ollama_chat/qwen3-coder:30b
-      api_base: http://STUDIO_HOST:11434
+      api_base: os.environ/STUDIO_OLLAMA_BASE
   - model_name: embed
     litellm_params:
       model: ollama/bge-m3
-      api_base: http://STUDIO_HOST:11434
+      api_base: os.environ/STUDIO_OLLAMA_BASE
+  - model_name: embed-cloud            # Studio 다운 시 임베딩 백스톱(M3)
+    litellm_params:
+      model: openai/text-embedding-3-small
 
   # ── 프런티어(대외·돈·최난도) — 프리미엄 1순위 고정 ──
   - model_name: write-ko-final         # 대외 발행물 최종 퇴고 (T1: 로컬 대외문서 금지 근거)
@@ -61,6 +64,7 @@ router_settings:
     - {"code-max":        ["gpt-frontier"]}
     - {"analyst-trading": ["gpt-frontier"]}
     - {"quote-legal":     ["gpt-frontier"]}
+    - {"embed":           ["embed-cloud"]}
   timeout: 20                          # ollama 콜드스타트 대비(≥15s)
   num_retries: 1
 

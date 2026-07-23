@@ -23,13 +23,25 @@ bash deploy/studio/harden-studio.sh   # pmset·ollama 0.0.0.0·모델 pull
 # NAS SSH 접속 후, 데이터 볼륨에 배포 파일 배치(/volume1/...). 레포에서 deploy/nas/ 복사.
 cp deploy/nas/.env.example deploy/nas/.env    # .env 실제 값 채우기(패스워드매니저에도)
 #  - N8N_ENCRYPTION_KEY: openssl rand -hex 16
-#  - PG_PASSWORD/LITELLM_MASTER_KEY: openssl rand -hex 24
+#  - PG_PASSWORD: openssl rand -hex 24
+#  - LITELLM_MASTER_KEY: echo "sk-$(openssl rand -hex 24)"   # ★ 반드시 sk- 접두(H4)
+#  - NAS_TS_IP: `tailscale ip -4`  (NAS의 100.x — LAN IP 아님, H1)
+#  - STUDIO_OLLAMA_BASE=http://<studio-ts-ip>:11434  (harden-studio.sh 출력값)
 #  - N8N_HOST=nas.<tailnet>.ts.net
-# litellm-config.yaml: STUDIO_HOST + 모델ID를 현재값으로 교체. image 태그 핀.
+# litellm-config.yaml: 모델ID(claude/gpt/kimi)를 현재값으로 교체. compose의 image 태그 핀.
 cd deploy/nas
+# (포트 충돌 예방) 3001·4000·5678이 UGOS 다른 앱과 겹치지 않는지 확인: lsof -i :3001 등
 docker compose up -d
 docker compose ps          # 4개 up + postgres healthy 확인
 docker compose logs -f litellm   # 라우터 로드 확인
+# UGOS: 제어판>Docker에서 '컨테이너 자동 시작' 켜기(월례 재부팅 후 restart 정책이 실제로 동작하도록)
+```
+
+### 3-b. 스키마 확인 (기존 볼륨 재배포 시, M1)
+`init-db.sql`은 **Postgres 볼륨이 비었을 때만 1회** 실행된다. 재배포·복원 등으로 볼륨이 이미 있으면 수동 적용:
+```bash
+docker compose exec -T postgres psql -U $PG_USER -d $PG_DB < init-db.sql   # 전부 IF NOT EXISTS라 안전
+docker compose exec postgres psql -U $PG_USER -d $PG_DB -c "\dt"           # idempotency_keys·leads·archive 확인
 ```
 
 ## 4. 스모크 테스트
