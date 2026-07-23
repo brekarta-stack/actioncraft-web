@@ -1,0 +1,75 @@
+# LiteLLM 라우팅 (D3) — 역할 별칭 = model_name, 폴백 체인은 router_settings.fallbacks
+# ⚠️ 검증(설치 시): LiteLLM은 빠르게 변함. 최신 문서로 문법·모델ID 재확인.
+#    STUDIO_HOST = Studio의 Tailscale MagicDNS 이름(예: studio.<tailnet>.ts.net). IP 하드코딩 금지.
+#    모델 ID(claude/gpt/kimi)는 설치 시점 현재 버전으로 교체.
+
+model_list:
+  # ── 로컬 티어 (Studio ollama, 상시) ──
+  - model_name: classify-fast          # 태깅·분류·리드 1차 스코어링 (고volume 저비용)
+    litellm_params:
+      model: ollama_chat/qwen2.5:7b
+      api_base: http://STUDIO_HOST:11434
+  - model_name: summarize
+    litellm_params:
+      model: ollama_chat/qwen3.6:35b-a3b     # T1 실측 83 tok/s
+      api_base: http://STUDIO_HOST:11434
+  - model_name: write-ko-draft         # 블로그·SNS 초안(한국어)
+    litellm_params:
+      model: ollama_chat/qwen3.6:35b-a3b
+      api_base: http://STUDIO_HOST:11434
+  - model_name: code-fast              # n8n 노드·스크립트·표준 리팩터링
+    litellm_params:
+      model: ollama_chat/qwen3-coder:30b
+      api_base: http://STUDIO_HOST:11434
+  - model_name: embed
+    litellm_params:
+      model: ollama/bge-m3
+      api_base: http://STUDIO_HOST:11434
+
+  # ── 프런티어(대외·돈·최난도) — 프리미엄 1순위 고정 ──
+  - model_name: write-ko-final         # 대외 발행물 최종 퇴고 (T1: 로컬 대외문서 금지 근거)
+    litellm_params:
+      model: anthropic/claude-sonnet-5           # ← 현재 ID 확인
+  - model_name: code-max               # 매매 로직 등 최난도·고신뢰 코딩
+    litellm_params:
+      model: anthropic/claude-opus-4-8           # ← 현재 ID 확인
+  - model_name: analyst-trading        # 주식 분석(읽기전용)
+    litellm_params:
+      model: anthropic/claude-sonnet-5
+  - model_name: quote-legal            # 견적·계약 문안
+    litellm_params:
+      model: anthropic/claude-sonnet-5
+
+  # ── 폴백용 concrete 엔드포인트 ──
+  - model_name: kimi-cheap             # 대량 저가 + 로컬 백스톱(재부팅 창)
+    litellm_params:
+      model: openai/kimi-k2.5                     # ← 현재 Kimi ID 확인
+      api_base: https://api.moonshot.ai/v1
+      api_key: os.environ/MOONSHOT_API_KEY
+  - model_name: gpt-frontier           # 프리미엄 교차검증/폴백
+    litellm_params:
+      model: openai/gpt-5.x                       # ← 현재 ID 확인
+
+router_settings:
+  # 폴백 체인: 로컬 1순위 → 클라우드 저가 → (필요시) 프런티어
+  fallbacks:
+    - {"classify-fast":   ["kimi-cheap"]}
+    - {"summarize":       ["kimi-cheap"]}
+    - {"write-ko-draft":  ["kimi-cheap"]}
+    - {"code-fast":       ["kimi-cheap", "code-max"]}
+    - {"write-ko-final":  ["gpt-frontier"]}
+    - {"code-max":        ["gpt-frontier"]}
+    - {"analyst-trading": ["gpt-frontier"]}
+    - {"quote-legal":     ["gpt-frontier"]}
+  timeout: 20                          # ollama 콜드스타트 대비(≥15s)
+  num_retries: 1
+
+litellm_settings:
+  drop_params: true                    # 미지원 param 무시(엔진 간 호환)
+  # ollama 폴백 stream 버그(#6294) 회피: n8n 호출은 비스트리밍으로 보낼 것(요청 측 설정)
+  # 예산캡: 별칭별 월 상한은 LiteLLM Admin UI에서 가상 키(virtual key)에 max_budget으로 설정.
+  #   워크플로별 가상 키 발급 → 80% 경고(웹훅→#ops)/100% 도달 시 해당 키 차단→상위 폴백 자동 강등.
+
+general_settings:
+  master_key: os.environ/LITELLM_MASTER_KEY
+  database_url: os.environ/DATABASE_URL      # 예산·사용량 집계 UI
