@@ -34,6 +34,14 @@ PLIST
 launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/com.agent.ollama.plist 2>/dev/null || launchctl load -w ~/Library/LaunchAgents/com.agent.ollama.plist
 echo "  → ollama가 ${STUDIO_TS_IP}:11434 에 바인딩(재부팅 생존). NAS의 .env STUDIO_OLLAMA_BASE=http://${STUDIO_TS_IP}:11434"
 echo "  ⚠️ macOS 방화벽 ON. Tailscale IP 바인딩이라 LAN 노출 없음(0.0.0.0 아님)."
+# CLIENT도 같은 엔드포인트를 봐야 함(서버가 127.0.0.1이 아니라 Tailscale IP에 붙음). 영구 등록.
+grep -q '^export OLLAMA_HOST=' ~/.zshrc 2>/dev/null || echo "export OLLAMA_HOST=\"${STUDIO_TS_IP}:11434\"" >> ~/.zshrc
+# 서버가 실제로 응답할 때까지 대기(경쟁 조건 방지 — 안 하면 첫 pull이 튕김)
+echo "  ollama 서버 기동 대기..."
+for i in $(seq 1 30); do
+  curl -s "http://${STUDIO_TS_IP}:11434/api/tags" >/dev/null 2>&1 && { echo "  서버 준비됨"; break; }
+  sleep 1
+done
 
 echo "== 3. 로컬 모델 상주 (미리 받기) =="
 # OLLAMA_HOST가 설정됐으니 pull도 같은 엔드포인트로. (태그는 설치 시 현재 버전 확인)
