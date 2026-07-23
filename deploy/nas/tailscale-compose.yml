@@ -1,0 +1,21 @@
+# NAS Tailscale (앱센터에 없어서 Docker로 — host 모드로 NAS 호스트에 100.x IP 부여).
+# 백본 compose와 별개의 상시 컨테이너. TS_AUTHKEY는 git에 넣지 말 것(런타임 GUI에서 입력).
+# 실제 적용됨(2026-07-23): nas = 100.86.100.119 (Linux 6.12).
+name: tailscale
+services:
+  tailscale:
+    image: tailscale/tailscale:stable
+    network_mode: host            # NAS 호스트가 Tailscale IP를 가져야 백본 포트 바인딩 가능
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
+    devices:
+      - /dev/net/tun
+    environment:
+      TS_AUTHKEY: ${TS_AUTHKEY}    # login.tailscale.com > Settings > Keys 에서 발급(비영구 인증)
+      TS_HOSTNAME: nas
+      TS_STATE_DIR: /var/lib/tailscale
+      TS_USERSPACE: "false"
+    volumes:
+      - ./ts-state:/var/lib/tailscale
+    restart: unless-stopped
