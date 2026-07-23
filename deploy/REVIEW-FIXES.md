@@ -21,3 +21,18 @@
 **리뷰어가 정상 확인(무수정)**: pgvector:pg16 태그 유효 · n8n DB_POSTGRESDB_* env 정확 · `mem_limit`가 compose v2 비스웜에 맞음 · depends_on healthcheck 문법 정확 · `ollama_chat/`(챗)+`ollama/bge-m3`(임베딩) 접두 정확 · router_settings.fallbacks 구조 현행 일치 · BGE-M3 1024차원 정확.
 
 **여전히 "설치 시 확인" 잔여**: 모든 image 태그 현재 안정판 핀 · 모델ID(claude/gpt/kimi) 현재값 · L2(litellm·n8n DB 공유는 동작하나 장기적으로 분리 고려).
+
+## 버전 핀 + 모델 ID 확정 (2026-07-23 리서치)
+| 대상 | 확정 값 | 비고 |
+|---|---|---|
+| n8n | `n8nio/n8n:2.32.2` | 2.x 안정선(신규 설치라 마이그레이션 무관) |
+| LiteLLM | `ghcr.io/berriai/litellm:v1.93.0` | **main-stable 폐기** → 평문 SemVer 핀 |
+| Postgres | `pgvector/pgvector:0.8.5-pg17-bookworm` | PG17 안정 |
+| Uptime Kuma | `louislam/uptime-kuma:2` | v2 GA(루트리스) |
+| Claude 프런티어/최난도 | `claude-sonnet-5` / `claude-opus-4-8` | 날짜접미사 금지 |
+| GPT 프런티어 | `gpt-5.6-sol` | (저가 필요시 gpt-5.6-luna) |
+| Kimi 저가 | `moonshot/kimi-k2.6` | LiteLLM moonshot 프로바이더 |
+| 임베딩 | `ollama/bge-m3`(1024) | **클라우드 폴백 제거**(벡터공간 불일치 — text-embedding-3-small은 1536차원) |
+
+**추가로 잡은 버그**: embed 별칭에 클라우드 폴백(text-embedding-3-small)을 걸었던 것 → BGE-M3(1024)와 차원·벡터공간 불일치로 검색 파괴 → 제거. 임베딩은 단일 모델 원칙, Studio 다운 시 큐잉.
+**설치 시 재확인**: n8n 패치·LiteLLM 주간마이너·gpt-5.6/kimi 정확한 ID(가장 빠르게 변함). 쓰기 데이터는 전부 명명 볼륨으로 전환(UGOS 권한 안전).

@@ -1,12 +1,12 @@
 # NAS 백본 (D2) — n8n + Postgres(pgvector) + LiteLLM + Uptime Kuma
-# ⚠️ 검증(설치 시): 모든 image 태그를 "그 시점 현재 안정판"으로 핀. latest 금지.
-#    지식 컷오프(2026-01) 이후 버전은 반드시 재확인. 아래는 방향 초안.
+# 버전 핀: 2026-07-23 리서치로 확정. 설치 시 n8n 패치·LiteLLM 주간마이너만 재확인 권장.
 # 원칙: restart:unless-stopped(UGOS 월례 재시작 대비) · TZ=Asia/Seoul · 포트포워딩 금지(Tailscale 전용)
+# 쓰기 데이터는 전부 명명 볼륨(UGOS 바인드마운트 권한오류 회피). 설정파일만 read-only 바인드.
 name: agent-backbone
 
 services:
   postgres:
-    image: pgvector/pgvector:pg16          # pgvector 포함 (Qdrant 대신 pgvector로 시작 — C3)
+    image: pgvector/pgvector:0.8.5-pg17-bookworm   # pgvector 0.8.5 + PG17 (Qdrant 대신 pgvector — C3)
     restart: unless-stopped
     environment:
       POSTGRES_USER: ${PG_USER}
@@ -24,7 +24,7 @@ services:
     # 포트 미노출 — 컨테이너 이름 'postgres'로만 접근 (C6 IP 안정화)
 
   n8n:
-    image: n8nio/n8n:1.NN.N                 # ← 설치 시 현재 안정판으로 핀 (BREAKING-CHANGES 확인)
+    image: n8nio/n8n:2.32.2                  # 2.x 안정선(신규 설치라 1.x→2.x 마이그레이션 이슈 없음)
     restart: unless-stopped
     depends_on:
       postgres:
@@ -45,12 +45,12 @@ services:
       N8N_DIAGNOSTICS_ENABLED: "false"      # 텔레메트리 off
       N8N_RUNNERS_ENABLED: "true"           # 태스크 러너(권장)
     volumes:
-      - ./data/n8n:/home/node/.n8n
+      - n8ndata:/home/node/.n8n            # 명명 볼륨(UGOS 권한오류 회피)
     ports:
       - "${NAS_TS_IP}:5678:5678"            # ★ Tailscale IP에만 바인딩(H1) — 0.0.0.0=LAN 전체 노출 방지
 
   litellm:
-    image: ghcr.io/berriai/litellm:main-stable   # ← 설치 시 특정 버전으로 핀(메모리릭 이력)
+    image: ghcr.io/berriai/litellm:v1.93.0   # 평문 SemVer 핀(main-stable은 폐기됨 — 쓰지 말 것)
     restart: unless-stopped
     depends_on:
       postgres:
@@ -71,17 +71,19 @@ services:
       - "${NAS_TS_IP}:4000:4000"            # Tailscale IP 전용(H1)
 
   uptime-kuma:
-    image: louislam/uptime-kuma:1           # NAS 안에서 '컨테이너·플로우' 감시 (NAS 자체는 외부 클라우드 모니터가 감시)
+    image: louislam/uptime-kuma:2           # v2 GA(루트리스 기본). NAS 안 컨테이너·플로우 감시(NAS 자체는 외부 클라우드 모니터가 감시)
     restart: unless-stopped
     environment:
       TZ: Asia/Seoul
     volumes:
-      - ./data/kuma:/app/data
+      - kumadata:/app/data                  # 명명 볼륨(루트리스+UGOS 권한 안전)
     ports:
       - "${NAS_TS_IP}:3001:3001"            # Tailscale IP 전용(H1)
 
 volumes:
   pgdata:                                   # 명명 볼륨(M2)
+  n8ndata:
+  kumadata:
 
 # 매매 엔진(python-kis)은 커스텀 코드라 D7에 별도 서비스로 추가(격리 컨테이너, GD-1).
 # 백업 데몬(pg_dump→restic→B2)은 D5에 추가.

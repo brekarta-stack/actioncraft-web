@@ -1,7 +1,6 @@
 # LiteLLM 라우팅 (D3) — 역할 별칭 = model_name, 폴백 체인은 router_settings.fallbacks
-# ⚠️ 검증(설치 시): LiteLLM은 빠르게 변함. 최신 문서로 문법·모델ID 재확인.
-#    STUDIO_HOST = Studio의 Tailscale MagicDNS 이름(예: studio.<tailnet>.ts.net). IP 하드코딩 금지.
-#    모델 ID(claude/gpt/kimi)는 설치 시점 현재 버전으로 교체.
+# 모델 ID: 2026-07-23 리서치 확정. gpt-5.6-*·kimi-k2.6은 빠르게 변하니 설치 시 재확인 권장.
+# STUDIO_OLLAMA_BASE는 컨테이너 env로 주입(compose). Anthropic ID는 날짜접미사 붙이지 말 것.
 
 model_list:
   # ── 로컬 티어 (Studio ollama, 상시) ──
@@ -21,13 +20,10 @@ model_list:
     litellm_params:
       model: ollama_chat/qwen3-coder:30b
       api_base: os.environ/STUDIO_OLLAMA_BASE
-  - model_name: embed
-    litellm_params:
-      model: ollama/bge-m3
+  - model_name: embed                  # ⚠️ 임베딩은 폴백 금지 — 모델마다 벡터공간이 달라 교차폴백=검색 파괴.
+    litellm_params:                    #    (BGE-M3=1024차원 vs OpenAI=1536차원, 컬럼도 vector(1024).)
+      model: ollama/bge-m3             #    Studio 다운 시엔 임베딩 잡을 큐잉/대기(비실시간이라 허용). 클라우드 폴백 제거.
       api_base: os.environ/STUDIO_OLLAMA_BASE
-  - model_name: embed-cloud            # Studio 다운 시 임베딩 백스톱(M3)
-    litellm_params:
-      model: openai/text-embedding-3-small
 
   # ── 프런티어(대외·돈·최난도) — 프리미엄 1순위 고정 ──
   - model_name: write-ko-final         # 대외 발행물 최종 퇴고 (T1: 로컬 대외문서 금지 근거)
@@ -44,14 +40,12 @@ model_list:
       model: anthropic/claude-sonnet-5
 
   # ── 폴백용 concrete 엔드포인트 ──
-  - model_name: kimi-cheap             # 대량 저가 + 로컬 백스톱(재부팅 창)
+  - model_name: kimi-cheap             # 대량 저가 + 로컬 백스톱(재부팅 창). LiteLLM moonshot 프로바이더가 MOONSHOT_API_KEY 자동 사용
     litellm_params:
-      model: openai/kimi-k2.5                     # ← 현재 Kimi ID 확인
-      api_base: https://api.moonshot.ai/v1
-      api_key: os.environ/MOONSHOT_API_KEY
-  - model_name: gpt-frontier           # 프리미엄 교차검증/폴백
+      model: moonshot/kimi-k2.6                   # ~$0.6/$2.5 per M, 256K context
+  - model_name: gpt-frontier           # 프리미엄 교차검증/폴백 (플래그십)
     litellm_params:
-      model: openai/gpt-5.x                       # ← 현재 ID 확인
+      model: openai/gpt-5.6-sol
 
 router_settings:
   # 폴백 체인: 로컬 1순위 → 클라우드 저가 → (필요시) 프런티어
@@ -64,7 +58,7 @@ router_settings:
     - {"code-max":        ["gpt-frontier"]}
     - {"analyst-trading": ["gpt-frontier"]}
     - {"quote-legal":     ["gpt-frontier"]}
-    - {"embed":           ["embed-cloud"]}
+  # embed는 폴백 없음(벡터공간 불일치 방지 — 위 주석). Studio 다운 시 임베딩 잡은 대기.
   timeout: 20                          # ollama 콜드스타트 대비(≥15s)
   num_retries: 1
 
