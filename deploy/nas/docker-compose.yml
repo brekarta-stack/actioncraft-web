@@ -47,8 +47,8 @@ services:
     volumes:
       - n8ndata:/home/node/.n8n            # 명명 볼륨(UGOS 권한오류 회피)
     ports:
-      - "${NAS_TS_IP}:5679:5678"            # ★ Tailscale IP에만 바인딩(H1) — 0.0.0.0=LAN 전체 노출 방지
-                                            # 호스트 5679인 이유: 기존 독립 n8n 컨테이너가 5678 점유(HANDOFF #5). 제거 확정 시 5678 복귀 가능.
+      - "${NAS_TS_IP}:5678:5678"            # ★ Tailscale IP에만 바인딩(H1) — 0.0.0.0=LAN 전체 노출 방지
+                                            # (07-24 구 독립 n8n 제거 후 5679→5678 복귀 완료. 볼륨 n8n_n8n_data는 보존 중)
 
   litellm:
     image: ghcr.io/berriai/litellm:v1.93.0   # 평문 SemVer 핀(main-stable은 폐기됨 — 쓰지 말 것)
