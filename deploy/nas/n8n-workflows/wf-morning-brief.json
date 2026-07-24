@@ -22,6 +22,11 @@
       }
     },
     {
+      "id": "b1m", "name": "수동 테스트",
+      "type": "n8n-nodes-base.manualTrigger", "typeVersion": 1,
+      "position": [0, 170], "parameters": {}
+    },
+    {
       "id": "b2", "name": "오늘 일정 placeholder",
       "type": "n8n-nodes-base.set", "typeVersion": 3.4,
       "position": [220, 0],
@@ -44,7 +49,7 @@
         "sendBody": true,
         "specifyBody": "json",
         "jsonBody": "={{ JSON.stringify({model: 'write-ko-draft', messages: [{role:'user', content: '다음 일정·업무를 3줄 아침 브리핑으로. 존댓말, 이모지 없이:\\n' + $json.schedule_raw}], stream: false}) }}",
-        "options": { "timeout": 90000 }
+        "options": { "timeout": 120000 }
       },
       "credentials": {
         "httpHeaderAuth": { "id": "litellmkey000001", "name": "LiteLLM n8n-ops" }
@@ -58,6 +63,7 @@
   ],
   "connections": {
     "매일 08:30": { "main": [[ { "node": "오늘 일정 placeholder", "type": "main", "index": 0 } ]] },
+    "수동 테스트": { "main": [[ { "node": "오늘 일정 placeholder", "type": "main", "index": 0 } ]] },
     "오늘 일정 placeholder": { "main": [[ { "node": "브리핑 생성 (LiteLLM)", "type": "main", "index": 0 } ]] },
     "브리핑 생성 (LiteLLM)": { "main": [[ { "node": "→ Slack #inbox (크레덴셜 연결 후 교체)", "type": "main", "index": 0 } ]] }
   }

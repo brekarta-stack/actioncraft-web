@@ -59,7 +59,7 @@ router_settings:
     - {"analyst-trading": ["gpt-frontier"]}
     - {"quote-legal":     ["gpt-frontier"]}
   # embed는 폴백 없음(벡터공간 불일치 방지 — 위 주석). Studio 다운 시 임베딩 잡은 대기.
-  timeout: 20                          # ollama 콜드스타트 대비(≥15s)
+  timeout: 120                         # 35B 콜드로드·kimi 추론형 대응(실측: 20s론 둘 다 잘림 — 2026-07-24)
   num_retries: 1
 
 litellm_settings:

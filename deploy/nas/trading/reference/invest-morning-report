@@ -1,0 +1,140 @@
+#!/usr/bin/env python3
+"""invest-morning-report — 매일 09:30 자산 브리핑.
+국내+해외 총자산, 전일 대비 변동, 양도세(추정)를 #inv-투자관리에 slack-card로 게시.
+kis-balance 모듈 재사용. READ-ONLY(조회만). 스냅샷: memory/invest_daily_snapshots.json.
+실행: bin/invest-morning-report          # dry-run(콘솔만)
+      bin/invest-morning-report --post   # 실제 게시
+launchd가 AUTOMATION_MODE=1 로 돌리면 자동 게시."""
+import os, sys, json, time, subprocess, datetime, pathlib
+import importlib.machinery, importlib.util
+
+ROOT = pathlib.Path(__file__).resolve().parent.parent
+INV_CHANNEL = "C0B6WRBJE82"   # #inv-투자관리
+SNAP_F = ROOT / "memory/invest_daily_snapshots.json"
+DEDUCT = 2_500_000            # 해외주식 양도소득 기본공제(연)
+TAX_RATE = 0.22              # 양도세 20% + 지방소득세 2%
+
+# kis-balance(하이픈 파일) 임포트 → KIS REST 함수 재사용(중복 없이)
+_loader = importlib.machinery.SourceFileLoader("kisbal", str(ROOT / "bin/kis-balance"))
+kb = importlib.util.module_from_spec(importlib.util.spec_from_loader("kisbal", _loader))
+_loader.exec_module(kb)
+
+
+def won(x):
+    return f"{int(round(kb._num(x))):,}원"
+
+
+def realized_overseas(token):
+    """올해 해외 실현손익(TTTS3039R). 매도 없으면 0."""
+    cano, prdt = kb._cano()
+    y = datetime.date.today().year
+    params = {"CANO": cano, "ACNT_PRDT_CD": prdt, "OVRS_EXCG_CD": "", "NATN_CD": "000",
+              "CRCY_CD": "", "PDNO": "", "INQR_STRT_DT": f"{y}0101", "INQR_END_DT": f"{y}1231",
+              "WCRC_FRCR_DVSN_CD": "02", "CTX_AREA_FK200": "", "CTX_AREA_NK200": ""}
+    try:
+        j = kb._http("GET", f"{kb.BASE}/uapi/overseas-stock/v1/trading/inquire-period-profit",
+                     headers=kb._headers(token, "TTTS3039R"), params=params)
+        return kb._num((j.get("output2") or {}).get("ovrs_rlzt_pfls_tot_amt"))
+    except Exception:
+        return 0.0
+
+
+def tax_est(gain_krw):
+    return int(round(max(0.0, gain_krw - DEDUCT) * TAX_RATE))
+
+
+def post_card(main_text, thread):
+    spec = {"channel": INV_CHANNEL, "main": main_text,
+            "thread": [t[:2900] for t in thread] or ["-"], "agent": "inv"}
+    tmp = pathlib.Path("/tmp/inv-morning-card.json")
+    tmp.write_text(json.dumps(spec, ensure_ascii=False), encoding="utf-8")
+    subprocess.run(["python3", str(ROOT / "bin/slack-card"), str(tmp)], capture_output=True, text=True)
+
+
+def main():
+    do_post = ("--post" in sys.argv) or (os.environ.get("AUTOMATION_MODE") == "1")
+    token = kb.get_token()
+    dom = kb.domestic(token)
+    time.sleep(0.4)  # KIS 초당 호출제한 보호
+    ovs = kb.overseas(token)
+    dom = dom if (dom and "error" not in dom) else None
+    ovs = ovs if (ovs and "error" not in ovs) else None
+
+    dom_eval = kb._num(dom["total_eval"]) if dom else 0.0
+    ovs_eval = kb._num(ovs["total_eval_krw"]) if ovs else 0.0
+    total = int(dom_eval + ovs_eval)
+    dom_pl = kb._num(dom["pl_amt"]) if dom else 0.0
+    ovs_pl = kb._num(ovs["total_pl_krw"]) if ovs else 0.0
+
+    # ----- 전일 대비 -----
+    snaps = {}
+    if SNAP_F.exists():
+        try:
+            snaps = json.loads(SNAP_F.read_text())
+        except Exception:
+            snaps = {}
+    today = datetime.date.today().isoformat()
+    prev_dates = sorted(d for d in snaps if d < today)
+    if prev_dates:
+        pv = snaps[prev_dates[-1]]
+        d_total = total - int(pv.get("total", 0))
+        base = int(pv.get("total", 0)) or 1
+        d_pct = d_total / base * 100
+        arrow = "🔺" if d_total > 0 else ("🔻" if d_total < 0 else "▪️")
+        dod = f"{arrow} 전일({prev_dates[-1]}) 대비 {d_total:+,}원 ({d_pct:+.2f}%)"
+    else:
+        dod = "전일 스냅샷 없음 — 오늘부터 누적합니다."
+
+    realized = realized_overseas(token)
+    tax_realized = tax_est(realized)
+    tax_hypo = tax_est(ovs_pl)   # 해외 미실현이익 기준(국내 상장 소액주주 비과세 가정)
+
+    # ----- 스냅샷 저장(최근 120일) -----
+    snaps[today] = {"total": total, "dom_eval": int(dom_eval), "ovs_eval": int(ovs_eval),
+                    "dom_pl": int(dom_pl), "ovs_pl": int(ovs_pl),
+                    "ts": datetime.datetime.now().isoformat(timespec="seconds")}
+    for d in sorted(snaps)[:-120]:
+        snaps.pop(d, None)
+    SNAP_F.parent.mkdir(parents=True, exist_ok=True)
+    SNAP_F.write_text(json.dumps(snaps, ensure_ascii=False, indent=2))
+
+    now = datetime.datetime.now().strftime("%Y-%m-%d (%a) %H:%M")
+    main_text = (
+        f":sunny: *{now} 자산 브리핑*\n"
+        f":moneybag: 총자산 *{total:,}원*  ·  해외 {won(ovs_eval)} / 국내 {won(dom_eval)}\n"
+        f"{dod}\n"
+        f":bar_chart: 평가손익 누적 {int(round(ovs_pl + dom_pl)):+,}원  (해외 {int(round(ovs_pl)):+,} · 국내 {int(round(dom_pl)):+,})\n"
+        f":receipt: 양도세(추정) — 올해 실현분 *{tax_realized:,}원*"
+        + (" _(올해 매도 없음)_" if realized == 0 else "")
+        + f"  ·  전량매도 가정 *약 {tax_hypo:,}원*"
+    )
+
+    thread = []
+    thread.append(
+        ":receipt: *양도세 추정 근거*\n"
+        "• 해외주식: (양도차익 − 기본공제 250만원) × 22%(지방소득세 포함)\n"
+        f"• 올해 실현 양도차익 {won(realized)} → 실현 양도세 *{tax_realized:,}원*\n"
+        f"• 미실현(전량매도 가정) 해외이익 {won(ovs_pl)} → *약 {tax_hypo:,}원*\n"
+        "• 국내 상장주식은 *소액주주 비과세* 가정 (대주주면 별도 과세)\n"
+        "⚠️ 환율·취득가(선입선출) 방식 차이로 실제 신고액과 다른 _개략 추정_. 정확한 금액은 홈택스/세무사 기준."
+    )
+    if ovs and ovs.get("holdings"):
+        lines = [f"*{h['name']}* {kb._num(h['qty']):g}주 · 손익 {h['pl_rate']}%" for h in ovs["holdings"][:25]]
+        thread.append(f"🌏 *해외 {len(ovs['holdings'])}종목*\n" + "\n".join(lines))
+    if dom and dom.get("positions"):
+        lines = [f"*{p['name']}* {kb._num(p['qty']):g}주 · 손익 {p['pl_rate']}%" for p in dom["positions"]]
+        thread.append(f"🇰🇷 *국내 {len(dom['positions'])}종목*\n" + "\n".join(lines))
+
+    print(main_text)
+    for t in thread:
+        print("\n--- thread ---\n" + t)
+    if do_post:
+        post_card(main_text, thread)
+        print("\n[posted to #inv-투자관리]")
+    else:
+        print("\n[dry-run] --post 또는 AUTOMATION_MODE=1 이면 게시")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

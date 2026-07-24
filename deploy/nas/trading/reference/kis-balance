@@ -1,0 +1,226 @@
+#!/usr/bin/env python3
+"""kis-balance — KIS(한국투자증권) 국내+해외 잔고/포지션을 REST 직접호출(urllib)로 조회.
+mcp-servers/kis/server.py 로직 복제 — MCP 없이도(헤드리스/Slack ask) 동작. READ-ONLY(조회만, 주문 없음).
+국내 inquire-balance(TTTC8434R) + 해외 inquire-present-balance(CTRP6504R, KRW환산 합계).
+.env에서 KIS_APP_KEY/SECRET/ACCOUNT/ENV 로드, 토큰 23h 캐시(config/kis_token.json).
+사용:
+  bin/kis-balance                 # 콘솔 출력(국내+해외)
+  bin/kis-balance --post <CHAN>   # slack-card로 채널에 '총자산 요약 + 해외/국내 스레드' 게시
+  bin/kis-balance --check         # 성공/실패만(금액 노출 안 함)
+"""
+import os, sys, json, time, argparse, subprocess, datetime, pathlib
+import urllib.request, urllib.parse
+
+ROOT = pathlib.Path(__file__).resolve().parent.parent
+TOKEN_CACHE = ROOT / "config/kis_token.json"
+
+
+def env(k):
+    f = ROOT / ".env"
+    if f.exists():
+        for line in f.read_text(encoding="utf-8").splitlines():
+            if line.startswith(k + "="):
+                return line.split("=", 1)[1].strip().strip('"').strip("'")
+    return os.environ.get(k, "")
+
+
+APP_KEY = env("KIS_APP_KEY")
+APP_SECRET = env("KIS_APP_SECRET")
+ACCOUNT = env("KIS_ACCOUNT")
+ENV = env("KIS_ENV") or "paper"
+BASE = {"paper": "https://openapivts.koreainvestment.com:29443",
+        "live": "https://openapi.koreainvestment.com:9443"}.get(ENV, "https://openapivts.koreainvestment.com:29443")
+
+
+def _http(method, url, headers=None, body=None, params=None):
+    if params:
+        url = url + "?" + urllib.parse.urlencode(params)
+    data = json.dumps(body).encode() if body is not None else None
+    last = None
+    for attempt in range(3):  # 일시 5xx/네트워크 오류 재시도(KIS 간헐 500 대응)
+        try:
+            req = urllib.request.Request(url, data=data, method=method, headers=headers or {})
+            with urllib.request.urlopen(req, timeout=15) as r:
+                return json.load(r)
+        except Exception as e:
+            last = e
+            if attempt < 2:
+                time.sleep(0.8)
+                continue
+            raise
+    raise last
+
+
+def get_token():
+    if TOKEN_CACHE.exists():
+        try:
+            d = json.loads(TOKEN_CACHE.read_text())
+            if d.get("env") == ENV and time.time() < d.get("exp", 0) - 300:
+                return d["access_token"]
+        except Exception:
+            pass
+    if not APP_KEY or not APP_SECRET:
+        raise RuntimeError("KIS_APP_KEY/SECRET missing")
+    j = _http("POST", f"{BASE}/oauth2/tokenP", headers={"Content-Type": "application/json"},
+              body={"grant_type": "client_credentials", "appkey": APP_KEY, "appsecret": APP_SECRET})
+    if "access_token" not in j:
+        raise RuntimeError(f"token error: {j}")
+    TOKEN_CACHE.parent.mkdir(parents=True, exist_ok=True)
+    TOKEN_CACHE.write_text(json.dumps({"env": ENV, "access_token": j["access_token"],
+                                       "exp": time.time() + int(j.get("expires_in", 86400))}))
+    return j["access_token"]
+
+
+def _headers(token, tr_id):
+    return {"Content-Type": "application/json; charset=utf-8", "authorization": f"Bearer {token}",
+            "appkey": APP_KEY, "appsecret": APP_SECRET, "tr_id": tr_id, "custtype": "P"}
+
+
+def _cano():
+    p = ACCOUNT.split("-")
+    return p[0], (p[1] if len(p) > 1 else "01")
+
+
+def _num(x):
+    try:
+        return float(str(x).replace(",", "").strip() or 0)
+    except Exception:
+        return 0.0
+
+
+def _won(x):
+    return f"{int(_num(x)):,}원"
+
+
+def _frcr(x, ccy):
+    return f"{_num(x):,.2f} {ccy or ''}".strip()
+
+
+def domestic(token):
+    tr_id = "TTTC8434R" if ENV == "live" else "VTTC8434R"
+    cano, prdt = _cano()
+    params = {"CANO": cano, "ACNT_PRDT_CD": prdt, "AFHR_FLPR_YN": "N", "OFL_YN": "",
+              "INQR_DVSN": "02", "UNPR_DVSN": "01", "FUND_STTL_ICLD_YN": "N",
+              "FNCG_AMT_AUTO_RDPT_YN": "N", "PRCS_DVSN": "01",
+              "CTX_AREA_FK100": "", "CTX_AREA_NK100": ""}
+    j = _http("GET", f"{BASE}/uapi/domestic-stock/v1/trading/inquire-balance",
+              headers=_headers(token, tr_id), params=params)
+    if j.get("rt_cd") != "0":
+        return {"error": j.get("msg1", str(j))}
+    s = (j.get("output2") or [{}])[0]
+    positions = [{"name": i.get("prdt_name"), "code": i.get("pdno"), "qty": i.get("hldg_qty"),
+                  "now": i.get("prpr"), "eval": i.get("evlu_amt"), "pl_rate": i.get("evlu_pfls_rt")}
+                 for i in j.get("output1", []) if _num(i.get("hldg_qty")) > 0]
+    return {"deposit": s.get("dnca_tot_amt"), "total_eval": s.get("tot_evlu_amt"),
+            "pl_amt": s.get("evlu_pfls_smtl_amt"), "positions": positions}
+
+
+def overseas(token):
+    tr_id = "CTRP6504R" if ENV == "live" else "VTRP6504R"
+    cano, prdt = _cano()
+    params = {"CANO": cano, "ACNT_PRDT_CD": prdt, "WCRC_FRCR_DVSN_CD": "02",
+              "NATN_CD": "000", "TR_MKET_CD": "00", "INQR_DVSN_CD": "00"}
+    j = _http("GET", f"{BASE}/uapi/overseas-stock/v1/trading/inquire-present-balance",
+              headers=_headers(token, tr_id), params=params)
+    if j.get("rt_cd") != "0":
+        return {"error": j.get("msg1", str(j))}
+    holdings = []
+    for it in j.get("output1", []):
+        if _num(it.get("cblc_qty13")) <= 0:
+            continue
+        pchs = _num(it.get("frcr_pchs_amt")); ev = _num(it.get("frcr_evlu_amt2"))
+        plr = round((ev - pchs) / pchs * 100, 2) if pchs > 0 else 0.0
+        if abs(plr) > 100000:
+            plr = 0.0
+        holdings.append({"name": it.get("prdt_name"), "code": it.get("pdno"),
+                         "country": it.get("natn_kor_name"), "currency": it.get("buy_crcy_cd"),
+                         "qty": it.get("cblc_qty13"), "now": it.get("ovrs_now_pric1"),
+                         "eval_frcr": it.get("frcr_evlu_amt2"), "pl_rate": plr})
+    o3 = j.get("output3", {}) or {}
+    return {"total_eval_krw": o3.get("evlu_amt_smtl_amt"), "total_pl_krw": o3.get("tot_evlu_pfls_amt"),
+            "total_assets_krw": o3.get("tot_asst_amt"), "return_rate_pct": o3.get("evlu_erng_rt1"),
+            "holdings": holdings}
+
+
+def _post_slack(channel, main_text, thread_list):
+    spec = {"channel": channel, "main": main_text,
+            "thread": [t[:2900] for t in thread_list] or ["(내용 없음)"], "agent": "inv"}
+    tmp = pathlib.Path("/tmp/kis-card.json")
+    tmp.write_text(json.dumps(spec, ensure_ascii=False), encoding="utf-8")
+    subprocess.run(["python3", str(ROOT / "bin/slack-card"), str(tmp)], capture_output=True, text=True)
+
+
+def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--post", metavar="CHANNEL", default="")
+    ap.add_argument("--check", action="store_true")
+    a = ap.parse_args()
+
+    dom = ovs = None
+    derr = oerr = None
+    try:
+        token = get_token()
+    except Exception as e:
+        msg = f"KIS 토큰 실패: {e}"
+        print("QUERY_FAILED" if a.check else msg)
+        if a.post:
+            _post_slack(a.post, ":warning: KIS 조회 실패", [str(e)])
+        return 1
+    try:
+        dom = domestic(token)
+        if "error" in dom:
+            derr, dom = dom["error"], None
+    except Exception as e:
+        derr = str(e)
+    time.sleep(0.4)  # KIS 초당 호출제한 보호
+    try:
+        ovs = overseas(token)
+        if "error" in ovs:
+            oerr, ovs = ovs["error"], None
+    except Exception as e:
+        oerr = str(e)
+
+    if a.check:
+        print(f"domestic={'ok' if dom else 'fail:'+str(derr)} overseas={'ok' if ovs else 'fail:'+str(oerr)}")
+        return 0 if (dom or ovs) else 1
+
+    combined = int((_num(dom["total_eval"]) if dom else 0) + (_num(ovs["total_eval_krw"]) if ovs else 0))
+    now = datetime.datetime.now().strftime("%m-%d %H:%M")
+    parts = []
+    if ovs:
+        parts.append(f"해외 {_won(ovs['total_eval_krw'])}(수익률 {ovs.get('return_rate_pct', '?')}%)")
+    if dom:
+        parts.append(f"국내 {_won(dom['total_eval'])}")
+    summary = f":moneybag: 총자산 {combined:,}원 — " + " · ".join(parts or ["조회됨"]) + f" ({now} KST, {ENV})"
+
+    thread = []
+    if ovs:
+        if ovs["holdings"]:
+            lines = [f"*{h['name']}* ({h.get('country', '')}/{h['code']}) {h['qty']}주 · 현재 "
+                     f"{_frcr(h['now'], h['currency'])} · 평가 {_frcr(h['eval_frcr'], h['currency'])} · 손익 {h['pl_rate']}%"
+                     for h in ovs["holdings"]]
+            thread.append(f"🌏 *해외* ({len(ovs['holdings'])}종목)\n" + "\n".join(lines))
+        else:
+            thread.append("🌏 *해외* — 보유 없음")
+    elif oerr:
+        thread.append(f"🌏 *해외* 조회 실패: {oerr}")
+    if dom:
+        if dom["positions"]:
+            lines = [f"*{p['name']}* ({p['code']}) {p['qty']}주 · 현재 {_won(p['now'])} · "
+                     f"평가 {_won(p['eval'])} · 손익 {p['pl_rate']}%" for p in dom["positions"]]
+            thread.append(f"🇰🇷 *국내* ({len(dom['positions'])}종목)\n" + "\n".join(lines))
+        else:
+            thread.append("🇰🇷 *국내* — 보유 없음")
+    elif derr:
+        thread.append(f"🇰🇷 *국내* 조회 실패: {derr}")
+
+    print(summary)
+    for t in thread:
+        print(t)
+    if a.post:
+        _post_slack(a.post, summary, thread)
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

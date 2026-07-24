@@ -1,0 +1,295 @@
+#!/usr/bin/env python3
+"""kis-order — 인간 승인 게이트 기반 KIS 주문 집행기 (국내 + 미국).
+
+보안 원칙:
+  * LLM은 이 경로에 없다. 주문은 결정론적으로 파싱·검증된다.
+  * 브로커가 게이트(킬스위치/한도/시장가차단)를 통과시키고, *본인 Slack 승인*을
+    받아야만 KIS에 전송한다. 자율매매 없음. 스케줄 주문 없음.
+  * --no-execute: 주문표+게이트만(전송 안 함). 키/승인 없이 검증용.
+
+사용:
+  bin/kis-order --env paper|live --side buy|sell --code <종목코드/티커> --qty <n>
+                [--price <지정가> | --market] [--exchange NASD|NYSE|AMEX]
+                [--no-execute]
+"""
+import os, sys, json, time, argparse, subprocess, datetime, pathlib
+import urllib.request, urllib.parse
+
+ROOT = pathlib.Path(__file__).resolve().parent.parent
+CFG_F = ROOT / "config/trade_config.json"
+AUDIT_F = ROOT / "logs/trade_audit.log"
+DAILY_F = ROOT / "state/trade_daily.json"
+APPROVE = ROOT / "bin/trade-approve"
+
+DEFAULT_CFG = {
+    "kill_switch": False, "block_market_orders": True,
+    "approve_channel": "C0B939YS2LA", "owner": "U0B535RLXND",
+    "approve_timeout": 90, "usdkrw_fallback": 1380,
+    "limits": {"paper": {"per_order_krw": 10000000, "daily_krw": 30000000},
+               "live":  {"per_order_krw": 5000000,  "daily_krw": 15000000}},
+}
+
+
+def cfg():
+    d = json.loads(json.dumps(DEFAULT_CFG))
+    if CFG_F.exists():
+        try:
+            d.update(json.loads(CFG_F.read_text()))
+        except Exception:
+            pass
+    return d
+
+
+def env(k):
+    f = ROOT / ".env"
+    if f.exists():
+        for line in f.read_text(encoding="utf-8").splitlines():
+            if line.startswith(k + "="):
+                return line.split("=", 1)[1].strip().strip('"').strip("'")
+    return os.environ.get(k, "")
+
+
+def keys(envname):
+    if envname == "live":
+        return (env("KIS_APP_KEY"), env("KIS_APP_SECRET"), env("KIS_ACCOUNT"),
+                "https://openapi.koreainvestment.com:9443")
+    return (env("KIS_PAPER_APP_KEY"), env("KIS_PAPER_APP_SECRET"), env("KIS_PAPER_ACCOUNT"),
+            "https://openapivts.koreainvestment.com:29443")
+
+
+def _http(method, url, headers=None, body=None, params=None):
+    if params:
+        url = url + "?" + urllib.parse.urlencode(params)
+    data = json.dumps(body).encode() if body is not None else None
+    req = urllib.request.Request(url, data=data, method=method, headers=headers or {})
+    with urllib.request.urlopen(req, timeout=15) as r:
+        return json.load(r)
+
+
+def get_token(envname, ak, sk, base):
+    cache = ROOT / f"config/kis_token_{envname}.json"
+    if cache.exists():
+        try:
+            d = json.loads(cache.read_text())
+            if time.time() < d.get("exp", 0) - 300:
+                return d["access_token"]
+        except Exception:
+            pass
+    j = _http("POST", f"{base}/oauth2/tokenP", headers={"Content-Type": "application/json"},
+              body={"grant_type": "client_credentials", "appkey": ak, "appsecret": sk})
+    if "access_token" not in j:
+        raise RuntimeError(f"token error: {j}")
+    cache.write_text(json.dumps({"access_token": j["access_token"],
+                                 "exp": time.time() + int(j.get("expires_in", 86400))}))
+    return j["access_token"]
+
+
+def hashkey(base, ak, sk, body):
+    j = _http("POST", f"{base}/uapi/hashkey",
+              headers={"Content-Type": "application/json", "appkey": ak, "appsecret": sk},
+              body=body)
+    return j.get("HASH", "")
+
+
+def audit(msg):
+    AUDIT_F.parent.mkdir(parents=True, exist_ok=True)
+    with AUDIT_F.open("a", encoding="utf-8") as f:
+        f.write(f"{datetime.datetime.now().isoformat()}\t{msg}\n")
+
+
+def daily_used(envname):
+    if DAILY_F.exists():
+        try:
+            d = json.loads(DAILY_F.read_text())
+            if d.get("date") == datetime.date.today().isoformat():
+                return d.get(envname, 0)
+        except Exception:
+            pass
+    return 0
+
+
+def daily_add(envname, amt):
+    today = datetime.date.today().isoformat()
+    d = {"date": today}
+    if DAILY_F.exists():
+        try:
+            old = json.loads(DAILY_F.read_text())
+            if old.get("date") == today:
+                d = old
+        except Exception:
+            pass
+    d[envname] = d.get(envname, 0) + int(amt)
+    d["date"] = today
+    DAILY_F.parent.mkdir(parents=True, exist_ok=True)
+    DAILY_F.write_text(json.dumps(d))
+
+
+def is_domestic(code):
+    return code.isdigit() and len(code) == 6
+
+
+def cur_price_domestic(base, ak, sk, tok, code):
+    h = {"authorization": f"Bearer {tok}", "appkey": ak, "appsecret": sk, "tr_id": "FHKST01010100"}
+    j = _http("GET", f"{base}/uapi/domestic-stock/v1/quotations/inquire-price",
+              headers=h, params={"FID_COND_MRKT_DIV_CODE": "J", "FID_INPUT_ISCD": code})
+    o = j.get("output", {}) or {}
+    return float(o.get("stck_prpr") or 0), o.get("hts_kor_isnm") or code
+
+
+def cur_price_overseas(base, ak, sk, tok, excd, symb):
+    h = {"authorization": f"Bearer {tok}", "appkey": ak, "appsecret": sk, "tr_id": "HHDFS00000300"}
+    j = _http("GET", f"{base}/uapi/overseas-price/v1/quotations/price",
+              headers=h, params={"AUTH": "", "EXCD": excd, "SYMB": symb})
+    o = j.get("output", {}) or {}
+    return float(o.get("last") or 0), symb
+
+
+EXCD_MAP = {"NASD": "NAS", "NYSE": "NYS", "AMEX": "AMS"}
+
+
+def place_domestic(base, ak, sk, tok, account, envname, side, code, qty, price, market):
+    cano, prdt = (account.split("-") + ["01"])[:2]
+    tr = {("live", "buy"): "TTTC0802U", ("live", "sell"): "TTTC0801U",
+          ("paper", "buy"): "VTTC0802U", ("paper", "sell"): "VTTC0801U"}[(envname, side)]
+    body = {"CANO": cano, "ACNT_PRDT_CD": prdt, "PDNO": code,
+            "ORD_DVSN": "01" if market else "00",
+            "ORD_QTY": str(int(qty)), "ORD_UNPR": "0" if market else str(int(price))}
+    hk = hashkey(base, ak, sk, body)
+    h = {"Content-Type": "application/json; charset=utf-8", "authorization": f"Bearer {tok}",
+         "appkey": ak, "appsecret": sk, "tr_id": tr, "custtype": "P", "hashkey": hk}
+    return _http("POST", f"{base}/uapi/domestic-stock/v1/trading/order-cash", headers=h, body=body)
+
+
+def place_overseas(base, ak, sk, tok, account, envname, side, excg, code, qty, price, market):
+    cano, prdt = (account.split("-") + ["01"])[:2]
+    tr = {("live", "buy"): "TTTT1002U", ("live", "sell"): "TTTT1006U",
+          ("paper", "buy"): "VTTT1002U", ("paper", "sell"): "VTTT1001U"}[(envname, side)]
+    body = {"CANO": cano, "ACNT_PRDT_CD": prdt, "OVRS_EXCG_CD": excg, "PDNO": code,
+            "ORD_QTY": str(int(qty)), "OVRS_ORD_UNPR": "0" if market else f"{price}",
+            "ORD_SVR_DVSN_CD": "0", "ORD_DVSN": "00"}
+    hk = hashkey(base, ak, sk, body)
+    h = {"Content-Type": "application/json; charset=utf-8", "authorization": f"Bearer {tok}",
+         "appkey": ak, "appsecret": sk, "tr_id": tr, "custtype": "P", "hashkey": hk}
+    return _http("POST", f"{base}/uapi/overseas-stock/v1/trading/order", headers=h, body=body)
+
+
+def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--env", choices=["paper", "live"], required=True)
+    ap.add_argument("--side", choices=["buy", "sell"], required=True)
+    ap.add_argument("--code", required=True)
+    ap.add_argument("--qty", type=int, required=True)
+    ap.add_argument("--price", type=float, default=0)
+    ap.add_argument("--market", action="store_true")
+    ap.add_argument("--exchange", default="NASD")
+    ap.add_argument("--no-execute", action="store_true")
+    a = ap.parse_args()
+    c = cfg()
+
+    sidekr = "매수" if a.side == "buy" else "매도"
+    envkr = "모의투자" if a.env == "paper" else "🔴 실거래"
+
+    # 게이트 0: 킬스위치
+    if c.get("kill_switch"):
+        print(f"⛔ 매매 중지(킬스위치 ON) 상태입니다. `!매매재개` 후 다시 시도하세요.")
+        audit(f"BLOCK kill_switch env={a.env} {a.side} {a.code} x{a.qty}")
+        return 2
+    # 게이트 0.5: 실거래 활성화 여부 (모의 우선 — 실거래는 명시 활성화 필요)
+    if a.env == "live" and not c.get("live_enabled", False):
+        print("⛔ 실거래가 아직 비활성입니다. 모의투자로 검증 후 활성화하세요 (config live_enabled).")
+        audit(f"BLOCK live_disabled {a.side} {a.code} x{a.qty}")
+        return 2
+    # 게이트 1: 시장가 차단
+    if a.market and c.get("block_market_orders", True):
+        print("⛔ 시장가 주문은 안전상 차단되어 있습니다. 지정가(--price)로 주문하세요.")
+        audit(f"BLOCK market_order env={a.env} {a.side} {a.code}")
+        return 2
+
+    ak, sk, account, base = keys(a.env)
+    if not ak or not sk or not account:
+        print(f"⛔ {envkr} 키가 .env에 없습니다 (KIS_{'PAPER_' if a.env=='paper' else ''}APP_KEY 등). 발급 후 등록 필요.")
+        return 3
+
+    dom = is_domestic(a.code)
+    try:
+        tok = get_token(a.env, ak, sk, base)
+        if dom:
+            cur, name = cur_price_domestic(base, ak, sk, tok, a.code)
+            ccy, fx = "KRW", 1.0
+        else:
+            excd = EXCD_MAP.get(a.exchange.upper(), "NAS")
+            cur, name = cur_price_overseas(base, ak, sk, tok, excd, a.code.upper())
+            ccy, fx = "USD", float(c.get("usdkrw_fallback", 1380))
+    except Exception as e:
+        print(f"⚠️ 시세/토큰 조회 실패: {e}")
+        return 3
+
+    unit = a.price if (a.price and not a.market) else cur
+    amount_native = unit * a.qty
+    amount_krw = int(amount_native * fx)
+
+    # 게이트 2/3: 1회 한도 / 일일 한도
+    lim = c["limits"][a.env]
+    used = daily_used(a.env)
+    if amount_krw > lim["per_order_krw"]:
+        print(f"⛔ 1회 한도 초과: 주문 ≈{amount_krw:,}원 > 한도 {lim['per_order_krw']:,}원 ({a.env}). 거부.")
+        audit(f"BLOCK per_order env={a.env} amt={amount_krw} {a.side} {a.code} x{a.qty}")
+        return 2
+    if used + amount_krw > lim["daily_krw"]:
+        print(f"⛔ 일일 한도 초과: 오늘 {used:,} + 주문 {amount_krw:,} > 한도 {lim['daily_krw']:,}원. 거부.")
+        audit(f"BLOCK daily env={a.env} used={used} amt={amount_krw}")
+        return 2
+
+    otype = "시장가" if a.market else f"지정가 {unit:,.2f}{ccy}"
+    market_str = "국내" if dom else f"미국({a.exchange.upper()})"
+    ticket = (f"[{envkr}] 주문표\n"
+              f"• {market_str}  {name} ({a.code})\n"
+              f"• {sidekr}  {a.qty}주  {otype}\n"
+              f"• 현재가 {cur:,.2f}{ccy}\n"
+              f"• 예상금액 {amount_native:,.2f}{ccy}" + (f" (≈{amount_krw:,}원)" if not dom else "") + "\n"
+              f"• 한도 {lim['per_order_krw']:,}원/회 · 오늘 사용 {used:,}원")
+    print(ticket)
+
+    if a.no_execute:
+        print("\n[DRY] --no-execute: 게이트 통과. 실제 전송 안 함.")
+        audit(f"DRY env={a.env} {a.side} {a.code} x{a.qty} amt={amount_krw} PASS")
+        return 0
+
+    # 승인 게이트: 본인 Slack 승인 필수
+    if not APPROVE.exists():
+        print("⛔ 승인 도우미(bin/trade-approve)가 없습니다. 집행 중단(안전).")
+        return 4
+    summary = ticket.replace("\n", " / ")
+    rc = subprocess.run([sys.executable, str(APPROVE), summary] + (["--live"] if a.env == "live" else []),
+                        cwd=str(ROOT)).returncode
+    if rc != 0:
+        print("✗ 승인 실패/거부/시간초과 — 주문을 내지 않았습니다.")
+        audit(f"DENY env={a.env} {a.side} {a.code} x{a.qty} amt={amount_krw} rc={rc}")
+        return 1
+
+    # 집행
+    try:
+        if dom:
+            res = place_domestic(base, ak, sk, tok, account, a.env, a.side, a.code, a.qty, unit, a.market)
+        else:
+            res = place_overseas(base, ak, sk, tok, account, a.env, a.side,
+                                 a.exchange.upper(), a.code.upper(), a.qty, unit, a.market)
+    except Exception as e:
+        print(f"⚠️ 주문 전송 오류: {e}")
+        audit(f"ERROR env={a.env} {a.side} {a.code} x{a.qty} err={e}")
+        return 5
+
+    if res.get("rt_cd") == "0":
+        odno = (res.get("output") or {}).get("ODNO", "?")
+        daily_add(a.env, amount_krw)
+        print(f"✅ 주문 접수됨 — 주문번호 {odno}  ({envkr} {name} {sidekr} {a.qty}주)")
+        audit(f"EXECUTED env={a.env} {a.side} {a.code} x{a.qty} amt={amount_krw} odno={odno}")
+        return 0
+    else:
+        print(f"✗ KIS 거부: {res.get('msg1', res)}")
+        audit(f"REJECTED env={a.env} {a.side} {a.code} x{a.qty} msg={res.get('msg1')}")
+        return 6
+
+
+if __name__ == "__main__":
+    sys.exit(main())
