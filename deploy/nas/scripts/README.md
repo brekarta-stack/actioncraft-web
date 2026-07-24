@@ -4,7 +4,10 @@
 |---|---|---|
 | `hc-ping.sh` | NAS 생존 하트비트 → healthchecks.io | cron 5분 (URL 파일 있을 때만 동작) |
 | `backup-daily.sh` | pg_dump+글로벌 / n8n 워크플로·크리덴셜(암호화)·런타임설정 / Kuma 데이터 / .env·N8N_ENCRYPTION_KEY 사본 → 다른 볼륨, 14일 보존, 무결성 검증 | cron 매일 03:30 KST |
-| `install-cron.sh` | 위 둘을 `/usr/local/sbin/ab-*.sh`(root 소유)로 복사 후 `/etc/cron.d/agent-backbone` 설치(멱등) | root 1회 |
+| `ab-boot-up.sh` | @reboot 방어선 — docker·TS IP 대기 후 `compose up -d`(3회 재시도). 로그 `/var/log/agent-backbone-boot.log` | cron @reboot |
+| `install-cron.sh` | 위 셋을 `/usr/local/sbin/ab-*.sh`(root 소유)로 복사 후 `/etc/cron.d/agent-backbone` 설치(멱등) | root 1회 |
+
+> ⚠️ **부팅 순서 함정(실측)**: TS IP에 바인딩하는 컨테이너는 tailscale 컨테이너보다 먼저 복원 시도되어 bind 실패로 죽는다. 1차 방어=`/etc/sysctl.d/99-agent-backbone.conf`(ip_nonlocal_bind=1), 2차 방어=ab-boot-up.sh. compose는 `restart: always`. UGOS 업데이트 후 sysctl 파일·cron 파일 생존을 함께 확인할 것.
 
 ## 설치 (NAS에서)
 ```sh

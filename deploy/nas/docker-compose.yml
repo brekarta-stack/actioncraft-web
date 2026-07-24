@@ -7,7 +7,7 @@ name: agent-backbone
 services:
   postgres:
     image: pgvector/pgvector:0.8.5-pg17-bookworm   # pgvector 0.8.5 + PG17 (Qdrant 대신 pgvector — C3)
-    restart: unless-stopped
+    restart: always
     environment:
       POSTGRES_USER: ${PG_USER}
       POSTGRES_PASSWORD: ${PG_PASSWORD}
@@ -25,7 +25,7 @@ services:
 
   n8n:
     image: n8nio/n8n:2.32.2                  # 2.x 안정선(신규 설치라 1.x→2.x 마이그레이션 이슈 없음)
-    restart: unless-stopped
+    restart: always
     depends_on:
       postgres:
         condition: service_healthy
@@ -52,7 +52,7 @@ services:
 
   litellm:
     image: ghcr.io/berriai/litellm:v1.93.0   # 평문 SemVer 핀(main-stable은 폐기됨 — 쓰지 말 것)
-    restart: unless-stopped
+    restart: always
     depends_on:
       postgres:
         condition: service_healthy
@@ -73,7 +73,7 @@ services:
 
   uptime-kuma:
     image: louislam/uptime-kuma:2           # v2 GA(루트리스 기본). NAS 안 컨테이너·플로우 감시(NAS 자체는 외부 클라우드 모니터가 감시)
-    restart: unless-stopped
+    restart: always
     environment:
       TZ: Asia/Seoul
     volumes:

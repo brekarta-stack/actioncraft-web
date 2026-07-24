@@ -21,14 +21,16 @@ case "$COMPOSE_DIR$BACKUP_ROOT" in *%*|*"'"*) echo "FATAL: path must not contain
 SRC_DIR=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
 [ -f "$SRC_DIR/hc-ping.sh" ] || { echo "FATAL: $SRC_DIR/hc-ping.sh missing"; exit 1; }
 [ -f "$SRC_DIR/backup-daily.sh" ] || { echo "FATAL: $SRC_DIR/backup-daily.sh missing"; exit 1; }
+[ -f "$SRC_DIR/ab-boot-up.sh" ] || { echo "FATAL: $SRC_DIR/ab-boot-up.sh missing"; exit 1; }
 
 # root 소유 사본 설치
 BIN_DIR=/usr/local/sbin
 mkdir -p "$BIN_DIR"
 cp "$SRC_DIR/hc-ping.sh" "$BIN_DIR/ab-hc-ping.sh"
 cp "$SRC_DIR/backup-daily.sh" "$BIN_DIR/ab-backup-daily.sh"
-chown root:root "$BIN_DIR/ab-hc-ping.sh" "$BIN_DIR/ab-backup-daily.sh"
-chmod 755 "$BIN_DIR/ab-hc-ping.sh" "$BIN_DIR/ab-backup-daily.sh"
+cp "$SRC_DIR/ab-boot-up.sh" "$BIN_DIR/ab-boot-up.sh"
+chown root:root "$BIN_DIR/ab-hc-ping.sh" "$BIN_DIR/ab-backup-daily.sh" "$BIN_DIR/ab-boot-up.sh"
+chmod 755 "$BIN_DIR/ab-hc-ping.sh" "$BIN_DIR/ab-backup-daily.sh" "$BIN_DIR/ab-boot-up.sh"
 
 # 백업 목적지: root 소유(사용자 계정 침해 시 심볼릭링크 스왑 방지)
 mkdir -p "$BACKUP_ROOT/daily"
@@ -49,6 +51,7 @@ cat > "$CRON_FILE" <<EOF
 # agent-backbone: 하트비트(5분) + 일일백업. install-cron.sh 가 생성/갱신함.
 SHELL=/bin/sh
 PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+@reboot root sh $BIN_DIR/ab-boot-up.sh '$COMPOSE_DIR' >> /var/log/agent-backbone-boot.log 2>&1
 */5 * * * * root sh $BIN_DIR/ab-hc-ping.sh '$COMPOSE_DIR/heartbeat.url' >/dev/null 2>&1
 $BK_MIN $BK_HOUR * * * root COMPOSE_DIR='$COMPOSE_DIR' BACKUP_ROOT='$BACKUP_ROOT' sh $BIN_DIR/ab-backup-daily.sh >> '$BACKUP_ROOT/backup.log' 2>&1
 EOF
