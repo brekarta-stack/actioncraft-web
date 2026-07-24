@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  Orca headless runtime server as a durable 24/7 LaunchAgent on the Mac Studio.
+  Windows laptop + phone pair over Tailscale; sessions survive the laptop closing.
+  Install/refresh with deploy/studio/orca-serve-setup.sh (do not hand-edit the
+  live copy at ~/Library/LaunchAgents/com.orca.serve.plist — edit here and re-run).
+
+  Notes:
+  - gui/$UID domain (Electron runtime needs the Aqua session; auto-login must be
+    ON for unattended recovery after a reboot).
+  - runtime-scope pairing (Windows desktop + browser web client). For the native
+    mobile app QR use deploy/studio/orca-mobile-pair.sh (single-instance lock
+    means only one `orca serve` runs at a time).
+  - Server binds 0.0.0.0:6768 but is protected by the pairing trust model; keep it
+    Tailscale-only — never port-forward 6768 on the router.
+-->
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.orca.serve</string>
+
+    <key>ProgramArguments</key>
+    <array>
+        <string>/opt/homebrew/bin/orca</string>
+        <string>serve</string>
+        <string>--port</string>
+        <string>6768</string>
+        <string>--pairing-address</string>
+        <string>100.65.201.6</string>
+    </array>
+
+    <key>RunAtLoad</key>
+    <true/>
+
+    <key>KeepAlive</key>
+    <true/>
+
+    <key>ThrottleInterval</key>
+    <integer>10</integer>
+
+    <key>ProcessType</key>
+    <string>Interactive</string>
+
+    <key>StandardOutPath</key>
+    <string>/Users/seakimacultra/Library/Logs/orca-serve.log</string>
+
+    <key>StandardErrorPath</key>
+    <string>/Users/seakimacultra/Library/Logs/orca-serve.log</string>
+
+    <key>WorkingDirectory</key>
+    <string>/Users/seakimacultra</string>
+
+    <key>EnvironmentVariables</key>
+    <dict>
+        <key>PATH</key>
+        <string>/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin</string>
+    </dict>
+</dict>
+</plist>
