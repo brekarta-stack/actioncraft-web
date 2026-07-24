@@ -7,7 +7,14 @@
 # and Orca's single-instance lock allows only one `orca serve` at a time — so this
 # helper briefly stops the durable server, prints a QR to scan, then restores it.
 #
-# Phone must have Tailscale ON. Scan the QR in the Orca app, then press Ctrl+C.
+# FIRST install the native Orca Mobile app on the phone (the pairing links are
+# NOT install links — orca://pair and the web-client URL only work once the app
+# exists / in a browser):
+#   iOS App Store : https://apps.apple.com/app/orca-ide/id6766130217
+#   iOS TestFlight: https://testflight.apple.com/join/YjeGMQBA
+#   Android APK   : https://github.com/stablyai/orca/releases  (tag mobile-android-v*)
+#
+# Then: phone Tailscale ON -> open Orca app -> Pair -> scan the QR below -> Ctrl+C.
 #
 #   bash deploy/studio/orca-mobile-pair.sh
 #
@@ -37,7 +44,11 @@ for i in $(seq 1 20); do
   sleep 0.5
 done
 
-echo "→ Starting mobile pairing. Scan the QR below with the Orca app (Tailscale ON)."
+echo "→ Install the Orca Mobile app on the phone FIRST (pairing links are not install links):"
+echo "    iOS : https://apps.apple.com/app/orca-ide/id6766130217  (or TestFlight https://testflight.apple.com/join/YjeGMQBA)"
+echo "    Android APK: https://github.com/stablyai/orca/releases  (latest tag mobile-android-v*)"
+echo ""
+echo "→ Starting mobile pairing. In the Orca app tap Pair, then scan the QR below (Tailscale ON)."
 echo "  Already-paired Windows/desktop clients reconnect automatically afterwards."
 echo "  Press Ctrl+C once the phone shows paired."
 echo ""
