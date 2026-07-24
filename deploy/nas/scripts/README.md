@@ -40,9 +40,13 @@ B2_ACCOUNT_KEY=<applicationKey>
 
 ## 복원 리허설 (2주차 말, 요약)
 ```sh
-# 1) Postgres: 임시 인스턴스 기동 후 로드
+# 1) Postgres: 임시 인스턴스 기동 → 글로벌(롤) → 본 덤프(--create 포함이라 DB 자동 생성)
 docker run -d --name pg-restore-test -e POSTGRES_PASSWORD=t pgvector/pgvector:0.8.5-pg17-bookworm
-gzip -dc pg_<db>.sql.gz | docker exec -i pg-restore-test psql -U postgres
+sleep 8
+gzip -dc pg_globals.sql.gz | docker exec -i pg-restore-test psql -U postgres
+gzip -dc pg_<db>.sql.gz   | docker exec -i pg-restore-test psql -U postgres -v ON_ERROR_STOP=1
+docker exec pg-restore-test psql -U postgres -d <db> -c '\dt'   # 테이블 목록 = 라이브와 대조
+docker rm -f pg-restore-test
 # 2) n8n: 새 볼륨 + env.backup의 N8N_ENCRYPTION_KEY(또는 n8n_runtime_config.json의 encryptionKey)로 기동
 #    → n8n import:workflow / import:credentials
 # 핵심 검증: 크리덴셜이 실제 해독되는가(키 일치), 워크플로 개수 일치, Kuma tar 풀어 kuma.db 존재

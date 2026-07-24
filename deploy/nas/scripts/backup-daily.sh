@@ -56,7 +56,8 @@ FAIL=0
 WARN=0
 
 # ── 1. Postgres 덤프 (2단계 — 파이프라인이 pg_dump 실패를 숨기는 것 방지) ──
-if $DC exec -T postgres pg_dump -U "$PG_USER" -d "$PG_DB" > "$DEST/pg_${PG_DB}.sql" \
+#    --create: 덤프에 CREATE DATABASE 포함 → 복원이 "psql -U postgres < dump" 한 방(DB 사전 생성 불필요)
+if $DC exec -T postgres pg_dump --create -U "$PG_USER" -d "$PG_DB" > "$DEST/pg_${PG_DB}.sql" \
    && gzip "$DEST/pg_${PG_DB}.sql"; then
   log "pg_dump OK"
 else
