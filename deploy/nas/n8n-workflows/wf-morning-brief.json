@@ -1,0 +1,64 @@
+{
+  "id": "tbbrief000000001",
+  "name": "업무·일정: 아침 브리핑 (08:30 KST) — 골격",
+  "active": false,
+  "settings": { "executionOrder": "v1" },
+  "nodes": [
+    {
+      "id": "b0", "name": "골격 안내",
+      "type": "n8n-nodes-base.stickyNote", "typeVersion": 1,
+      "position": [-40, -220],
+      "parameters": {
+        "height": 190, "width": 620,
+        "content": "## 아침 브리핑 골격 (§3-1)\n활성화 전 사용자 연결 2개:\n1) Google Calendar 노드 추가 + OAuth 크레덴셜 (아래 '오늘 일정 placeholder' 교체)\n2) Slack 크레덴셜/웹훅 (#inbox) — 마지막 노드 교체\nLLM 요약은 LiteLLM(n8n-ops 키)로 이미 동작. 완료 후 워크플로 Active ON."
+      }
+    },
+    {
+      "id": "b1", "name": "매일 08:30",
+      "type": "n8n-nodes-base.scheduleTrigger", "typeVersion": 1.2,
+      "position": [0, 0],
+      "parameters": {
+        "rule": { "interval": [ { "field": "cronExpression", "expression": "30 8 * * *" } ] }
+      }
+    },
+    {
+      "id": "b2", "name": "오늘 일정 placeholder",
+      "type": "n8n-nodes-base.set", "typeVersion": 3.4,
+      "position": [220, 0],
+      "parameters": {
+        "assignments": { "assignments": [ {
+          "id": "a1", "name": "schedule_raw", "type": "string",
+          "value": "[Google Calendar 연결 전 데모] 10:00 팀 미팅 / 14:00 papercraft 고객 통화 / 미처리: 견적서 2건"
+        } ] }
+      }
+    },
+    {
+      "id": "b3", "name": "브리핑 생성 (LiteLLM)",
+      "type": "n8n-nodes-base.httpRequest", "typeVersion": 4.2,
+      "position": [440, 0],
+      "parameters": {
+        "method": "POST",
+        "url": "http://litellm:4000/v1/chat/completions",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({model: 'write-ko-draft', messages: [{role:'user', content: '다음 일정·업무를 3줄 아침 브리핑으로. 존댓말, 이모지 없이:\\n' + $json.schedule_raw}], stream: false}) }}",
+        "options": { "timeout": 90000 }
+      },
+      "credentials": {
+        "httpHeaderAuth": { "id": "litellmkey000001", "name": "LiteLLM n8n-ops" }
+      }
+    },
+    {
+      "id": "b4", "name": "→ Slack #inbox (크레덴셜 연결 후 교체)",
+      "type": "n8n-nodes-base.noOp", "typeVersion": 1,
+      "position": [660, 0], "parameters": {}
+    }
+  ],
+  "connections": {
+    "매일 08:30": { "main": [[ { "node": "오늘 일정 placeholder", "type": "main", "index": 0 } ]] },
+    "오늘 일정 placeholder": { "main": [[ { "node": "브리핑 생성 (LiteLLM)", "type": "main", "index": 0 } ]] },
+    "브리핑 생성 (LiteLLM)": { "main": [[ { "node": "→ Slack #inbox (크레덴셜 연결 후 교체)", "type": "main", "index": 0 } ]] }
+  }
+}

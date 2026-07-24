@@ -1,0 +1,34 @@
+{
+  "id": "tbsmoke000000001",
+  "name": "smoke: n8n→LiteLLM (n8n-ops key)",
+  "active": false,
+  "settings": { "executionOrder": "v1" },
+  "nodes": [
+    {
+      "id": "n1", "name": "Manual Trigger",
+      "type": "n8n-nodes-base.manualTrigger", "typeVersion": 1,
+      "position": [0, 0], "parameters": {}
+    },
+    {
+      "id": "n2", "name": "LiteLLM classify-fast",
+      "type": "n8n-nodes-base.httpRequest", "typeVersion": 4.2,
+      "position": [220, 0],
+      "parameters": {
+        "method": "POST",
+        "url": "http://litellm:4000/v1/chat/completions",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{\"model\":\"classify-fast\",\"messages\":[{\"role\":\"user\",\"content\":\"n8n 게이트웨이 연결 테스트다. 정확히 한 단어로만 답하라: 연결됨\"}],\"stream\":false}",
+        "options": { "timeout": 60000 }
+      },
+      "credentials": {
+        "httpHeaderAuth": { "id": "litellmkey000001", "name": "LiteLLM n8n-ops" }
+      }
+    }
+  ],
+  "connections": {
+    "Manual Trigger": { "main": [[ { "node": "LiteLLM classify-fast", "type": "main", "index": 0 } ]] }
+  }
+}
